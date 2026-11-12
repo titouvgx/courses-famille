@@ -22,7 +22,7 @@ export const auth: AuthState = $state({
 export function initAuth(): void {
   if (!supabase || !supabaseConfigured) {
     auth.loading = false
-    auth.error = 'Supabase non configuré. Voir .env.local.'
+    auth.error = 'Supabase non configuré.'
     return
   }
 
