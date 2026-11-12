@@ -40,27 +40,53 @@ export interface KnownIngredient {
   shopping_category_id: string | null
 }
 
-/** Récupère tous les noms d'ingrédients distincts utilisés par la famille. */
+/**
+ * Récupère les ingrédients connus pour l'autocomplétion.
+ * Fusionne deux sources :
+ *  1. La table known_ingredients (base de ~250 ingrédients courants)
+ *  2. Les ingrédients déjà utilisés dans les recettes de la famille
+ * Les ingrédients de la famille ont la priorité (écrasent l'unité/rayon).
+ */
 export async function fetchKnownIngredients(familyId: string): Promise<KnownIngredient[]> {
   if (!supabase) return []
-  // Jointure : recipe_ingredients → recipes (pour filtrer par famille)
-  const { data, error } = await supabase
-    .from('recipe_ingredients')
-    .select('name, unit, shopping_category_id, recipes!inner(family_id)')
-    .eq('recipes.family_id', familyId)
-  if (error) throw error
 
-  // Dédupliquer par nom (garder le dernier unit/category utilisé)
+  // Charger les deux sources en parallèle
+  const [globalRes, familyRes] = await Promise.all([
+    supabase
+      .from('known_ingredients')
+      .select('name, default_unit, shopping_category_id'),
+    supabase
+      .from('recipe_ingredients')
+      .select('name, unit, shopping_category_id, recipes!inner(family_id)')
+      .eq('recipes.family_id', familyId),
+  ])
+
+  if (globalRes.error) throw globalRes.error
+  if (familyRes.error) throw familyRes.error
+
+  // Fusionner : les ingrédients de la famille écrasent les globaux
   const map = new Map<string, KnownIngredient>()
-  for (const row of data ?? []) {
+
+  // D'abord les globaux
+  for (const row of globalRes.data ?? []) {
     const lower = row.name.toLowerCase()
     if (!map.has(lower)) {
       map.set(lower, {
         name: row.name,
-        unit: row.unit,
+        unit: row.default_unit,
         shopping_category_id: row.shopping_category_id,
       })
     }
+  }
+
+  // Ensuite la famille (écrase si même nom)
+  for (const row of familyRes.data ?? []) {
+    const lower = row.name.toLowerCase()
+    map.set(lower, {
+      name: row.name,
+      unit: row.unit,
+      shopping_category_id: row.shopping_category_id,
+    })
   }
 
   return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
