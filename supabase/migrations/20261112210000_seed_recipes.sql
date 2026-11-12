@@ -1,16 +1,14 @@
 -- ============================================================
 -- Migration : Seed — 20 recettes françaises classiques
 -- ============================================================
--- INSTRUCTIONS :
---   1. Remplace les deux valeurs ci-dessous par tes vrais UUIDs
---   2. Exécute ce script dans le SQL Editor de Supabase
+-- Détecte automatiquement la première famille et le premier user.
+-- Les recettes sont partagées (visibles par tous les foyers).
 -- ============================================================
 
 DO $$
 DECLARE
-  -- ⚠️ REMPLACE CES DEUX VALEURS ⚠️
-  v_family_id uuid := '00000000-0000-0000-0000-000000000000'; -- ton family id
-  v_user_id   uuid := '00000000-0000-0000-0000-000000000000'; -- ton user id
+  v_family_id uuid;
+  v_user_id   uuid;
 
   -- Catégories de recettes
   v_entree   uuid;
@@ -30,6 +28,14 @@ DECLARE
 
   v_rid uuid; -- recipe id courant
 BEGIN
+  -- Détecter automatiquement la première famille et le premier user
+  SELECT id INTO v_family_id FROM families ORDER BY created_at LIMIT 1;
+  SELECT id INTO v_user_id   FROM auth.users ORDER BY created_at LIMIT 1;
+
+  IF v_family_id IS NULL OR v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Il faut au moins 1 famille et 1 utilisateur avant de lancer ce script.';
+  END IF;
+
   -- Récupérer les catégories de recettes
   SELECT id INTO v_entree   FROM recipe_categories WHERE name = 'Entrée';
   SELECT id INTO v_plat     FROM recipe_categories WHERE name = 'Plat';
