@@ -49,6 +49,29 @@ export async function fetchListItems(
   return (data ?? []) as ShoppingListItemWithCategory[]
 }
 
+// ────────── Historique (listes terminées) ──────────
+
+/**
+ * Récupère les listes terminées du foyer, triées par date (récentes d'abord).
+ */
+export async function fetchCompletedLists(
+  familyId: string,
+  limit = 20,
+): Promise<ShoppingList[]> {
+  if (!supabase) return []
+
+  const { data, error } = await supabase
+    .from('shopping_lists')
+    .select('*')
+    .eq('family_id', familyId)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return (data ?? []) as ShoppingList[]
+}
+
 // ────────── Génération depuis le planning ──────────
 
 interface AggregatedIngredient {
