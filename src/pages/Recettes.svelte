@@ -1,21 +1,22 @@
 <script lang="ts">
   import { profileState } from '../lib/profile.svelte'
   import { href } from '../lib/router.svelte'
-  import { fetchRecipes, fetchRecipeCategories } from '../lib/api/recipes'
+  import { fetchRecipes, fetchRecipeCategories, RECIPES_PAGE_SIZE } from '../lib/api/recipes'
   import type { RecipeWithCategory, RecipeCategory } from '../lib/types'
 
   let recipes: RecipeWithCategory[] = $state([])
   let categories: RecipeCategory[] = $state([])
   let loading = $state(true)
+  let loadingMore = $state(false)
+  let hasMore = $state(false)
   let error = $state<string | null>(null)
 
   // Filtres
   let search = $state('')
   let selectedCategory = $state<string | null>(null)
 
-  // Chargement des données
+  // Chargement initial
   $effect(() => {
-    // Attendre que le profil soit chargé
     if (profileState.loading) return
 
     const familyId = profileState.profile?.family_id
@@ -27,13 +28,15 @@
 
     loading = true
     error = null
+    recipes = []
 
     Promise.all([
-      fetchRecipes(familyId),
+      fetchRecipes(familyId, 0),
       fetchRecipeCategories(),
     ])
-      .then(([r, c]) => {
-        recipes = r
+      .then(([page, c]) => {
+        recipes = page.recipes
+        hasMore = page.hasMore
         categories = c
       })
       .catch((e) => {
@@ -44,7 +47,24 @@
       })
   })
 
-  // Recettes filtrées
+  // Charger la page suivante
+  async function loadMore() {
+    const familyId = profileState.profile?.family_id
+    if (!familyId || loadingMore) return
+
+    loadingMore = true
+    try {
+      const page = await fetchRecipes(familyId, recipes.length)
+      recipes = [...recipes, ...page.recipes]
+      hasMore = page.hasMore
+    } catch (e: any) {
+      error = e.message
+    } finally {
+      loadingMore = false
+    }
+  }
+
+  // Recettes filtrées (le filtre s'applique sur ce qui est chargé)
   const filtered = $derived.by(() => {
     let result = recipes
 
@@ -148,6 +168,20 @@
         </a>
       {/each}
     </div>
+
+    <!-- Bouton charger plus -->
+    {#if hasMore}
+      <div class="load-more-wrap">
+        <button class="btn btn-outline btn-load-more" onclick={loadMore} disabled={loadingMore}>
+          {#if loadingMore}
+            <span class="btn-spinner"></span>
+            Chargement…
+          {:else}
+            Voir plus de recettes
+          {/if}
+        </button>
+      </div>
+    {/if}
   {/if}
 
   <!-- FAB : ajouter une recette -->
@@ -316,6 +350,30 @@
     font-size: 12px;
     color: var(--text-secondary);
     margin-top: 2px;
+  }
+
+  /* Load more */
+  .load-more-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0 8px;
+  }
+
+  .btn-load-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+
+  .btn-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
   }
 
   /* État vide */

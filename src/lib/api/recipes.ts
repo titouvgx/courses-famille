@@ -66,17 +66,42 @@ export async function fetchKnownIngredients(familyId: string): Promise<KnownIngr
   return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
 }
 
-// ────────── Liste des recettes ──────────
+// ────────── Liste des recettes (paginée) ──────────
 
-export async function fetchRecipes(familyId: string): Promise<RecipeWithCategory[]> {
-  if (!supabase) return []
+export const RECIPES_PAGE_SIZE = 30
+
+export interface RecipesPage {
+  recipes: RecipeWithCategory[]
+  /** true s'il reste des recettes après cette page */
+  hasMore: boolean
+}
+
+/**
+ * Charge une page de recettes.
+ * @param offset – nombre de recettes à sauter (0 pour la première page)
+ */
+export async function fetchRecipes(
+  familyId: string,
+  offset = 0,
+  limit = RECIPES_PAGE_SIZE,
+): Promise<RecipesPage> {
+  if (!supabase) return { recipes: [], hasMore: false }
+
+  // On demande limit + 1 pour savoir s'il reste des résultats après
   const { data, error } = await supabase
     .from('recipes')
     .select('*, recipe_categories(*)')
     .eq('family_id', familyId)
     .order('title')
+    .range(offset, offset + limit)
+
   if (error) throw error
-  return data ?? []
+
+  const rows = data ?? []
+  const hasMore = rows.length > limit
+  const recipes = hasMore ? rows.slice(0, limit) : rows
+
+  return { recipes, hasMore }
 }
 
 // ────────── Détail d'une recette ──────────
