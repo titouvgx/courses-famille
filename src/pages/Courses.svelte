@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import { profileState } from '../lib/profile.svelte'
   import { auth } from '../lib/auth.svelte'
+  import { supabase } from '../lib/supabase'
   import { fetchOrCreatePlan, fetchSlots, getMonday, toISODate } from '../lib/api/meals'
   import { fetchShoppingCategories } from '../lib/api/recipes'
   import {
@@ -18,6 +20,7 @@
     ShoppingListItemWithCategory,
     ShoppingCategory,
   } from '../lib/types'
+  import type { RealtimeChannel } from '@supabase/supabase-js'
 
   // ── État principal ──
   let list: ShoppingList | null = $state(null)
@@ -107,6 +110,87 @@
   const totalItems = $derived(items.length)
   const checkedItems = $derived(items.filter((i) => i.checked).length)
   const progressPct = $derived(totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0)
+
+  // ── Real-time : abonnement aux changements de la liste ──
+
+  let realtimeChannel: RealtimeChannel | null = $state(null)
+
+  /** S'abonne aux changements sur les items de la liste active. */
+  function subscribeToList(listId: string) {
+    unsubscribe()
+    if (!supabase) return
+
+    realtimeChannel = supabase
+      .channel(`shopping-items-${listId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'shopping_list_items',
+          filter: `shopping_list_id=eq.${listId}`,
+        },
+        (payload) => {
+          const updated = payload.new as any
+          items = items.map((i) =>
+            i.id === updated.id
+              ? { ...i, checked: updated.checked, checked_by: updated.checked_by, checked_at: updated.checked_at }
+              : i
+          )
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'shopping_list_items',
+          filter: `shopping_list_id=eq.${listId}`,
+        },
+        async () => {
+          // Recharger tous les items (l'INSERT ne renvoie pas la jointure shopping_categories)
+          if (list) {
+            items = await fetchListItems(list.id)
+          }
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'shopping_list_items',
+        },
+        (payload) => {
+          const deletedId = (payload.old as any).id
+          if (deletedId) {
+            items = items.filter((i) => i.id !== deletedId)
+          }
+        },
+      )
+      .subscribe()
+  }
+
+  function unsubscribe() {
+    if (realtimeChannel) {
+      supabase?.removeChannel(realtimeChannel)
+      realtimeChannel = null
+    }
+  }
+
+  // S'abonner quand la liste change
+  $effect(() => {
+    if (list?.id) {
+      subscribeToList(list.id)
+    } else {
+      unsubscribe()
+    }
+  })
+
+  // Nettoyage à la destruction du composant
+  onDestroy(() => {
+    unsubscribe()
+  })
 
   // ── Générer la liste ──
 

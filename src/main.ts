@@ -7,3 +7,12 @@ const app = mount(App, {
 })
 
 export default app
+
+// ── Service Worker (PWA) ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Silencieux : le SW est un bonus, pas critique
+    })
+  })
+}
