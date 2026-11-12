@@ -5,7 +5,9 @@
 export type Route =
   | 'login'
   | 'recettes'
-  | 'recette'      // détail : #/recette/<id>
+  | 'recette'          // détail : #/recette/<id>
+  | 'nouvelle-recette' // création : #/nouvelle-recette
+  | 'editer-recette'   // édition : #/editer-recette/<id>
   | 'semaine'
   | 'courses'
   | 'historique'
@@ -15,7 +17,7 @@ export type Route =
 export const TAB_ROUTES = ['recettes', 'semaine', 'courses', 'historique'] as const
 export type TabRoute = (typeof TAB_ROUTES)[number]
 
-const STATIC_ROUTES: string[] = ['login', 'recettes', 'semaine', 'courses', 'historique']
+const STATIC_ROUTES: string[] = ['login', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique']
 const DEFAULT_ROUTE: Route = 'recettes'
 
 interface RouterState {
@@ -30,9 +32,12 @@ function readHash(): RouterState {
 
   if (raw === '') return { current: DEFAULT_ROUTE, recipeId: null }
 
-  // Route dynamique : #/recette/<uuid>
+  // Routes dynamiques
   if (parts[0] === 'recette' && parts[1]) {
     return { current: 'recette', recipeId: parts[1] }
+  }
+  if (parts[0] === 'editer-recette' && parts[1]) {
+    return { current: 'editer-recette', recipeId: parts[1] }
   }
 
   // Routes statiques
@@ -54,6 +59,7 @@ window.addEventListener('hashchange', () => {
 
 export function href(route: Route | string, id?: string): string {
   if (route === 'recette' && id) return `#/recette/${id}`
+  if (route === 'editer-recette' && id) return `#/editer-recette/${id}`
   return `#/${route}`
 }
 

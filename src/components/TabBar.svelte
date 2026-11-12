@@ -10,7 +10,7 @@
 
   function isActive(route: TabRoute): boolean {
     if (route === 'recettes') {
-      return router.current === 'recettes' || router.current === 'recette'
+      return ['recettes', 'recette', 'nouvelle-recette', 'editer-recette'].includes(router.current)
     }
     return router.current === route
   }

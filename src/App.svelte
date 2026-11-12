@@ -1,18 +1,29 @@
 <script lang="ts">
   import { router, navigate } from './lib/router.svelte'
   import { auth, initAuth, signOut } from './lib/auth.svelte'
+  import { profileState, loadProfile, clearProfile } from './lib/profile.svelte'
   import { supabaseConfigured } from './lib/supabase'
 
   import TabBar from './components/TabBar.svelte'
   import Login from './pages/Login.svelte'
   import Recettes from './pages/Recettes.svelte'
   import RecetteDetail from './pages/RecetteDetail.svelte'
+  import RecetteForm from './pages/RecetteForm.svelte'
   import Semaine from './pages/Semaine.svelte'
   import Courses from './pages/Courses.svelte'
   import Historique from './pages/Historique.svelte'
 
   // Initialiser l'auth au montage
   initAuth()
+
+  // Charger le profil quand l'user change
+  $effect(() => {
+    if (auth.user) {
+      loadProfile(auth.user.id)
+    } else {
+      clearProfile()
+    }
+  })
 
   // Redirection : si pas connecté → login, si connecté et sur login → recettes
   $effect(() => {
@@ -26,6 +37,7 @@
   })
 
   function handleSignOut() {
+    clearProfile()
     signOut()
   }
 </script>
@@ -44,6 +56,10 @@
       <Recettes />
     {:else if router.current === 'recette'}
       <RecetteDetail />
+    {:else if router.current === 'nouvelle-recette'}
+      <RecetteForm />
+    {:else if router.current === 'editer-recette'}
+      <RecetteForm editId={router.recipeId} />
     {:else if router.current === 'semaine'}
       <Semaine />
     {:else if router.current === 'courses'}
