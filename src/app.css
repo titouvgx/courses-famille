@@ -1,43 +1,217 @@
-/* Jetons de design provisoires (direction « carnet de marché »).
-   Ils seront affinés à l'étape 1 (maquettes) : polices, tailles, espacements. */
+/* ============================================================
+   Design System — « Frais & Bold »
+   Teal #1A535C · Coral #FF6B35 · Outfit + DM Sans
+   ============================================================ */
+
 :root {
-  --paper: #f5f1e8;
-  --paper-raised: #fbf8f2;
-  --ink: #1f1c17;
-  --ink-soft: #6b6459;
-  --rule: #ddd5c6;
-  --accent: #c8401e;
+  /* Couleurs principales */
+  --primary: #1A535C;
+  --primary-light: #EAF3F5;
+  --accent: #FF6B35;
+  --accent-shadow: rgba(255, 107, 53, 0.35);
 
-  --radius: 10px;
-  --tap: 48px; /* zone tactile minimale */
-  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+  /* Surfaces */
+  --bg: #FFFFFF;
+  --bg-raised: #FFFFFF;
+  --surface: #F3F5F7;
+  --surface-hover: #ECEEF1;
 
-  color-scheme: light dark;
+  /* Texte */
+  --text: #1A1E23;
+  --text-secondary: #5A6470;
+  --text-placeholder: #8A94A0;
+
+  /* Bordures */
+  --border: #F0F2F4;
+  --border-strong: #E0E4E8;
+
+  /* Feedback */
+  --success: #1B9B53;
+  --success-bg: #E8F8EF;
+  --error: #D63B3B;
+  --error-bg: #FDF0F0;
+
+  /* Catégories recettes */
+  --cat-entree: #5A7FA0;
+  --cat-plat: #D97B3A;
+  --cat-accomp: #4A8A6A;
+  --cat-dessert: #9A4A7A;
+
+  /* Typographie */
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+
+  /* Rayons */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-fab: 16px;
+
+  /* Espacement */
+  --gutter: 20px;
+  --tap: 48px;
+
+  /* État */
+  color-scheme: light;
   font-family: var(--font-body);
-  color: var(--ink);
-  background: var(--paper);
+  color: var(--text);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Dark mode ─────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #16130f;
-    --paper-raised: #201c17;
-    --ink: #ede6d8;
-    --ink-soft: #a39a8a;
-    --rule: #39322a;
-    --accent: #e2643f;
+  :root:not([data-theme="light"]) {
+    --primary: #3ABAC8;
+    --primary-light: #1A2E32;
+    --accent: #FF8555;
+    --accent-shadow: rgba(255, 133, 85, 0.3);
+
+    --bg: #0E1A1D;
+    --bg-raised: #142428;
+    --surface: #1A2E32;
+    --surface-hover: #213A3F;
+
+    --text: #E8ECF0;
+    --text-secondary: #9AABB4;
+    --text-placeholder: #5E7680;
+
+    --border: #1E3338;
+    --border-strong: #2A4248;
+
+    --success: #3DD97A;
+    --success-bg: #0E2818;
+    --error: #F06060;
+    --error-bg: #2A1010;
+
+    --cat-entree: #7AA0C4;
+    --cat-plat: #E8994A;
+    --cat-accomp: #5EAA84;
+    --cat-dessert: #BA6A9A;
+
+    color-scheme: dark;
   }
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--paper); }
-body { font-size: 17px; line-height: 1.45; }
-h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; margin: 0; }
-a { color: inherit; }
+:root[data-theme="dark"] {
+  --primary: #3ABAC8;
+  --primary-light: #1A2E32;
+  --accent: #FF8555;
+  --accent-shadow: rgba(255, 133, 85, 0.3);
 
+  --bg: #0E1A1D;
+  --bg-raised: #142428;
+  --surface: #1A2E32;
+  --surface-hover: #213A3F;
+
+  --text: #E8ECF0;
+  --text-secondary: #9AABB4;
+  --text-placeholder: #5E7680;
+
+  --border: #1E3338;
+  --border-strong: #2A4248;
+
+  --success: #3DD97A;
+  --success-bg: #0E2818;
+  --error: #F06060;
+  --error-bg: #2A1010;
+
+  --cat-entree: #7AA0C4;
+  --cat-plat: #E8994A;
+  --cat-accomp: #5EAA84;
+  --cat-dessert: #BA6A9A;
+
+  color-scheme: dark;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100dvh; background: var(--bg); }
+body { font-size: 16px; line-height: 1.5; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 32px; font-weight: 800; }
+h2 { font-size: 20px; }
+h3 { font-size: 17px; }
+
+a { color: inherit; text-decoration: none; }
+
+p { margin: 0; }
+
+/* ── Utilitaires ───────────────────────────────────────────── */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-accent { color: var(--accent); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 16px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--accent);
+  color: #FFFFFF;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-outline {
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--border-strong);
+}
+
+/* ── Input ─────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder { color: var(--text-placeholder); }
+.input:focus { border-color: var(--primary); }
+.input.error { border-color: var(--error); }
+
+/* ── Reduced motion ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -2,26 +2,62 @@
 // Le serveur (GitHub Pages) ne voit jamais ce qui suit le #, il renvoie donc
 // toujours index.html : aucune erreur 404 possible, même en rechargeant la page.
 
-export type Route = 'recettes' | 'semaine' | 'courses' | 'plus' | 'introuvable'
+export type Route =
+  | 'login'
+  | 'recettes'
+  | 'recette'      // détail : #/recette/<id>
+  | 'semaine'
+  | 'courses'
+  | 'historique'
+  | 'introuvable'
 
-const ROUTES: Route[] = ['recettes', 'semaine', 'courses', 'plus']
-const DEFAULT_ROUTE: Route = 'semaine'
+/** Les 4 onglets de la tab bar. */
+export const TAB_ROUTES = ['recettes', 'semaine', 'courses', 'historique'] as const
+export type TabRoute = (typeof TAB_ROUTES)[number]
 
-function readHash(): Route {
-  // "#/courses" → "courses" ; adresse vide → page par défaut
-  const path = window.location.hash.replace(/^#\/?/, '').split('/')[0]
-  if (path === '') return DEFAULT_ROUTE
-  return (ROUTES as string[]).includes(path) ? (path as Route) : 'introuvable'
+const STATIC_ROUTES: string[] = ['login', 'recettes', 'semaine', 'courses', 'historique']
+const DEFAULT_ROUTE: Route = 'recettes'
+
+interface RouterState {
+  current: Route
+  /** ID de la recette quand current === 'recette'. */
+  recipeId: string | null
 }
 
-// $state = valeur réactive de Svelte 5 : tout composant qui lit router.current
-// se met à jour tout seul quand elle change.
-export const router = $state({ current: readHash() })
+function readHash(): RouterState {
+  const raw = window.location.hash.replace(/^#\/?/, '')
+  const parts = raw.split('/')
+
+  if (raw === '') return { current: DEFAULT_ROUTE, recipeId: null }
+
+  // Route dynamique : #/recette/<uuid>
+  if (parts[0] === 'recette' && parts[1]) {
+    return { current: 'recette', recipeId: parts[1] }
+  }
+
+  // Routes statiques
+  if (STATIC_ROUTES.includes(parts[0])) {
+    return { current: parts[0] as Route, recipeId: null }
+  }
+
+  return { current: 'introuvable', recipeId: null }
+}
+
+// $state = valeur réactive de Svelte 5
+export const router: RouterState = $state(readHash())
 
 window.addEventListener('hashchange', () => {
-  router.current = readHash()
+  const next = readHash()
+  router.current = next.current
+  router.recipeId = next.recipeId
 })
 
-export function href(route: Route): string {
+export function href(route: Route | string, id?: string): string {
+  if (route === 'recette' && id) return `#/recette/${id}`
   return `#/${route}`
+}
+
+/** Navigation programmatique. */
+export function navigate(route: Route | string, id?: string): void {
+  window.location.hash = href(route, id).slice(1) // enlève le #
 }

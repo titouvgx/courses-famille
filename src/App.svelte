@@ -1,106 +1,103 @@
 <script lang="ts">
-  import { router, href, type Route } from './lib/router.svelte'
+  import { router, navigate } from './lib/router.svelte'
+  import { auth, initAuth, signOut } from './lib/auth.svelte'
   import { supabaseConfigured } from './lib/supabase'
 
-  const tabs: { route: Route; label: string }[] = [
-    { route: 'recettes', label: 'Recettes' },
-    { route: 'semaine', label: 'Semaine' },
-    { route: 'courses', label: 'Courses' },
-    { route: 'plus', label: 'Plus' },
-  ]
+  import TabBar from './components/TabBar.svelte'
+  import Login from './pages/Login.svelte'
+  import Recettes from './pages/Recettes.svelte'
+  import RecetteDetail from './pages/RecetteDetail.svelte'
+  import Semaine from './pages/Semaine.svelte'
+  import Courses from './pages/Courses.svelte'
+  import Historique from './pages/Historique.svelte'
 
-  const titles: Record<Route, string> = {
-    recettes: 'Recettes',
-    semaine: 'Cette semaine',
-    courses: 'Courses',
-    plus: 'Plus',
-    introuvable: 'Page introuvable',
+  // Initialiser l'auth au montage
+  initAuth()
+
+  // Redirection : si pas connecté → login, si connecté et sur login → recettes
+  $effect(() => {
+    if (auth.loading) return
+
+    if (!auth.user && router.current !== 'login') {
+      navigate('login')
+    } else if (auth.user && router.current === 'login') {
+      navigate('recettes')
+    }
+  })
+
+  function handleSignOut() {
+    signOut()
   }
 </script>
 
-<main>
-  <header>
-    <p class="kicker">Courses en famille</p>
-    <h1>{titles[router.current]}</h1>
-  </header>
+{#if auth.loading}
+  <div class="loading">
+    <div class="spinner"></div>
+  </div>
+{:else if !auth.user}
+  <!-- Non connecté : page de login -->
+  <Login />
+{:else}
+  <!-- Connecté : app shell -->
+  <div class="app-shell">
+    {#if router.current === 'recettes'}
+      <Recettes />
+    {:else if router.current === 'recette'}
+      <RecetteDetail />
+    {:else if router.current === 'semaine'}
+      <Semaine />
+    {:else if router.current === 'courses'}
+      <Courses />
+    {:else if router.current === 'historique'}
+      <Historique />
+    {:else}
+      <div class="page-404">
+        <h1>Page introuvable</h1>
+        <p>Cette adresse n'existe pas.</p>
+        <a href="#/recettes" class="btn btn-outline">Retour aux recettes</a>
+      </div>
+    {/if}
+  </div>
 
-  {#if router.current === 'introuvable'}
-    <p class="muted">Cette adresse n'existe pas. <a href={href('semaine')}>Retour à la semaine</a>.</p>
-  {:else}
-    <!-- Étape 0 : simple vérification que tout est branché. Remplacé dès l'étape 3. -->
-    <section class="check">
-      <h2>Étape 0</h2>
-      <ul>
-        <li>Déploiement GitHub Pages : <strong>OK</strong> (tu lis cette page)</li>
-        <li>
-          Configuration Supabase :
-          {#if supabaseConfigured}
-            <strong>OK</strong>
-          {:else}
-            <strong class="warn">manquante</strong> — voir le README
-          {/if}
-        </li>
-        <li>Navigation : <strong>OK</strong> si les onglets changent le titre</li>
-      </ul>
-    </section>
-  {/if}
-</main>
-
-<nav aria-label="Navigation principale">
-  {#each tabs as tab (tab.route)}
-    <a href={href(tab.route)} aria-current={router.current === tab.route ? 'page' : undefined}>
-      {tab.label}
-    </a>
-  {/each}
-</nav>
+  <TabBar />
+{/if}
 
 <style>
-  main {
-    max-width: 640px;
-    margin: 0 auto;
-    /* place pour la barre d'onglets + la zone du geste iPhone */
-    padding: calc(24px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+  .loading {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
   }
-  header { margin-bottom: 24px; }
-  .kicker {
-    margin: 0 0 4px;
-    font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-  h1 { font-size: 34px; }
-  h2 { font-size: 20px; margin-bottom: 8px; }
-  .muted { color: var(--ink-soft); }
-  .check {
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px dashed var(--rule);
-    padding: 16px 0;
-  }
-  .check ul { margin: 0; padding-left: 18px; }
-  .check li { margin: 6px 0; }
-  .warn { color: var(--accent); }
 
-  nav {
-    position: fixed;
-    inset: auto 0 0 0;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    padding-bottom: env(safe-area-inset-bottom);
-    background: var(--paper-raised);
-    border-top: 1px solid var(--rule);
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
   }
-  nav a {
-    min-height: var(--tap);
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    text-decoration: none;
-    color: var(--ink-soft);
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
-  nav a[aria-current='page'] {
-    color: var(--ink);
-    font-weight: 600;
-    box-shadow: inset 0 2px 0 var(--accent);
+
+  .app-shell {
+    min-height: 100dvh;
+    /* Place pour la tab bar + safe area bottom */
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-404 {
+    padding: var(--gutter);
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+    text-align: center;
+  }
+
+  .page-404 p {
+    color: var(--text-secondary);
+    margin: 8px 0 24px;
   }
 </style>
