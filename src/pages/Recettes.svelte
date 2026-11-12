@@ -31,7 +31,7 @@
     recipes = []
 
     Promise.all([
-      fetchRecipes(familyId, 0),
+      fetchRecipes(0),
       fetchRecipeCategories(),
     ])
       .then(([page, c]) => {
@@ -49,12 +49,11 @@
 
   // Charger la page suivante
   async function loadMore() {
-    const familyId = profileState.profile?.family_id
-    if (!familyId || loadingMore) return
+    if (loadingMore) return
 
     loadingMore = true
     try {
-      const page = await fetchRecipes(familyId, recipes.length)
+      const page = await fetchRecipes(recipes.length)
       recipes = [...recipes, ...page.recipes]
       hasMore = page.hasMore
     } catch (e: any) {

@@ -107,17 +107,15 @@ export interface RecipesPage {
  * @param offset – nombre de recettes à sauter (0 pour la première page)
  */
 export async function fetchRecipes(
-  familyId: string,
   offset = 0,
   limit = RECIPES_PAGE_SIZE,
 ): Promise<RecipesPage> {
   if (!supabase) return { recipes: [], hasMore: false }
 
-  // On demande limit + 1 pour savoir s'il reste des résultats après
+  // Les recettes sont partagées entre tous les foyers (RLS is_member)
   const { data, error } = await supabase
     .from('recipes')
     .select('*, recipe_categories(*)')
-    .eq('family_id', familyId)
     .order('title')
     .range(offset, offset + limit)
 
