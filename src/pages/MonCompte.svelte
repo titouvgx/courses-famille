@@ -3,6 +3,7 @@
   import { profileState, loadProfile, clearProfile } from '../lib/profile.svelte'
   import { supabase } from '../lib/supabase'
   import { navigate } from '../lib/router.svelte'
+  import { toast } from '../lib/toast.svelte'
 
   let displayName = $state('')
   let newPassword = $state('')
@@ -10,8 +11,6 @@
 
   let saving = $state(false)
   let savingPw = $state(false)
-  let success = $state<string | null>(null)
-  let error = $state<string | null>(null)
 
   // Charger les infos initiales
   $effect(() => {
@@ -23,13 +22,11 @@
   async function handleSaveName() {
     if (!supabase || !auth.user || saving) return
     if (!displayName.trim()) {
-      error = 'Le nom ne peut pas être vide.'
+      toast.error('Le nom ne peut pas être vide.')
       return
     }
 
     saving = true
-    error = null
-    success = null
 
     const { error: err } = await supabase
       .from('profiles')
@@ -37,10 +34,9 @@
       .eq('id', auth.user.id)
 
     if (err) {
-      error = err.message
+      toast.error(err.message)
     } else {
-      success = 'Nom mis à jour !'
-      // Recharger le profil en mémoire
+      toast.success('Nom mis à jour !')
       await loadProfile(auth.user.id)
     }
     saving = false
@@ -49,24 +45,22 @@
   async function handleChangePassword() {
     if (!supabase || savingPw) return
     if (newPassword.length < 6) {
-      error = 'Le mot de passe doit faire au moins 6 caractères.'
+      toast.error('Le mot de passe doit faire au moins 6 caractères.')
       return
     }
     if (newPassword !== confirmPassword) {
-      error = 'Les mots de passe ne correspondent pas.'
+      toast.error('Les mots de passe ne correspondent pas.')
       return
     }
 
     savingPw = true
-    error = null
-    success = null
 
     const { error: err } = await supabase.auth.updateUser({ password: newPassword })
 
     if (err) {
-      error = err.message
+      toast.error(err.message)
     } else {
-      success = 'Mot de passe changé !'
+      toast.success('Mot de passe changé !')
       newPassword = ''
       confirmPassword = ''
     }
@@ -150,13 +144,6 @@
       {savingPw ? 'Modification…' : 'Changer le mot de passe'}
     </button>
   </div>
-
-  {#if error}
-    <p class="msg msg-error">{error}</p>
-  {/if}
-  {#if success}
-    <p class="msg msg-success">{success}</p>
-  {/if}
 
   <!-- Déconnexion -->
   <button class="btn btn-danger-outline btn-logout" onclick={handleSignOut}>
@@ -286,36 +273,6 @@
     align-self: flex-start;
     padding: 8px 18px;
     font-size: 14px;
-  }
-
-  /* ── Messages ── */
-  .msg {
-    font-size: 14px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 12px;
-  }
-
-  .msg-error {
-    color: var(--error);
-    background: var(--error-bg);
-  }
-
-  .msg-success {
-    color: #15803d;
-    background: #dcfce7;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme="light"])) .msg-success {
-      color: #86efac;
-      background: rgba(34, 197, 94, 0.15);
-    }
-  }
-
-  :global(:root[data-theme="dark"]) .msg-success {
-    color: #86efac;
-    background: rgba(34, 197, 94, 0.15);
   }
 
   /* ── Logout ── */

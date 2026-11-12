@@ -21,6 +21,7 @@
     ShoppingCategory,
   } from '../lib/types'
   import type { RealtimeChannel } from '@supabase/supabase-js'
+  import { toast } from '../lib/toast.svelte'
 
   // ── État principal ──
   let list: ShoppingList | null = $state(null)
@@ -110,6 +111,19 @@
   const totalItems = $derived(items.length)
   const checkedItems = $derived(items.filter((i) => i.checked).length)
   const progressPct = $derived(totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0)
+  const allDone = $derived(totalItems > 0 && checkedItems === totalItems)
+
+  // Célébration quand tous les items sont cochés
+  let celebrated = $state(false)
+  $effect(() => {
+    if (allDone && !celebrated) {
+      celebrated = true
+      toast.success('Tous les articles sont cochés ! 🎉')
+    }
+    if (!allDone) {
+      celebrated = false
+    }
+  })
 
   // ── Real-time : abonnement aux changements de la liste ──
 
@@ -213,6 +227,7 @@
 
       list = await generateListFromPlan(familyId, plan.id)
       items = await fetchListItems(list.id)
+      toast.success(`Liste générée — ${items.length} articles`)
     } catch (e: any) {
       error = e.message
     } finally {
@@ -289,6 +304,7 @@
       list = null
       items = []
       showCompleteConfirm = false
+      toast.success('Courses terminées ! 🛒✅')
     } catch (e: any) {
       error = e.message
     } finally {
@@ -346,9 +362,15 @@
     <!-- Barre de progression -->
     <div class="progress-section">
       <div class="progress-bar">
-        <div class="progress-fill" style="width: {progressPct}%"></div>
+        <div class="progress-fill" class:done={allDone} style="width: {progressPct}%"></div>
       </div>
-      <span class="progress-text">{checkedItems}/{totalItems} articles</span>
+      <span class="progress-text" class:done={allDone}>
+        {#if allDone}
+          ✅ Tout est coché !
+        {:else}
+          {checkedItems}/{totalItems} articles
+        {/if}
+      </span>
     </div>
 
     <!-- Articles groupés par rayon -->
@@ -558,7 +580,11 @@
     height: 100%;
     background: var(--primary);
     border-radius: 4px;
-    transition: width 0.3s ease;
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+  }
+
+  .progress-fill.done {
+    background: var(--success);
   }
 
   .progress-text {
@@ -566,6 +592,11 @@
     font-weight: 600;
     color: var(--text-secondary);
     white-space: nowrap;
+    transition: color 0.3s;
+  }
+
+  .progress-text.done {
+    color: var(--success);
   }
 
   /* ── Erreur ── */
@@ -622,7 +653,7 @@
     padding: 10px 12px;
     background: var(--surface);
     border-radius: var(--radius-sm);
-    transition: opacity 0.2s;
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
   .item-row.checked {
@@ -655,6 +686,7 @@
   .item-check input:checked + .checkmark {
     background: var(--primary);
     border-color: var(--primary);
+    animation: check-pop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .item-check input:checked + .checkmark::after {
@@ -665,6 +697,18 @@
     border: solid white;
     border-width: 0 2.5px 2.5px 0;
     transform: translate(5.5px, 2px) rotate(45deg);
+    animation: check-stroke 0.2s ease-out 0.05s;
+  }
+
+  @keyframes check-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes check-stroke {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   .item-info {
@@ -825,6 +869,12 @@
     justify-content: center;
     z-index: 100;
     padding: var(--gutter);
+    animation: overlay-in 0.2s ease-out;
+  }
+
+  @keyframes overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 
   .confirm-dialog {
@@ -833,6 +883,12 @@
     padding: 24px;
     max-width: 360px;
     width: 100%;
+    animation: dialog-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes dialog-in {
+    from { opacity: 0; transform: scale(0.92) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
   }
 
   .confirm-title {

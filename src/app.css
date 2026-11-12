@@ -207,6 +207,46 @@ p { margin: 0; }
 .input:focus { border-color: var(--primary); }
 .input.error { border-color: var(--error); }
 
+/* ── Animations ───────────────────────────────────────────── */
+
+/* Entrée de page : fondu + glissement léger vers le haut */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page {
+  animation: page-in 0.25s ease-out;
+}
+
+/* Entrée échelonnée pour les listes */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse subtil pour attirer l'attention */
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.03); }
+}
+
+/* Slide-in depuis la droite */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Hover / focus améliorés pour les cartes interactives */
+.btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-outline:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
 /* ── Reduced motion ────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

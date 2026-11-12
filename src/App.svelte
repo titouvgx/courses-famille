@@ -6,6 +6,7 @@
 
   import TabBar from './components/TabBar.svelte'
   import AppHeader from './components/AppHeader.svelte'
+  import ToastContainer from './components/ToastContainer.svelte'
   import Login from './pages/Login.svelte'
   import Recettes from './pages/Recettes.svelte'
   import RecetteDetail from './pages/RecetteDetail.svelte'
@@ -43,6 +44,8 @@
     signOut()
   }
 </script>
+
+<ToastContainer />
 
 {#if auth.loading}
   <div class="loading">
