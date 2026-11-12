@@ -14,7 +14,7 @@ UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1609607285694-
 WHERE title = 'Bœuf bourguignon';
 
 UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1616401616927-3c81de22dfa8?w=800&h=600&fit=crop&auto=format'
-WHERE title = 'Poulet rôti traditionnel';
+WHERE title = 'Poulet rôti';
 
 UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1767065584177-9ceb902eec7a?w=800&h=600&fit=crop&auto=format'
 WHERE title = 'Quiche lorraine';
@@ -35,7 +35,7 @@ UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1551578657-a7e
 WHERE title = 'Mousse au chocolat';
 
 UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1588013273468-315fd88ea34c?w=800&h=600&fit=crop&auto=format'
-WHERE title = 'Pâtes carbonara';
+WHERE title = 'Pâtes à la carbonara';
 
 UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1549203438-a7696aed4dac?w=800&h=600&fit=crop&auto=format'
 WHERE title = 'Soupe à l''oignon gratinée';
