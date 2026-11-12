@@ -1,0 +1,20 @@
+# Dépendances et build
+node_modules
+dist
+*.local
+
+# Variables d'environnement : seul .env.example est versionné
+.env
+.env.*
+!.env.example
+
+# Supabase CLI (fichiers locaux)
+supabase/.temp
+supabase/.branches
+
+# Éditeurs et système
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.log

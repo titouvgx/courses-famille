@@ -1,0 +1,43 @@
+/* Jetons de design provisoires (direction « carnet de marché »).
+   Ils seront affinés à l'étape 1 (maquettes) : polices, tailles, espacements. */
+:root {
+  --paper: #f5f1e8;
+  --paper-raised: #fbf8f2;
+  --ink: #1f1c17;
+  --ink-soft: #6b6459;
+  --rule: #ddd5c6;
+  --accent: #c8401e;
+
+  --radius: 10px;
+  --tap: 48px; /* zone tactile minimale */
+  --font-body: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
+
+  color-scheme: light dark;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #16130f;
+    --paper-raised: #201c17;
+    --ink: #ede6d8;
+    --ink-soft: #a39a8a;
+    --rule: #39322a;
+    --accent: #e2643f;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--paper); }
+body { font-size: 17px; line-height: 1.45; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.15; margin: 0; }
+a { color: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
