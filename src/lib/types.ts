@@ -100,6 +100,36 @@ export interface MealSlotWithRecipe extends MealSlot {
   }
 }
 
+// ---------- Liste de courses ----------
+
+export interface ShoppingList {
+  id: string
+  family_id: string
+  meal_plan_id: string | null
+  status: 'active' | 'completed'
+  created_at: string
+  completed_at: string | null
+}
+
+export interface ShoppingListItem {
+  id: string
+  shopping_list_id: string
+  name: string
+  quantity: string | null
+  shopping_category_id: string | null
+  source_recipe_id: string | null
+  is_extra: boolean
+  checked: boolean
+  checked_by: string | null
+  checked_at: string | null
+  position: number
+}
+
+/** Item enrichi avec son rayon (jointure) */
+export interface ShoppingListItemWithCategory extends ShoppingListItem {
+  shopping_categories: ShoppingCategory | null
+}
+
 // ---------- Formulaire ----------
 
 export interface RecipeIngredientInput {
