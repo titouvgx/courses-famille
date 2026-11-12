@@ -71,6 +71,35 @@ export interface RecipeDetail extends Recipe {
   recipe_steps: RecipeStep[]
 }
 
+// ---------- Planning repas ----------
+
+export interface MealPlan {
+  id: string
+  family_id: string
+  week_start: string          // date ISO (lundi)
+  created_at: string
+}
+
+export interface MealSlot {
+  id: string
+  meal_plan_id: string
+  day_of_week: number          // 0 = lundi … 6 = dimanche
+  meal_type: 'midi' | 'soir'
+  recipe_id: string
+  portions: number
+}
+
+/** Slot enrichi avec les infos de la recette (jointure) */
+export interface MealSlotWithRecipe extends MealSlot {
+  recipes: {
+    id: string
+    title: string
+    image_url: string | null
+    default_portions: number
+    prep_time_min: number | null
+  }
+}
+
 // ---------- Formulaire ----------
 
 export interface RecipeIngredientInput {
