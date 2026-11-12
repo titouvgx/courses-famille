@@ -6,8 +6,10 @@
     fetchRecipe,
     fetchRecipeCategories,
     fetchShoppingCategories,
+    fetchKnownIngredients,
     createRecipe,
     updateRecipe,
+    type KnownIngredient,
   } from '../lib/api/recipes'
   import type {
     RecipeCategory,
@@ -38,20 +40,29 @@
   // Données de référence
   let recipeCategories: RecipeCategory[] = $state([])
   let shoppingCategories: ShoppingCategory[] = $state([])
+  let knownIngredients: KnownIngredient[] = $state([])
+
+  // Autocomplétion
+  let activeAutocomplete = $state<number | null>(null)
+  let autocompleteResults = $state<KnownIngredient[]>([])
 
   // UI
   let loading = $state(true)
   let saving = $state(false)
   let error = $state<string | null>(null)
 
-  // Charger les catégories + données existantes si édition
+  // Charger les catégories + ingrédients connus + données existantes si édition
   $effect(() => {
+    if (profileState.loading) return
+    const familyId = profileState.profile?.family_id
+
     loading = true
     error = null
 
     const promises: Promise<any>[] = [
       fetchRecipeCategories(),
       fetchShoppingCategories(),
+      familyId ? fetchKnownIngredients(familyId) : Promise.resolve([]),
     ]
 
     if (editId) {
@@ -62,9 +73,10 @@
       .then((results) => {
         recipeCategories = results[0]
         shoppingCategories = results[1]
+        knownIngredients = results[2]
 
-        if (editId && results[2]) {
-          const r = results[2]
+        if (editId && results[3]) {
+          const r = results[3]
           title = r.title
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min
@@ -96,6 +108,48 @@
       })
   })
 
+  // Autocomplétion : filtrer les suggestions
+  function onIngredientInput(index: number) {
+    const query = ingredients[index].name.trim().toLowerCase()
+    if (query.length < 1) {
+      activeAutocomplete = null
+      autocompleteResults = []
+      return
+    }
+
+    const results = knownIngredients.filter(
+      (ki) => ki.name.toLowerCase().includes(query)
+    ).slice(0, 6)
+
+    if (results.length > 0) {
+      activeAutocomplete = index
+      autocompleteResults = results
+    } else {
+      activeAutocomplete = null
+      autocompleteResults = []
+    }
+  }
+
+  function selectSuggestion(index: number, suggestion: KnownIngredient) {
+    ingredients[index].name = suggestion.name
+    if (suggestion.unit && !ingredients[index].unit) {
+      ingredients[index].unit = suggestion.unit
+    }
+    if (suggestion.shopping_category_id && !ingredients[index].shopping_category_id) {
+      ingredients[index].shopping_category_id = suggestion.shopping_category_id
+    }
+    activeAutocomplete = null
+    autocompleteResults = []
+  }
+
+  function closeAutocomplete() {
+    // Petit délai pour laisser le click sur la suggestion se propager
+    setTimeout(() => {
+      activeAutocomplete = null
+      autocompleteResults = []
+    }, 150)
+  }
+
   // Gestion ingrédients
   function addIngredient() {
     ingredients = [...ingredients, { name: '', quantity: null, unit: '', shopping_category_id: '' }]
@@ -121,7 +175,6 @@
     e.preventDefault()
     if (saving) return
 
-    // Validation
     if (!title.trim()) {
       error = 'Le titre est requis.'
       return
@@ -162,6 +215,10 @@
       saving = false
     }
   }
+
+  function shoppingCatIcon(id: string): string {
+    return shoppingCategories.find((s) => s.id === id)?.icon ?? '🛒'
+  }
 </script>
 
 <div class="page">
@@ -176,124 +233,176 @@
     <div class="center-msg"><div class="spinner"></div></div>
   {:else}
     <form onsubmit={handleSubmit}>
-      <!-- Titre -->
-      <label class="field">
-        <span class="label-text">Titre *</span>
-        <input
-          type="text"
-          class="input"
-          placeholder="Ex : Poulet rôti aux herbes"
-          required
-          bind:value={title}
-        />
-      </label>
 
-      <!-- Catégorie -->
-      <label class="field">
-        <span class="label-text">Catégorie</span>
-        <select class="input" bind:value={categoryId}>
-          <option value="">— Aucune —</option>
-          {#each recipeCategories as cat (cat.id)}
-            <option value={cat.id}>{cat.name}</option>
-          {/each}
-        </select>
-      </label>
-
-      <!-- Portions + Temps -->
-      <div class="row-2">
+      <!-- ── Infos principales ── -->
+      <div class="card">
         <label class="field">
-          <span class="label-text">Portions</span>
+          <span class="label-text">Titre *</span>
           <input
-            type="number"
+            type="text"
             class="input"
-            min="1"
-            max="50"
-            bind:value={defaultPortions}
+            placeholder="Ex : Poulet rôti aux herbes"
+            required
+            bind:value={title}
           />
         </label>
-        <label class="field">
-          <span class="label-text">Temps de prépa (min)</span>
-          <input
-            type="number"
-            class="input"
-            min="0"
-            max="600"
-            placeholder="Ex : 45"
-            bind:value={prepTimeMin}
-          />
-        </label>
-      </div>
 
-      <!-- Ingrédients -->
-      <fieldset class="fieldset">
-        <legend>Ingrédients</legend>
-        {#each ingredients as ing, i (i)}
-          <div class="ingredient-row">
+        <label class="field">
+          <span class="label-text">Catégorie</span>
+          <div class="chip-select">
+            <button
+              type="button"
+              class="chip-option"
+              class:selected={categoryId === ''}
+              onclick={() => (categoryId = '')}
+            >Aucune</button>
+            {#each recipeCategories as cat (cat.id)}
+              <button
+                type="button"
+                class="chip-option"
+                class:selected={categoryId === cat.id}
+                onclick={() => (categoryId = cat.id)}
+                style="--cat-color: {cat.color}"
+              >{cat.name}</button>
+            {/each}
+          </div>
+        </label>
+
+        <div class="row-2">
+          <label class="field">
+            <span class="label-text">🍽️ Portions</span>
             <input
               type="number"
-              class="input input-qty"
-              placeholder="Qté"
-              step="any"
+              class="input"
+              min="1"
+              max="50"
+              bind:value={defaultPortions}
+            />
+          </label>
+          <label class="field">
+            <span class="label-text">⏱️ Prépa (min)</span>
+            <input
+              type="number"
+              class="input"
               min="0"
-              bind:value={ing.quantity}
+              max="600"
+              placeholder="Ex : 45"
+              bind:value={prepTimeMin}
             />
-            <input
-              type="text"
-              class="input input-unit"
-              placeholder="Unité"
-              bind:value={ing.unit}
-            />
-            <input
-              type="text"
-              class="input input-name"
-              placeholder="Nom de l'ingrédient"
-              bind:value={ing.name}
-            />
-            <select class="input input-cat" bind:value={ing.shopping_category_id} title="Rayon">
-              <option value="">Rayon</option>
-              {#each shoppingCategories as sc (sc.id)}
-                <option value={sc.id}>{sc.icon} {sc.name}</option>
-              {/each}
-            </select>
-            <button
-              type="button"
-              class="btn-icon btn-remove"
-              onclick={() => removeIngredient(i)}
-              title="Retirer"
-              aria-label="Retirer l'ingrédient"
-            >×</button>
-          </div>
-        {/each}
-        <button type="button" class="btn-add" onclick={addIngredient}>
-          + Ajouter un ingrédient
-        </button>
-      </fieldset>
+          </label>
+        </div>
+      </div>
 
-      <!-- Étapes -->
-      <fieldset class="fieldset">
-        <legend>Préparation</legend>
-        {#each steps as step, i (i)}
-          <div class="step-row">
-            <span class="step-num">{i + 1}</span>
-            <textarea
-              class="input textarea"
-              placeholder="Décris cette étape…"
-              rows="2"
-              bind:value={step.instruction}
-            ></textarea>
-            <button
-              type="button"
-              class="btn-icon btn-remove"
-              onclick={() => removeStep(i)}
-              title="Retirer"
-              aria-label="Retirer l'étape"
-            >×</button>
-          </div>
-        {/each}
-        <button type="button" class="btn-add" onclick={addStep}>
-          + Ajouter une étape
+      <!-- ── Ingrédients ── -->
+      <div class="card">
+        <h2 class="section-title">🥕 Ingrédients</h2>
+
+        <div class="ingredient-list">
+          {#each ingredients as ing, i (i)}
+            <div class="ingredient-item">
+              <div class="ing-main-row">
+                <div class="ing-name-wrap">
+                  <input
+                    type="text"
+                    class="input"
+                    placeholder="Nom (ex : oeufs, beurre…)"
+                    bind:value={ing.name}
+                    oninput={() => onIngredientInput(i)}
+                    onfocusout={closeAutocomplete}
+                  />
+                  {#if activeAutocomplete === i && autocompleteResults.length > 0}
+                    <ul class="autocomplete">
+                      {#each autocompleteResults as suggestion (suggestion.name)}
+                        <li>
+                          <button
+                            type="button"
+                            class="autocomplete-item"
+                            onmousedown={() => selectSuggestion(i, suggestion)}
+                          >
+                            <span class="ac-name">{suggestion.name}</span>
+                            {#if suggestion.unit}
+                              <span class="ac-unit">({suggestion.unit})</span>
+                            {/if}
+                          </button>
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+                </div>
+                <button
+                  type="button"
+                  class="btn-remove"
+                  onclick={() => removeIngredient(i)}
+                  title="Retirer"
+                  aria-label="Retirer l'ingrédient"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="ing-detail-row">
+                <input
+                  type="number"
+                  class="input input-sm"
+                  placeholder="Qté"
+                  step="any"
+                  min="0"
+                  bind:value={ing.quantity}
+                />
+                <input
+                  type="text"
+                  class="input input-sm"
+                  placeholder="Unité (g, cl…)"
+                  bind:value={ing.unit}
+                />
+                <select class="input input-sm" bind:value={ing.shopping_category_id} title="Rayon">
+                  <option value="">🛒 Rayon</option>
+                  {#each shoppingCategories as sc (sc.id)}
+                    <option value={sc.id}>{sc.icon} {sc.name}</option>
+                  {/each}
+                </select>
+              </div>
+            </div>
+          {/each}
+        </div>
+
+        <button type="button" class="btn-add" onclick={addIngredient}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter un ingrédient
         </button>
-      </fieldset>
+      </div>
+
+      <!-- ── Étapes ── -->
+      <div class="card">
+        <h2 class="section-title">👩‍🍳 Préparation</h2>
+
+        <div class="step-list">
+          {#each steps as step, i (i)}
+            <div class="step-item">
+              <span class="step-badge">{i + 1}</span>
+              <textarea
+                class="input textarea"
+                placeholder="Décris cette étape…"
+                rows="2"
+                bind:value={step.instruction}
+              ></textarea>
+              <button
+                type="button"
+                class="btn-remove"
+                onclick={() => removeStep(i)}
+                title="Retirer"
+                aria-label="Retirer l'étape"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          {/each}
+        </div>
+
+        <button type="button" class="btn-add" onclick={addStep}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter une étape
+        </button>
+      </div>
 
       {#if error}
         <p class="form-error">{error}</p>
@@ -303,7 +412,7 @@
         {#if saving}
           Enregistrement…
         {:else}
-          {isEdit ? 'Enregistrer' : 'Créer la recette'}
+          {isEdit ? '✅ Enregistrer les modifications' : '✅ Créer la recette'}
         {/if}
       </button>
     </form>
@@ -314,7 +423,8 @@
   .page {
     padding: var(--gutter);
     padding-top: calc(var(--gutter) + env(safe-area-inset-top, 0px));
-    max-width: 600px;
+    max-width: 560px;
+    padding-bottom: 32px;
   }
 
   .back {
@@ -324,7 +434,7 @@
     color: var(--primary);
     font-size: 15px;
     font-weight: 500;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     text-decoration: none;
   }
 
@@ -339,6 +449,25 @@
     gap: 16px;
   }
 
+  /* ── Card sections ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* ── Champs ── */
   .field {
     display: flex;
     flex-direction: column;
@@ -346,9 +475,11 @@
   }
 
   .label-text {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .row-2 {
@@ -357,53 +488,136 @@
     gap: 12px;
   }
 
-  /* Fieldset */
-  .fieldset {
+  /* ── Chip select (catégories) ── */
+  .chip-select {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip-option {
+    padding: 6px 14px;
+    border-radius: 20px;
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .chip-option:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .chip-option.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+
+  /* ── Ingrédients ── */
+  .ingredient-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
 
-  .fieldset legend {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    padding: 0 8px;
+  .ingredient-item {
+    background: var(--bg);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
-  /* Ligne ingrédient */
-  .ingredient-row {
-    display: grid;
-    grid-template-columns: 60px 60px 1fr auto auto;
-    gap: 6px;
+  .ing-main-row {
+    display: flex;
+    gap: 8px;
     align-items: center;
   }
 
-  .input-qty {
-    text-align: center;
+  .ing-name-wrap {
+    flex: 1;
+    position: relative;
   }
 
-  .input-unit {
-    text-align: center;
+  .ing-detail-row {
+    display: grid;
+    grid-template-columns: 70px 80px 1fr;
+    gap: 6px;
   }
 
-  .input-cat {
-    max-width: 100%;
+  .input-sm {
     font-size: 13px;
+    padding: 7px 10px;
   }
 
-  /* Ligne étape */
-  .step-row {
+  /* ── Autocomplétion ── */
+  .autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    list-style: none;
+    padding: 4px 0;
+    margin: 4px 0 0;
+    z-index: 50;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .autocomplete-item:hover {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+
+  .ac-name {
+    font-weight: 500;
+  }
+
+  .ac-unit {
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  /* ── Étapes ── */
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step-item {
     display: grid;
     grid-template-columns: 28px 1fr auto;
     gap: 8px;
     align-items: start;
   }
 
-  .step-num {
+  .step-badge {
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -415,6 +629,7 @@
     align-items: center;
     justify-content: center;
     margin-top: 6px;
+    flex-shrink: 0;
   }
 
   .textarea {
@@ -423,8 +638,11 @@
     font-family: var(--font-body);
   }
 
-  /* Boutons */
+  /* ── Boutons ── */
   .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     align-self: flex-start;
     background: none;
     border: none;
@@ -433,36 +651,35 @@
     font-weight: 600;
     font-family: var(--font-body);
     cursor: pointer;
-    padding: 4px 0;
+    padding: 6px 0;
   }
 
   .btn-add:hover {
     text-decoration: underline;
   }
 
-  .btn-icon {
+  .btn-remove {
     width: 28px;
     height: 28px;
     border-radius: 50%;
     border: none;
-    background: var(--error);
-    color: white;
-    font-size: 18px;
-    line-height: 1;
+    background: transparent;
+    color: var(--text-placeholder);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.15s;
+    transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
   }
 
-  .btn-icon:hover {
-    opacity: 0.8;
+  .btn-remove:hover {
+    background: var(--error);
+    color: white;
   }
 
   .btn-submit {
-    margin-top: 8px;
+    margin-top: 4px;
     font-size: 16px;
     padding: 14px;
   }
@@ -475,19 +692,14 @@
     font-size: 14px;
   }
 
-  /* Mobile : empiler les colonnes ingrédient */
-  @media (max-width: 480px) {
-    .ingredient-row {
-      grid-template-columns: 50px 50px 1fr auto;
-      gap: 6px;
-    }
-
-    .input-cat {
-      grid-column: 1 / -2;
+  /* ── Mobile ── */
+  @media (max-width: 440px) {
+    .ing-detail-row {
+      grid-template-columns: 60px 70px 1fr;
     }
   }
 
-  /* Loading */
+  /* ── Loading ── */
   .center-msg {
     display: flex;
     justify-content: center;

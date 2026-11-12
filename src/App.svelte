@@ -5,6 +5,7 @@
   import { supabaseConfigured } from './lib/supabase'
 
   import TabBar from './components/TabBar.svelte'
+  import AppHeader from './components/AppHeader.svelte'
   import Login from './pages/Login.svelte'
   import Recettes from './pages/Recettes.svelte'
   import RecetteDetail from './pages/RecetteDetail.svelte'
@@ -12,6 +13,7 @@
   import Semaine from './pages/Semaine.svelte'
   import Courses from './pages/Courses.svelte'
   import Historique from './pages/Historique.svelte'
+  import MonCompte from './pages/MonCompte.svelte'
 
   // Initialiser l'auth au montage
   initAuth()
@@ -51,6 +53,7 @@
   <Login />
 {:else}
   <!-- Connecté : app shell -->
+  <AppHeader />
   <div class="app-shell">
     {#if router.current === 'recettes'}
       <Recettes />
@@ -66,6 +69,8 @@
       <Courses />
     {:else if router.current === 'historique'}
       <Historique />
+    {:else if router.current === 'compte'}
+      <MonCompte />
     {:else}
       <div class="page-404">
         <h1>Page introuvable</h1>

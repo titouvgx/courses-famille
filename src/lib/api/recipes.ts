@@ -32,6 +32,40 @@ export async function fetchShoppingCategories(): Promise<ShoppingCategory[]> {
   return data ?? []
 }
 
+// ────────── Ingrédients connus (autocomplétion) ──────────
+
+export interface KnownIngredient {
+  name: string
+  unit: string | null
+  shopping_category_id: string | null
+}
+
+/** Récupère tous les noms d'ingrédients distincts utilisés par la famille. */
+export async function fetchKnownIngredients(familyId: string): Promise<KnownIngredient[]> {
+  if (!supabase) return []
+  // Jointure : recipe_ingredients → recipes (pour filtrer par famille)
+  const { data, error } = await supabase
+    .from('recipe_ingredients')
+    .select('name, unit, shopping_category_id, recipes!inner(family_id)')
+    .eq('recipes.family_id', familyId)
+  if (error) throw error
+
+  // Dédupliquer par nom (garder le dernier unit/category utilisé)
+  const map = new Map<string, KnownIngredient>()
+  for (const row of data ?? []) {
+    const lower = row.name.toLowerCase()
+    if (!map.has(lower)) {
+      map.set(lower, {
+        name: row.name,
+        unit: row.unit,
+        shopping_category_id: row.shopping_category_id,
+      })
+    }
+  }
+
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+}
+
 // ────────── Liste des recettes ──────────
 
 export async function fetchRecipes(familyId: string): Promise<RecipeWithCategory[]> {

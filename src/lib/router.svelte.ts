@@ -11,13 +11,14 @@ export type Route =
   | 'semaine'
   | 'courses'
   | 'historique'
+  | 'compte'           // page profil / mon compte
   | 'introuvable'
 
 /** Les 4 onglets de la tab bar. */
 export const TAB_ROUTES = ['recettes', 'semaine', 'courses', 'historique'] as const
 export type TabRoute = (typeof TAB_ROUTES)[number]
 
-const STATIC_ROUTES: string[] = ['login', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique']
+const STATIC_ROUTES: string[] = ['login', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
 const DEFAULT_ROUTE: Route = 'recettes'
 
 interface RouterState {
