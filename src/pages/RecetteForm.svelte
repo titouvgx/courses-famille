@@ -59,24 +59,30 @@
     loading = true
     error = null
 
-    const promises: Promise<any>[] = [
+    // Requêtes essentielles (catégories + recette en édition)
+    const essentialPromises: Promise<any>[] = [
       fetchRecipeCategories(),
       fetchShoppingCategories(),
-      familyId ? fetchKnownIngredients(familyId) : Promise.resolve([]),
     ]
 
     if (editId) {
-      promises.push(fetchRecipe(editId))
+      essentialPromises.push(fetchRecipe(editId))
     }
 
-    Promise.all(promises)
+    // L'autocomplétion est chargée à part pour ne pas bloquer le formulaire
+    if (familyId) {
+      fetchKnownIngredients(familyId)
+        .then((data) => { knownIngredients = data })
+        .catch(() => { /* silencieux : l'autocomplétion sera juste vide */ })
+    }
+
+    Promise.all(essentialPromises)
       .then((results) => {
         recipeCategories = results[0]
         shoppingCategories = results[1]
-        knownIngredients = results[2]
 
-        if (editId && results[3]) {
-          const r = results[3]
+        if (editId && results[2]) {
+          const r = results[2]
           title = r.title
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min
