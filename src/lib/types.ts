@@ -36,6 +36,7 @@ export interface Recipe {
   category_id: string | null
   prep_time_min: number | null
   default_portions: number
+  image_url: string | null
   created_by: string | null
   created_at: string
   updated_at: string

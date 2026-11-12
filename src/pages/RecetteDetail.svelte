@@ -68,6 +68,12 @@
   {:else if error}
     <div class="center-msg error-msg">{error}</div>
   {:else if recipe}
+    {#if recipe.image_url}
+      <div class="recipe-hero">
+        <img src={recipe.image_url} alt={recipe.title} class="hero-img" />
+      </div>
+    {/if}
+
     <div class="recipe-header">
       {#if recipe.recipe_categories}
         <span
@@ -165,6 +171,20 @@
     font-weight: 500;
     margin-bottom: 16px;
     text-decoration: none;
+  }
+
+  .recipe-hero {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .recipe-header {

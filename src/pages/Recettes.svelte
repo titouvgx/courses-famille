@@ -147,7 +147,16 @@
       {#each filtered as recipe (recipe.id)}
         <a href={href('recette', recipe.id)} class="recipe-card">
           <div class="card-visual">
-            <span class="card-emoji">🍽️</span>
+            {#if recipe.image_url}
+              <img
+                src={recipe.image_url}
+                alt={recipe.title}
+                class="card-img"
+                loading="lazy"
+              />
+            {:else}
+              <span class="card-emoji">🍽️</span>
+            {/if}
           </div>
           <div class="card-body">
             {#if recipe.recipe_categories}
@@ -307,12 +316,19 @@
   }
 
   .card-visual {
-    height: 100px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: color-mix(in srgb, var(--primary) 8%, transparent);
     font-size: 36px;
+    overflow: hidden;
+  }
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .card-body {
