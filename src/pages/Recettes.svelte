@@ -15,8 +15,15 @@
 
   // Chargement des données
   $effect(() => {
+    // Attendre que le profil soit chargé
+    if (profileState.loading) return
+
     const familyId = profileState.profile?.family_id
-    if (!familyId) return
+    if (!familyId) {
+      loading = false
+      error = 'Profil introuvable. Vérifie que ton compte est bien lié à une famille.'
+      return
+    }
 
     loading = true
     error = null
