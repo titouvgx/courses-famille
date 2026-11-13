@@ -2,7 +2,11 @@
 // Stratégie : cache-first pour les assets statiques, network-first pour les API.
 
 // Changer ce nom vide l'ancien cache chez tout le monde au prochain chargement
-const CACHE_NAME = 'courses-v2'
+const CACHE_NAME = 'courses-v3'
+// Photos de recettes : cache séparé et plafonné (les noms de fichiers sont uniques,
+// une photo ne change jamais → on peut servir la copie locale en priorité)
+const IMAGE_CACHE = 'courses-images-v1'
+const IMAGE_CACHE_MAX = 150
 
 // Assets à pré-cacher lors de l'installation
 const PRECACHE_URLS = [
@@ -28,7 +32,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((names) =>
       Promise.all(
         names
-          .filter((name) => name !== CACHE_NAME)
+          .filter((name) => name !== CACHE_NAME && name !== IMAGE_CACHE)
           .map((name) => caches.delete(name))
       )
     )
@@ -42,7 +46,35 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Ne pas intercepter les requêtes Supabase (API + realtime)
+  // Photos de recettes (Supabase Storage public, Unsplash) : cache d'abord.
+  // Utile hors connexion et en 4G ; le cache est limité à IMAGE_CACHE_MAX photos.
+  const isRecipePhoto =
+    (url.hostname.includes('supabase') && url.pathname.includes('/storage/v1/object/public/')) ||
+    url.hostname === 'images.unsplash.com'
+  if (request.method === 'GET' && isRecipePhoto) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(async (cache) => {
+        const key = request.url
+        const cached = await cache.match(key)
+        if (cached) return cached
+        // On redemande l'image en mode CORS (Supabase et Unsplash l'autorisent) :
+        // une réponse « opaque » compterait ~7 Mo de quota par image dans Chrome.
+        let response
+        try {
+          response = await fetch(new Request(key, { mode: 'cors', credentials: 'omit' }))
+        } catch {
+          return fetch(request) // CORS refusé : on charge normalement, sans mettre en cache
+        }
+        if (response.ok) {
+          cache.put(key, response.clone()).then(() => trimCache(cache, IMAGE_CACHE_MAX))
+        }
+        return response
+      })
+    )
+    return
+  }
+
+  // Ne pas intercepter le reste de Supabase (API + realtime) : données toujours fraîches
   if (url.hostname.includes('supabase')) return
 
   // Ne pas intercepter les requêtes non-GET
@@ -107,3 +139,10 @@ self.addEventListener('fetch', (event) => {
     return
   }
 })
+
+
+/** Garde au plus `max` entrées dans le cache (supprime les plus anciennes). */
+async function trimCache(cache, max) {
+  const keys = await cache.keys()
+  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i])
+}

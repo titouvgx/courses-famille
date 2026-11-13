@@ -1,6 +1,9 @@
 <script lang="ts">
   import Icon from '../components/Icon.svelte'
+  import { onDestroy } from 'svelte'
   import { profileState } from '../lib/profile.svelte'
+  import { supabase } from '../lib/supabase'
+  import type { RealtimeChannel } from '@supabase/supabase-js'
   import { href } from '../lib/router.svelte'
   import {
     getMonday,
@@ -68,6 +71,44 @@
       .finally(() => {
         loading = false
       })
+  })
+
+  // ── Temps réel : le planning est partagé entre les membres du foyer ──
+  // Quand quelqu'un ajoute / retire / modifie un repas, on recharge la semaine.
+  // (Variable NON réactive : l'effet qui s'abonne la lit puis la modifie.)
+  let channel: RealtimeChannel | null = null
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined
+
+  function unsubscribe() {
+    if (channel) {
+      supabase?.removeChannel(channel)
+      channel = null
+    }
+  }
+
+  $effect(() => {
+    const id = planId
+    unsubscribe()
+    if (!id || !supabase) return
+    channel = supabase
+      .channel(`meal-slots-${id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'meal_slots', filter: `meal_plan_id=eq.${id}` },
+        () => {
+          // Plusieurs événements arrivent souvent ensemble (remplacement = suppression + ajout)
+          clearTimeout(refreshTimer)
+          refreshTimer = setTimeout(async () => {
+            if (planId === id) slots = await fetchSlots(id)
+          }, 250)
+        },
+      )
+      .subscribe()
+  })
+
+  onDestroy(() => {
+    clearTimeout(refreshTimer)
+    unsubscribe()
   })
 
   // ── Helpers ──

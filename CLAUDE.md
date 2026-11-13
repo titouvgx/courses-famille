@@ -67,13 +67,32 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 7. `seed_recipes.sql` — 20 recettes de démo
 8. `shared_recipes.sql` — partage entre foyers
 9. `recipe_images.sql` — images Unsplash
+10. `realtime_publication.sql` — temps réel sur `shopping_list_items` ET `meal_slots` (idempotent)
+11. `recipe_photos_storage.sql` — bucket public `recipe-photos` + politiques RLS Storage (idempotent)
 
 ### Realtime
 
-Pour que le temps réel fonctionne sur la liste de courses :
-```sql
-ALTER PUBLICATION supabase_realtime ADD TABLE shopping_list_items;
-```
+Liste de courses (Courses) et planning (Semaine) se synchronisent entre membres du foyer.
+Prérequis : migration `20261113110000_realtime_publication.sql` (ajoute les deux tables à `supabase_realtime`).
+Piège Svelte 5 : la variable qui garde le canal Realtime ne doit **pas** être en `$state` (l'effet qui s'abonne la lit puis l'écrit → boucle infinie).
+
+### Photos de recettes (`src/lib/api/recipeImages.ts`)
+- Choisies depuis la galerie dans le formulaire, **compressées dans le navigateur** (1600 px max, WebP ou JPEG si Safari, < 400 Ko). Le ré-encodage supprime les métadonnées EXIF (dont le GPS)
+- Bucket **public** `recipe-photos` (URL stables, cache hors connexion) ; chemin `<recipeId>/<uuid>.webp` ; envoi réservé au foyer propriétaire ; pas d'écrasement ; dossier vidé à la suppression de la recette
+- Le service worker met les photos en cache (cache séparé, 150 max, requêtes CORS pour éviter les réponses opaques)
+
+### Recherche de recettes
+- Index léger (`id, title, category_id`) de toutes les recettes chargé une fois, filtré côté client : insensible aux accents, à la casse et à l'ordre des mots (`normalizeText` dans `quantities.ts`). Recettes complètes chargées par pages de 30
+
+### Hors connexion (`src/lib/offline.ts`)
+- La dernière liste de courses et le profil sont gardés dans `localStorage` (clés `courses:*`)
+- Les cochages faits sans réseau sont mis en file et renvoyés au retour du réseau (`flushPending`)
+- Tout est effacé à la déconnexion (`clearProfile(true)`)
+
+### Liste de courses
+- `regenerateList` : recalcule depuis le planning en **gardant** les articles cochés et ceux ajoutés à la main (`is_extra`)
+- « Juste les ingrédients » (recette non planifiée) → articles `is_extra = true` (survivent à la régénération)
+- Quantités : `src/lib/quantities.ts` (regroupe g/kg, ml/cl/l, unités identiques ; « 1,5 kg », format français)
 
 ## Design System — « Mer »
 
@@ -132,6 +151,7 @@ src/
 │   ├── AppBackdrop.svelte        # Fond de TOUTES les pages : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile (variant home/page)
 │   ├── Icon.svelte               # Icônes au trait (remplacent les émojis décoratifs)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
+│   ├── ConfirmDialog.svelte      # Fenêtre de confirmation centrée commune
 │   ├── PlanRecipeDialog.svelte   # Fenêtre centrée 2 étapes : créneau (4 semaines, créneaux pris visibles) → ingrédients aux courses (mode 'plan' ou 'cart')
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
@@ -144,20 +164,23 @@ src/
 │   ├── types.ts                  # Interfaces TypeScript (miroir Supabase)
 │   ├── random.ts                 # Hasard reproductible (graine = date) : pickSeeded
 │   ├── floatLayout.ts            # Placement « en vrac » des cartes (fonction pure, tirage seedé, sans chevauchement)
+│   ├── quantities.ts             # Quantités : addition, conversion g→kg / ml→cl→l, format français
+│   ├── offline.ts                # Liste gardée sur le téléphone + cochages en attente
 │   ├── images.ts                 # sizedImage() : redimensionne les URL Unsplash pour le mobile
 │   └── api/
-│       ├── recipes.ts            # CRUD recettes
+│       ├── recipes.ts            # CRUD recettes + recherche (index léger) + photos
+│       ├── recipeImages.ts       # Photos : compression, envoi Storage, suppression
 │       ├── meals.ts              # CRUD planning (plans + slots) + fetchSlotsForWeeks (lecture seule, sans créer de plan)
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
 │   ├── Login.svelte              # Connexion / inscription
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
-│   ├── Recettes.svelte           # Liste des recettes (paginée)
+│   ├── Recettes.svelte           # Recherche (toute la base, sans accents) + puces catégories + grille
 │   ├── RecetteDetail.svelte      # Détail recette ; « Ajouter à ma semaine » (puis courses) / « Juste les ingrédients »
-│   ├── RecetteForm.svelte        # Formulaire création/édition
+│   ├── RecetteForm.svelte        # Formulaire création/édition + photo depuis la galerie
 │   ├── Semaine.svelte            # Planning : cartes jour + tuiles Midi/Soir (téléphone), 2 col (tablette), 7 colonnes (≥ 1100 px)
-│   ├── Courses.svelte            # Liste de courses active (realtime)
-│   ├── Historique.svelte         # Listes terminées
+│   ├── Courses.svelte            # Liste active : rayons, « Dans le chariot », temps réel, hors connexion, mise à jour sans perte
+│   ├── Historique.svelte         # Listes terminées : cartes dépliables par rayon, suppression confirmée
 │   └── MonCompte.svelte          # Profil + mot de passe
 public/
 ├── manifest.json                 # PWA manifest
@@ -196,7 +219,8 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 9 : Polish (toasts, animations, micro-interactions)
 - Bonus : « Ajouter à ma semaine » depuis une recette
 - Bonus : « Ajouter au panier » avec sélection d'ingrédients et portions ajustables
-- Refonte UI (en cours) : accueil flottant ✅, fond « mer » sur toutes les pages ✅, émojis décoratifs → icônes ✅, page Semaine ✅ — autres pages à affiner
+- Refonte UI V1 ✅ : accueil flottant, fond « mer », icônes, Semaine, Courses, Recettes, Historique, fenêtre « semaine puis courses »
+- V1 fiabilité ✅ : mise à jour de liste sans perte, hors connexion, planning en temps réel, recherche complète, quantités lisibles, photos
 
 ### Règles UI mobile-first (refonte)
 - Animer uniquement `transform` / `opacity` (pas de `filter: blur` animé, trop coûteux sur téléphone)

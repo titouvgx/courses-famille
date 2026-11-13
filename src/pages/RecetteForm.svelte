@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte'
   import Icon from '../components/Icon.svelte'
+  import { toast } from '../lib/toast.svelte'
   import { router, href, navigate } from '../lib/router.svelte'
   import { auth } from '../lib/auth.svelte'
   import { profileState } from '../lib/profile.svelte'
@@ -12,6 +14,13 @@
     updateRecipe,
     type KnownIngredient,
   } from '../lib/api/recipes'
+  import {
+    compressRecipeImage,
+    PhotoError,
+    PhotoUploadError,
+    type CompressedImage,
+    type PhotoChange,
+  } from '../lib/api/recipeImages'
   import type {
     RecipeCategory,
     ShoppingCategory,
@@ -37,6 +46,16 @@
     { name: '', quantity: null, unit: '', shopping_category_id: '' },
   ])
   let steps = $state<RecipeStepInput[]>([{ instruction: '' }])
+
+  // Photo
+  let currentImageUrl = $state<string | null>(null) // photo déjà enregistrée (édition)
+  let pendingImage = $state<CompressedImage | null>(null) // nouvelle photo compressée, pas encore envoyée
+  let pendingPreviewUrl = $state<string | null>(null)
+  let imageRemoved = $state(false)
+  let processingPhoto = $state(false)
+  let photoInput = $state<HTMLInputElement | null>(null)
+
+  const previewUrl = $derived(pendingPreviewUrl ?? (imageRemoved ? null : currentImageUrl))
 
   // Données de référence
   let recipeCategories: RecipeCategory[] = $state([])
@@ -88,6 +107,7 @@
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min
           defaultPortions = r.default_portions
+          currentImageUrl = r.image_url ?? null
 
           ingredients = r.recipe_ingredients.length > 0
             ? r.recipe_ingredients.map((ing: any) => ({
@@ -177,10 +197,63 @@
     if (steps.length === 0) addStep()
   }
 
+  // ── Photo ──
+  function setPendingPreview(url: string | null) {
+    if (pendingPreviewUrl) URL.revokeObjectURL(pendingPreviewUrl)
+    pendingPreviewUrl = url
+  }
+
+  // Si on quitte la page pendant la compression, l'aperçu ne doit pas être créé
+  // après coup (sinon son URL ne serait jamais libérée)
+  let destroyed = false
+  onDestroy(() => {
+    destroyed = true
+    setPendingPreview(null)
+  })
+
+  function pickPhoto() {
+    if (processingPhoto || saving) return
+    photoInput?.click()
+  }
+
+  async function onPhotoSelected(e: Event) {
+    const input = e.currentTarget as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = '' // permet de re-choisir la même photo
+    if (!file) return
+
+    processingPhoto = true
+    try {
+      const img = await compressRecipeImage(file)
+      if (destroyed) return
+      pendingImage = img
+      setPendingPreview(URL.createObjectURL(img.blob))
+      imageRemoved = false
+    } catch (err) {
+      toast.error(
+        err instanceof PhotoError ? err.message : 'Impossible de préparer cette photo. Essaie avec une autre.',
+      )
+    } finally {
+      processingPhoto = false
+    }
+  }
+
+  function removePhoto() {
+    pendingImage = null
+    setPendingPreview(null)
+    imageRemoved = true
+  }
+
+  function photoChange(): PhotoChange {
+    if (pendingImage) return { kind: 'replace', image: pendingImage }
+    if (imageRemoved && currentImageUrl) return { kind: 'remove' }
+    return { kind: 'keep' }
+  }
+
   // Soumission
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
-    if (saving) return
+    if (saving || processingPhoto) return
 
     if (!title.trim()) {
       error = 'Le titre est requis.'
@@ -201,10 +274,11 @@
 
     saving = true
     error = null
+    const photo = photoChange()
 
     try {
       if (isEdit && editId) {
-        await updateRecipe(editId, formData)
+        await updateRecipe(editId, formData, photo)
         navigate('recette', editId)
       } else {
         const familyId = profileState.profile?.family_id
@@ -214,11 +288,18 @@
           saving = false
           return
         }
-        const newId = await createRecipe(familyId, userId, formData)
+        const newId = await createRecipe(familyId, userId, formData, photo)
         navigate('recette', newId)
       }
     } catch (e: any) {
-      error = e.message
+      if (e instanceof PhotoUploadError) {
+        // La recette existe : on y va quand même (pas de doublon en réessayant)
+        toast.error(e.message)
+        navigate('recette', e.recipeId)
+        return
+      }
+      error = e?.message ?? 'Enregistrement impossible.'
+      if (e instanceof PhotoError) toast.error(e.message)
       saving = false
     }
   }
@@ -240,6 +321,68 @@
     <div class="center-msg"><div class="spinner"></div></div>
   {:else}
     <form onsubmit={handleSubmit}>
+
+      <!-- ── Photo ── -->
+      <div class="card">
+        <span class="label-text" id="photo-label"><Icon name="image" size={14} /> Photo</span>
+        <input
+          bind:this={photoInput}
+          type="file"
+          accept="image/*"
+          class="visually-hidden"
+          tabindex="-1"
+          aria-hidden="true"
+          onchange={onPhotoSelected}
+        />
+
+        {#if previewUrl}
+          <div class="photo-frame">
+            <img src={previewUrl} alt={title.trim() || 'Aperçu'} class="photo-img" />
+            {#if processingPhoto}
+              <div class="photo-busy" role="status">
+                <div class="spinner"></div>
+                <span>Préparation de la photo…</span>
+              </div>
+            {/if}
+          </div>
+          <div class="photo-actions">
+            <button
+              type="button"
+              class="photo-btn"
+              onclick={pickPhoto}
+              disabled={processingPhoto || saving}
+            >
+              <Icon name="camera" size={18} /> Changer
+            </button>
+            <button
+              type="button"
+              class="photo-btn photo-btn-danger"
+              onclick={removePhoto}
+              disabled={processingPhoto || saving}
+            >
+              <Icon name="trash" size={18} /> Retirer
+            </button>
+          </div>
+        {:else}
+          <button
+            type="button"
+            class="photo-frame photo-empty"
+            onclick={pickPhoto}
+            disabled={processingPhoto || saving}
+            aria-describedby="photo-label"
+          >
+            {#if processingPhoto}
+              <div class="spinner"></div>
+              <span class="photo-empty-title" role="status">Préparation de la photo…</span>
+            {:else}
+              <span class="photo-empty-icon"><Icon name="camera" size={28} strokeWidth={1.8} /></span>
+              <span class="photo-empty-title">Ajouter une photo</span>
+              <span class="photo-empty-sub">Galerie ou appareil photo</span>
+            {/if}
+          </button>
+        {/if}
+        <p class="photo-hint">Visible par toute la famille. Évite les visages et les documents.</p>
+      </div>
 
       <!-- ── Infos principales ── -->
       <div class="card">
@@ -417,7 +560,7 @@
 
       <button type="submit" class="btn btn-primary btn-submit" disabled={saving}>
         {#if saving}
-          Enregistrement…
+          {pendingImage ? 'Envoi de la photo…' : 'Enregistrement…'}
         {:else}
           <Icon name="check" /> {isEdit ? 'Enregistrer les modifications' : 'Créer la recette'}
         {/if}
@@ -699,6 +842,151 @@
     font-size: 14px;
   }
 
+  /* ── Photo ── */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .photo-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-busy {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(9, 24, 50, 0.72);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .photo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: var(--tap);
+    border: 1.5px dashed var(--border-strong);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .photo-empty:active:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .photo-empty:disabled {
+    cursor: progress;
+  }
+
+  .photo-empty:focus-visible,
+  .photo-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .photo-empty-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+
+  .photo-empty-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .photo-empty-sub {
+    font-size: 13px;
+  }
+
+  .photo-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .photo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s;
+  }
+
+  .photo-btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .photo-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .photo-btn-danger {
+    border-color: var(--border-strong);
+    color: var(--text-secondary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .photo-empty:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .photo-btn-danger:hover:not(:disabled) {
+      border-color: var(--error);
+      color: var(--error);
+    }
+  }
+
   /* ── Mobile ── */
   @media (max-width: 440px) {
     .ing-detail-row {
@@ -724,5 +1012,10 @@
 
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+  .photo-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
   }
 </style>

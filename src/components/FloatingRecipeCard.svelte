@@ -19,9 +19,11 @@
     /** null = carte fantôme pendant le chargement */
     recipe: RecipeWithCategory | null
     featured?: boolean
+    /** Bouton « planifier » sur la carte (ouvre la fenêtre semaine + courses) */
+    onplan?: (recipeId: string) => void
   }
 
-  let { slot, index, recipe, featured = false }: Props = $props()
+  let { slot, index, recipe, featured = false, onplan }: Props = $props()
 
   const imgSrc = $derived(
     recipe?.image_url ? sizedImage(recipe.image_url, slot.w, slot.h) : null,
@@ -90,6 +92,17 @@
           {/if}
         </div>
       </a>
+      {#if onplan}
+        <!-- Bouton à côté du lien (un bouton ne peut pas être DANS un lien) -->
+        <button
+          class="plan-btn"
+          style:--i={index}
+          onclick={() => onplan?.(recipe.id)}
+          aria-label="Ajouter {recipe.title} à ma semaine"
+        >
+          <Icon name="calendar" size={slot.w < 140 ? 15 : 17} strokeWidth={2.2} />
+        </button>
+      {/if}
     {:else}
       <div class="card skeleton" style:--i={index} aria-hidden="true"></div>
     {/if}
@@ -135,7 +148,35 @@
 
   .drift-x { animation-name: drift-x; }
   .drift-y { animation-name: drift-y; }
-  .drift-r { animation-name: drift-r; transform: rotate(var(--rot)); }
+  .drift-r { animation-name: drift-r; transform: rotate(var(--rot)); position: relative; }
+
+  /* Bouton « ajouter à ma semaine », en haut à droite de la carte */
+  .plan-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-raised);
+    background: var(--primary);
+    color: var(--on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    animation: pop-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--i) * 90ms + 250ms) backwards;
+    transition: transform 0.15s;
+  }
+
+  .plan-btn:active { transform: scale(0.9); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .plan-btn:hover { transform: scale(1.1); }
+  }
 
   @keyframes drift-x {
     from { transform: translate3d(calc(var(--dx) * -1), 0, 0); }

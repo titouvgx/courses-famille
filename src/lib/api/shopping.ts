@@ -2,6 +2,9 @@
 // Génération depuis le planning, cochage, ajout manuel.
 
 import { supabase } from '../supabase'
+import {
+  addQuantities, formatQuantity, fromIngredient, parseQuantity, ingredientKey, type Quantity,
+} from '../quantities'
 import type {
   ShoppingList,
   ShoppingListItemWithCategory,
@@ -72,27 +75,71 @@ export async function fetchCompletedLists(
   return (data ?? []) as ShoppingList[]
 }
 
+/** Résumé d'une liste terminée pour l'historique. */
+export interface ListSummary {
+  total: number
+  checked: number
+  /** Premiers articles (ordre de la liste), pour l'aperçu */
+  preview: string[]
+}
+
+/**
+ * Résumés (articles pris / total + aperçu) de plusieurs listes en une requête
+ * légère (nom + coché seulement). Lecture par blocs de 1000 lignes.
+ */
+export async function fetchListSummaries(
+  listIds: string[],
+  previewCount = 4,
+): Promise<Map<string, ListSummary>> {
+  const result = new Map<string, ListSummary>()
+  if (!supabase || listIds.length === 0) return result
+
+  const CHUNK = 1000
+  const rows: { shopping_list_id: string; name: string; checked: boolean; position: number }[] = []
+  for (let from = 0; ; from += CHUNK) {
+    const { data, error } = await supabase
+      .from('shopping_list_items')
+      .select('shopping_list_id, name, checked, position')
+      .in('shopping_list_id', listIds)
+      .order('shopping_list_id')
+      .order('position')
+      .range(from, from + CHUNK - 1)
+    if (error) throw error
+    const chunk = data ?? []
+    rows.push(...chunk)
+    if (chunk.length < CHUNK) break
+  }
+
+  for (const id of listIds) result.set(id, { total: 0, checked: 0, preview: [] })
+  rows.sort((a, b) => a.position - b.position)
+  for (const row of rows) {
+    const s = result.get(row.shopping_list_id)
+    if (!s) continue
+    s.total++
+    if (row.checked) s.checked++
+    if (s.preview.length < previewCount) s.preview.push(row.name)
+  }
+  return result
+}
+
 // ────────── Génération depuis le planning ──────────
 
 interface AggregatedIngredient {
   name: string
-  quantity: string
+  quantity: Quantity
   shopping_category_id: string | null
   source_recipe_id: string | null
 }
 
 /**
- * Génère une liste de courses à partir du plan de la semaine.
- * Agrège les ingrédients identiques et ajuste les quantités selon les portions.
+ * Additionne les ingrédients de toutes les recettes d'un plan, en ajustant
+ * chaque recette à ses portions. Les unités compatibles sont regroupées
+ * (g + kg, cl + l…), voir lib/quantities.ts.
  */
-export async function generateListFromPlan(
-  familyId: string,
-  planId: string,
-): Promise<ShoppingList> {
+async function aggregatePlanIngredients(planId: string): Promise<Map<string, AggregatedIngredient>> {
   if (!supabase) throw new Error('Supabase non configuré')
 
-  // 1. Récupérer les slots du plan avec les ingrédients de chaque recette
-  const { data: slots, error: slotsErr } = await supabase
+  const { data: slots, error } = await supabase
     .from('meal_slots')
     .select(`
       portions,
@@ -100,101 +147,126 @@ export async function generateListFromPlan(
       recipes (
         id,
         default_portions,
-        recipe_ingredients (
-          name,
-          quantity,
-          unit,
-          shopping_category_id
-        )
+        recipe_ingredients (name, quantity, unit, shopping_category_id)
       )
     `)
     .eq('meal_plan_id', planId)
 
-  if (slotsErr) throw slotsErr
+  if (error) throw error
   if (!slots || slots.length === 0) {
     throw new Error('Le planning est vide. Ajoute des recettes avant de générer la liste.')
   }
 
-  // 2. Agréger les ingrédients
   const aggregated = new Map<string, AggregatedIngredient>()
-
   for (const slot of slots) {
     const recipe = slot.recipes as any
     if (!recipe?.recipe_ingredients) continue
-
     const scale = slot.portions / (recipe.default_portions || 4)
 
     for (const ing of recipe.recipe_ingredients) {
-      const key = ing.name.toLowerCase().trim()
-      const scaledQty = ing.quantity ? Math.round(ing.quantity * scale * 100) / 100 : null
-      const unit = ing.unit || ''
-      const qtyStr = scaledQty ? `${scaledQty}${unit ? ' ' + unit : ''}` : unit || null
-
-      if (aggregated.has(key)) {
-        const existing = aggregated.get(key)!
-        // Essayer d'additionner les quantités si même unité
-        if (scaledQty && existing.quantity) {
-          const existingMatch = existing.quantity.match(/^([\d.]+)\s*(.*)$/)
-          if (existingMatch) {
-            const existingQty = parseFloat(existingMatch[1])
-            const existingUnit = existingMatch[2].trim()
-            if (existingUnit === unit) {
-              const total = Math.round((existingQty + scaledQty) * 100) / 100
-              existing.quantity = `${total}${unit ? ' ' + unit : ''}`
-              continue
-            }
-          }
-        }
-        // Si les unités ne matchent pas, concaténer
-        if (qtyStr && existing.quantity) {
-          existing.quantity = `${existing.quantity} + ${qtyStr}`
-        } else if (qtyStr) {
-          existing.quantity = qtyStr
-        }
+      const key = ingredientKey(ing.name)
+      const qty = fromIngredient(ing.quantity, ing.unit, scale)
+      const existing = aggregated.get(key)
+      if (existing) {
+        existing.quantity = addQuantities(existing.quantity, qty)
       } else {
         aggregated.set(key, {
           name: ing.name.trim(),
-          quantity: qtyStr,
+          quantity: qty,
           shopping_category_id: ing.shopping_category_id,
           source_recipe_id: recipe.id,
         })
       }
     }
   }
+  return aggregated
+}
 
-  // 3. Créer la liste
+/**
+ * Génère une nouvelle liste de courses active à partir du plan de la semaine.
+ */
+export async function generateListFromPlan(
+  familyId: string,
+  planId: string,
+): Promise<ShoppingList> {
+  if (!supabase) throw new Error('Supabase non configuré')
+
+  const aggregated = await aggregatePlanIngredients(planId)
+
   const { data: list, error: listErr } = await supabase
     .from('shopping_lists')
-    .insert({
-      family_id: familyId,
-      meal_plan_id: planId,
-      status: 'active',
-    })
+    .insert({ family_id: familyId, meal_plan_id: planId, status: 'active' })
     .select('*')
     .single()
-
   if (listErr) throw listErr
 
-  // 4. Insérer les articles
-  const items = Array.from(aggregated.values()).map((ing, i) => ({
+  const items = [...aggregated.values()].map((ing, i) => ({
     shopping_list_id: list.id,
     name: ing.name,
-    quantity: ing.quantity,
+    quantity: formatQuantity(ing.quantity),
     shopping_category_id: ing.shopping_category_id,
     source_recipe_id: ing.source_recipe_id,
     is_extra: false,
     checked: false,
     position: i,
   }))
-
   if (items.length > 0) {
-    const { error: itemsErr } = await supabase
-      .from('shopping_list_items')
-      .insert(items)
+    const { error: itemsErr } = await supabase.from('shopping_list_items').insert(items)
     if (itemsErr) throw itemsErr
   }
-
   return list as ShoppingList
+}
+
+/**
+ * Recalcule la liste active depuis le planning SANS rien perdre :
+ *   - les articles ajoutés à la main (is_extra) sont gardés tels quels
+ *   - les articles issus du planning sont recalculés, et ceux qui étaient
+ *     déjà cochés le restent
+ * @returns le nombre d'articles issus du planning après recalcul
+ */
+export async function regenerateList(listId: string, planId: string): Promise<number> {
+  if (!supabase) throw new Error('Supabase non configuré')
+
+  const aggregated = await aggregatePlanIngredients(planId)
+  const current = await fetchListItems(listId)
+
+  const extras = current.filter((i) => i.is_extra)
+  const checkedBefore = new Map(
+    current.filter((i) => !i.is_extra && i.checked).map((i) => [ingredientKey(i.name), i]),
+  )
+  let position = extras.reduce((m, i) => Math.max(m, i.position), -1) + 1
+
+  const fresh = [...aggregated.entries()].map(([key, ing]) => {
+    const was = checkedBefore.get(key)
+    return {
+      shopping_list_id: listId,
+      name: ing.name,
+      quantity: formatQuantity(ing.quantity),
+      shopping_category_id: ing.shopping_category_id,
+      source_recipe_id: ing.source_recipe_id,
+      is_extra: false,
+      checked: !!was,
+      checked_by: was?.checked_by ?? null,
+      checked_at: was?.checked_at ?? null,
+      position: position++,
+    }
+  })
+
+  // Remplacer uniquement les articles issus du planning
+  const { error: delErr } = await supabase
+    .from('shopping_list_items')
+    .delete()
+    .eq('shopping_list_id', listId)
+    .eq('is_extra', false)
+  if (delErr) throw delErr
+
+  if (fresh.length > 0) {
+    const { error: insErr } = await supabase.from('shopping_list_items').insert(fresh)
+    if (insErr) throw insErr
+  }
+
+  await supabase.from('shopping_lists').update({ meal_plan_id: planId }).eq('id', listId)
+  return fresh.length
 }
 
 // ────────── Actions sur les articles ──────────
@@ -268,10 +340,12 @@ export interface IngredientToAdd {
 }
 
 /**
- * Ajoute des ingrédients sélectionnés à la liste de courses active.
- * Si aucune liste active n'existe, en crée une.
- * Si un ingrédient identique (même nom) existe déjà, additionne les quantités.
- * @returns le nombre d'ingrédients ajoutés/mis à jour
+ * Ajoute des ingrédients sélectionnés à la liste de courses active
+ * (créée si besoin). Un ingrédient déjà présent voit sa quantité additionnée.
+ * @param asExtra true quand la recette n'est PAS planifiée (« Juste les
+ *   ingrédients ») : les articles sont alors marqués « ajoutés à la main » et
+ *   survivent à une régénération depuis le planning.
+ * @returns le nombre d'ingrédients ajoutés ou mis à jour
  */
 export async function addIngredientsToList(
   familyId: string,
@@ -279,92 +353,52 @@ export async function addIngredientsToList(
   portions: number,
   defaultPortions: number,
   recipeId: string,
+  asExtra = false,
 ): Promise<number> {
   if (!supabase) throw new Error('Supabase non configuré')
   if (ingredients.length === 0) return 0
 
-  // 1. Récupérer ou créer la liste active
   let list = await fetchActiveList(familyId)
-
   if (!list) {
     const { data: created, error: createErr } = await supabase
       .from('shopping_lists')
-      .insert({
-        family_id: familyId,
-        meal_plan_id: null,
-        status: 'active',
-      })
+      .insert({ family_id: familyId, meal_plan_id: null, status: 'active' })
       .select('*')
       .single()
-
     if (createErr) throw createErr
     list = created as ShoppingList
   }
 
-  // 2. Récupérer les articles existants pour détecter les doublons
   const existingItems = await fetchListItems(list.id)
-  const existingByName = new Map(
-    existingItems.map((it) => [it.name.toLowerCase().trim(), it])
-  )
-
-  // 3. Calculer le ratio de portions
+  const existingByKey = new Map(existingItems.map((it) => [ingredientKey(it.name), it]))
   const scale = portions / (defaultPortions || 4)
-
-  // 4. Trouver la position max actuelle
-  const maxPos = existingItems.length > 0
-    ? Math.max(...existingItems.map((it) => it.position))
-    : -1
-  let nextPos = maxPos + 1
+  let nextPos = existingItems.reduce((m, it) => Math.max(m, it.position), -1) + 1
 
   const toInsert: any[] = []
-  const toUpdate: { id: string; quantity: string }[] = []
+  const toUpdate: { id: string; quantity: string | null }[] = []
 
   for (const ing of ingredients) {
-    const scaledQty = ing.quantity ? Math.round(ing.quantity * scale * 100) / 100 : null
-    const unit = ing.unit || ''
-    const qtyStr = scaledQty ? `${scaledQty}${unit ? ' ' + unit : ''}` : unit || null
-
-    const key = ing.name.toLowerCase().trim()
-    const existing = existingByName.get(key)
-
+    const qty = fromIngredient(ing.quantity, ing.unit, scale)
+    const existing = existingByKey.get(ingredientKey(ing.name))
     if (existing) {
-      // Additionner les quantités si possible
-      if (scaledQty && existing.quantity) {
-        const match = existing.quantity.match(/^([\d.]+)\s*(.*)$/)
-        if (match) {
-          const existQty = parseFloat(match[1])
-          const existUnit = match[2].trim()
-          if (existUnit === unit) {
-            const total = Math.round((existQty + scaledQty) * 100) / 100
-            toUpdate.push({
-              id: existing.id,
-              quantity: `${total}${unit ? ' ' + unit : ''}`,
-            })
-            continue
-          }
-        }
-        // Unités différentes : concaténer
-        toUpdate.push({
-          id: existing.id,
-          quantity: `${existing.quantity} + ${qtyStr}`,
-        })
-      }
-      // Sinon on ne touche pas à l'existant
+      toUpdate.push({
+        id: existing.id,
+        quantity: formatQuantity(addQuantities(parseQuantity(existing.quantity), qty)),
+      })
     } else {
       toInsert.push({
         shopping_list_id: list.id,
         name: ing.name.trim(),
-        quantity: qtyStr,
+        quantity: formatQuantity(qty),
         shopping_category_id: ing.shopping_category_id,
         source_recipe_id: recipeId,
-        is_extra: false,
+        is_extra: asExtra,
         checked: false,
         position: nextPos++,
       })
     }
   }
 
-  // 5. Exécuter les updates
   for (const upd of toUpdate) {
     const { error } = await supabase
       .from('shopping_list_items')
@@ -372,15 +406,10 @@ export async function addIngredientsToList(
       .eq('id', upd.id)
     if (error) throw error
   }
-
-  // 6. Exécuter les inserts
   if (toInsert.length > 0) {
-    const { error } = await supabase
-      .from('shopping_list_items')
-      .insert(toInsert)
+    const { error } = await supabase.from('shopping_list_items').insert(toInsert)
     if (error) throw error
   }
-
   return toInsert.length + toUpdate.length
 }
 

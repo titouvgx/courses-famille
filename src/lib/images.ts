@@ -4,7 +4,11 @@
 /**
  * Renvoie l'URL d'une image à la taille voulue (en pixels CSS).
  * La densité d'écran (×2 sur la plupart des téléphones) est prise en compte.
- * Les URL qui ne viennent pas d'Unsplash sont renvoyées telles quelles.
+ * Les URL qui ne viennent pas d'Unsplash sont renvoyées telles quelles —
+ * en particulier les photos envoyées par la famille (Supabase Storage,
+ * `…/storage/v1/object/public/recipe-photos/…`) : elles sont déjà réduites à
+ * 1600 px / ~400 Ko dans le navigateur, et le redimensionnement à la volée de
+ * Supabase (`/render/image/`) est une option payante, donc on n'y touche pas.
  */
 export function sizedImage(url: string, cssWidth: number, cssHeight: number): string {
   try {

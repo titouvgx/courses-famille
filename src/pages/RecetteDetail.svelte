@@ -4,6 +4,7 @@
   import { profileState } from '../lib/profile.svelte'
   import { fetchRecipe, deleteRecipe } from '../lib/api/recipes'
   import PlanRecipeDialog from '../components/PlanRecipeDialog.svelte'
+  import { formatIngredient } from '../lib/quantities'
   import { toast } from '../lib/toast.svelte'
   import type { RecipeDetail } from '../lib/types'
 
@@ -103,10 +104,7 @@
         <ul class="ingredient-list">
           {#each recipe.recipe_ingredients as ing (ing.id)}
             <li class="ingredient">
-              <span class="ing-qty">
-                {#if ing.quantity}{ing.quantity}{/if}
-                {#if ing.unit} {ing.unit}{/if}
-              </span>
+              <span class="ing-qty">{formatIngredient(ing.quantity, ing.unit)}</span>
               <span class="ing-name">{ing.name}</span>
             </li>
           {/each}

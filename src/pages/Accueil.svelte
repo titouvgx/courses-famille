@@ -9,6 +9,10 @@
   import { fetchDailyRecipes, todayKey, DAILY_RECIPES_COUNT } from '../lib/api/recipes'
   import { computeFloatLayout, MIN_ZONE_HEIGHT } from '../lib/floatLayout'
   import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
+  import PlanRecipeDialog from '../components/PlanRecipeDialog.svelte'
+  import { fetchRecipe } from '../lib/api/recipes'
+  import { toast } from '../lib/toast.svelte'
+  import type { RecipeDetail } from '../lib/types'
   import type { RecipeWithCategory } from '../lib/types'
 
   // ────────── Données ──────────
@@ -74,6 +78,23 @@
   const cardCount = $derived(loading ? DAILY_RECIPES_COUNT : recipes.length)
   const layout = $derived(computeFloatLayout(zoneW, zoneH, cardCount, `layout:${dateKey}`))
 
+  // ────────── Planifier directement depuis une carte ──────────
+  // La fenêtre a besoin des ingrédients : on charge la recette complète au clic.
+  let planRecipe = $state<RecipeDetail | null>(null)
+  let opening = false
+
+  async function openPlan(recipeId: string) {
+    if (opening) return
+    opening = true
+    try {
+      planRecipe = await fetchRecipe(recipeId)
+    } catch (e: any) {
+      toast.error(e?.message ?? 'Recette introuvable')
+    } finally {
+      opening = false
+    }
+  }
+
   // ────────── Parallaxe (souris uniquement) ──────────
   // Au doigt, pointermove se déclenche pendant le défilement : les cartes
   // sauteraient. On la réserve donc à la souris / au trackpad.
@@ -102,6 +123,10 @@
 
   onDestroy(() => cancelAnimationFrame(frame))
 </script>
+
+{#if planRecipe}
+  <PlanRecipeDialog recipe={planRecipe} mode="plan" onclose={() => (planRecipe = null)} />
+{/if}
 
 <div class="page accueil">
 
@@ -145,6 +170,7 @@
           index={i}
           recipe={loading ? null : (recipes[i] ?? null)}
           featured={i === 0}
+          onplan={openPlan}
         />
       {/each}
     </section>

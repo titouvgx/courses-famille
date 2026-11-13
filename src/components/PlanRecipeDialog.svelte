@@ -11,6 +11,7 @@
     getMonday, toISODate, shiftWeek, fetchOrCreatePlan, setSlot, fetchSlotsForWeeks,
   } from '../lib/api/meals'
   import { addIngredientsToList, type IngredientToAdd } from '../lib/api/shopping'
+  import { formatIngredient } from '../lib/quantities'
   import type { RecipeDetail, MealSlotWithRecipe } from '../lib/types'
 
   interface Props {
@@ -128,13 +129,9 @@
     for (const i of recipe.recipe_ingredients) checked[i.id] = v
   }
 
-  /** Quantité ajustée aux portions, avec son unité : « 1000 g », « 2,5 » */
+  /** Quantité ajustée aux portions, avec son unité : « 1 kg », « 2,5 » */
   function scaledQty(qty: number | null, unit: string | null): string {
-    const u = unit?.trim() ?? ''
-    if (!qty) return u
-    const scaled = Math.round(qty * (portions / (recipe.default_portions || 4)) * 100) / 100
-    const n = scaled % 1 === 0 ? String(scaled) : String(scaled).replace('.', ',')
-    return u ? `${n} ${u}` : n
+    return formatIngredient(qty, unit, portions / (recipe.default_portions || 4))
   }
 
   async function addToCart() {
@@ -146,7 +143,9 @@
     if (selected.length === 0) return
     saving = true
     try {
-      const n = await addIngredientsToList(familyId, selected, portions, recipe.default_portions, recipe.id)
+      // Recette non planifiée (« Juste les ingrédients ») → articles « ajoutés à la main »,
+      // conservés si la liste est régénérée depuis le planning
+      const n = await addIngredientsToList(familyId, selected, portions, recipe.default_portions, recipe.id, !planned)
       toast.success(
         planned
           ? `Planifiée et ${n} ingrédient${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} aux courses`

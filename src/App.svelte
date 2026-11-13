@@ -21,8 +21,12 @@
   // Initialiser l'auth au montage
   initAuth()
 
-  // Charger le profil quand l'user change
+  // Charger le profil quand l'user change.
+  // On attend que la session soit vérifiée : sinon, au démarrage, l'utilisateur
+  // paraît déconnecté une fraction de seconde, le profil est marqué « chargé »
+  // sans données, et les pages affichent « Profil introuvable » à tort.
   $effect(() => {
+    if (auth.loading) return
     if (auth.user) {
       loadProfile(auth.user.id)
     } else {
@@ -42,7 +46,7 @@
   })
 
   function handleSignOut() {
-    clearProfile()
+    clearProfile(true) // déconnexion : on efface aussi les données gardées sur le téléphone
     signOut()
   }
 </script>

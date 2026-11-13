@@ -69,7 +69,7 @@
   }
 
   function handleSignOut() {
-    clearProfile()
+    clearProfile(true) // déconnexion : on efface aussi les données gardées sur le téléphone
     signOut()
     navigate('login')
   }
