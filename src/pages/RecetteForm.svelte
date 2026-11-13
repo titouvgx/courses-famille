@@ -21,6 +21,7 @@
     compressRecipeImage,
     PhotoError,
     PhotoUploadError,
+    recipeImageSrc,
     type CompressedImage,
     type PhotoChange,
   } from '../lib/api/recipeImages'
@@ -153,7 +154,7 @@
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min
           defaultPortions = r.default_portions
-          currentImageUrl = r.image_url ?? null
+          currentImageUrl = recipeImageSrc(r.image_url)
 
           ingredients = r.recipe_ingredients.length > 0
             ? r.recipe_ingredients.map((ing: any) => ({

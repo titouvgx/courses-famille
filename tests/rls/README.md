@@ -74,7 +74,7 @@ de **contrôles positifs** et de **contrôles de structure**, et la liste des é
   `family_id` / `meal_plan_id` / `shopping_list_id` dans un sens et dans l'autre) ;
 - élévation de privilège sur `profiles` et `super_admins` ;
 - recettes partagées en lecture, modifiables / supprimables par le seul foyer propriétaire ;
-- `recipes.image_url` (contrainte `recipes_image_url_origin`) ;
+- `recipes.image_url` (contrainte `recipes_image_url_origin` + trigger `trg_recipe_image_exists`, migration `photo_paths`) ;
 - `meal_slots.cook_id` (trigger `guard_meal_slot_cook`) ;
 - `storage.objects`, bucket `recipe-photos` ;
 - fonctions RPC vues par un anonyme et par un membre ;

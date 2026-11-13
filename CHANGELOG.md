@@ -23,7 +23,8 @@ numérotation [SemVer](https://semver.org/lang/fr/) : **MAJEUR.MINEUR.CORRECTIF*
 
 ## [0.9.0] — 2026-11-13 — Candidate V1 (base `courses-test`)
 
-Migrations nécessaires : **1 à 14** (`supabase/migrations/`, dans l'ordre).
+Migrations nécessaires : **1 à 15** (`supabase/migrations/`, dans l'ordre).
+⚠️ La migration 15 (`photo_paths`) s'exécute **juste après** le déploiement de cette version.
 
 ### Fonctions (V1)
 - Connexion par e-mail et mot de passe (inscriptions fermées, comptes créés par le super-admin).
@@ -44,6 +45,10 @@ Migrations nécessaires : **1 à 14** (`supabase/migrations/`, dans l'ordre).
 - Vérification automatique de chaque proposition de modification (types, tests, build, secrets).
 
 ### Sécurité
+- **Faille corrigée (migration 15)** : une recette pouvait afficher une image hébergée sur le stockage
+  de n'importe quel projet Supabase (« pixel espion »). Les photos sont désormais enregistrées par
+  chemin dans notre stockage (le fichier doit exister) ; seule autre origine : Unsplash. L'appli
+  n'affiche jamais une image d'une autre origine.
 - Politique de sécurité du contenu (CSP) : seuls les scripts du site s'exécutent ; seuls
   Supabase et Unsplash peuvent être contactés.
 - Polices hébergées avec le site : plus aucun appel à Google Fonts.

@@ -67,6 +67,11 @@ export const ID = {
 export const PHOTO_BUCKET = 'recipe-photos'
 export const OTHER_BUCKET = 'autre-bucket'
 export const objName = { A: `${ID.recA}/photo-a.webp`, B: `${ID.recB}/photo-b.webp` } as const
+/** Photos au format enregistré par l'appli (`<recette>/<uuid>.webp`), pour recipes.image_url (migration photo_paths). */
+export const photoPath = {
+  A: `${ID.recA}/c0ffee00-0000-4000-8000-00000000000a.webp`,
+  B: `${ID.recB}/c0ffee00-0000-4000-8000-00000000000b.webp`,
+} as const
 
 export type Actor = 'anon' | 'adminA' | 'memberA' | 'adminB' | 'memberB' | 'superAdmin' | 'sansProfil'
 export type Foyer = 'A' | 'B'
@@ -153,6 +158,10 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('${OTHER_BUCKET}', '${OTH
 INSERT INTO storage.objects (id, bucket_id, name, owner) VALUES
   ('${ID.objA}', '${PHOTO_BUCKET}', '${objName.A}', '${ID.memberA}'),
   ('${ID.objB}', '${PHOTO_BUCKET}', '${objName.B}', '${ID.memberB}');
+
+INSERT INTO storage.objects (bucket_id, name, owner) VALUES
+  ('${PHOTO_BUCKET}', '${photoPath.A}', '${ID.memberA}'),
+  ('${PHOTO_BUCKET}', '${photoPath.B}', '${ID.memberB}');
 `
 
 // ── Extensions ─────────────────────────────────────────────────────────────

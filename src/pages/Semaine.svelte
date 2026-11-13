@@ -457,7 +457,7 @@
         {/if}
       </button>
       <a href={href('recette', slot.recipes.id)} class="slot-visual" aria-label={slot.recipes.title}>
-        {#if slot.recipes.image_url}
+        {#if sizedImage(slot.recipes.image_url, 260, 110)}
           <img src={sizedImage(slot.recipes.image_url, 260, 110)} alt="" loading="lazy" />
         {:else}
           <span class="slot-monogram" aria-hidden="true">{slot.recipes.title.trim().charAt(0)}</span>
@@ -534,8 +534,8 @@
               disabled={savingSlot}
               onclick={() => selectRecipe(recipe.id, recipe.default_portions)}
             >
-              {#if recipe.image_url}
-                <img src={recipe.image_url} alt="" class="picker-thumb" loading="lazy" />
+              {#if sizedImage(recipe.image_url, 44, 44)}
+                <img src={sizedImage(recipe.image_url, 44, 44)} alt="" class="picker-thumb" loading="lazy" />
               {:else}
                 <span class="picker-emoji" aria-hidden="true">{recipe.title.trim().charAt(0)}</span>
               {/if}

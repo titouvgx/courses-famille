@@ -265,7 +265,7 @@
       {#each shown as recipe (recipe.id)}
         <a href={href('recette', recipe.id)} class="recipe-card">
           <div class="card-visual">
-            {#if recipe.image_url}
+            {#if sizedImage(recipe.image_url, 240, 180)}
               <img
                 src={sizedImage(recipe.image_url, 240, 180)}
                 alt=""

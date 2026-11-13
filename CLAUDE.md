@@ -75,10 +75,11 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 11. `recipe_photos_storage.sql` — bucket public `recipe-photos` + politiques RLS Storage (idempotent)
 12. `security_fixes.sql` — audit du 13/11/2026 : rôle et foyer verrouillés dans `profiles` (trigger `guard_profile_update`), admin limité à son foyer, `recipe_exists` fermé aux anonymes, `image_url` limitée au stockage Supabase / Unsplash (idempotent)
 13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
-14. `more_ingredients.sql` — environ 200 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
+14. `more_ingredients.sql` — 251 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
+15. `photo_paths.sql` — **`recipes.image_url` = chemin `<id recette>/<uuid>.webp|jpg` de NOTRE bucket** (plus d'URL complète : l'appli reconstruit l'adresse avec `VITE_SUPABASE_URL`) ou photo Unsplash `https://images.unsplash.com/photo-…` ; trigger `trg_recipe_image_exists` : le fichier doit exister dans `recipe-photos`. Convertit les anciennes URL de nos photos, vide le reste (idempotent). ⚠️ **Ordre** : déployer d'abord le code ≥ v0.9.0, puis exécuter cette migration aussitôt (entre les deux, l'envoi de photo est refusé)
 
 **État des bases** (à tenir à jour) :
-- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes)
+- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes) ; **15 à exécuter juste après le déploiement de la v0.9.0**
 - `courses-prod` : pas encore créée
 
 **Règle** : une migration est exécutée dans la base **avant** de pousser le code qui en dépend, puis vérifiée par une requête de contrôle (tables, colonnes, triggers, RLS actif). Toute nouvelle table : RLS par foyer + attaques ajoutées dans `tests/rls` avant de pousser.
@@ -250,7 +251,7 @@ CHANGELOG.md                      # Journal des versions (règle SemVer)
 - **Vérifications CI** (`verifications.yml`) : aucun `.env` suivi, aucun secret dans le dépôt, `npm audit` (bloquant : moyenne+ en production, haute+ en outils), types, tests, build. Le déploiement en dépend
 - **Droits côté appli = droits de la base** : Modifier = membre du foyer qui a créé la recette ; Supprimer recette / liste = admin de ce foyer. Une suppression filtrée par RLS (0 ligne, pas d'erreur) est signalée, jamais affichée comme réussie
 - RLS : les règles portent sur des **lignes**, pas des colonnes → pour limiter des colonnes (ex. `role`, `family_id`), un trigger. Sur Supabase, `REVOKE … FROM PUBLIC` ne retire pas `anon` : viser `anon` explicitement
-- **Banc d'attaque RLS dans le dépôt** (`tests/rls`, `npm run test:rls`) : stubs Supabase (rôles, `auth.uid()`, storage) + toutes les migrations rejouées dans PGlite + tentatives entre foyers et contrôles positifs. Lancé par la CI à chaque push. Au 13/11/2026 : **373 tentatives d'attaque, 91 contrôles positifs, 9 contrôles de structure** ; un test de mutation (RLS retiré, règle ouverte) est bien détecté. Limites (SQL direct, pas PostgREST/Auth/Realtime) : voir `tests/rls/README.md`
+- **Banc d'attaque RLS dans le dépôt** (`tests/rls`, `npm run test:rls`) : stubs Supabase (rôles, `auth.uid()`, storage) + toutes les migrations rejouées dans PGlite + tentatives entre foyers et contrôles positifs. Lancé par la CI à chaque push. Au 13/11/2026 : **379 tentatives d'attaque (toutes bloquées), 91 contrôles positifs, 9 contrôles de structure** ; un test de mutation (RLS retiré, règle ouverte) est bien détecté. Limites (SQL direct, pas PostgREST/Auth/Realtime) : voir `tests/rls/README.md`
 
 ## Variables d'environnement
 
@@ -291,10 +292,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Pas de limite de longueur sur les textes des recettes ; pas de sauvegarde automatique (offre gratuite) ; tâches planifiées GitHub désactivées après 60 jours sans commit sur un dépôt public
 
 ### Faiblesses connues relevées par le banc (13/11/2026)
-- ❌ **`image_url`** : le motif accepte le stockage de **n'importe quel** projet Supabase (`[a-z0-9]+.supabase.co`), pas seulement celui du projet → pixel espion possible par un membre (gravité faible). Le test correspondant échoue tant que ce n'est pas corrigé
+- ✅ **`image_url`** (corrigé par la migration 15) : le motif acceptait le stockage de **n'importe quel** projet Supabase → pixel espion possible. Désormais : chemin dans notre bucket (fichier existant, dossier de la recette) ou Unsplash ; l'appli n'affiche jamais une autre origine (`recipeImageSrc`)
 - `shopping_lists.meal_plan_id` : une liste peut être rattachée au planning d'un autre foyer (pas de lecture possible, mais incohérent)
 - `created_by` / `checked_by` : un membre peut y mettre l'id de quelqu'un d'autre (usurpation de signature)
-- Supprimer une recette efface les créneaux qui l'utilisent **dans tous les foyers** (`ON DELETE CASCADE`)
+- Supprimer une recette efface les créneaux qui l'utilisent **dans tous les foyers** (`ON DELETE CASCADE`). Piste choisie par l'utilisateur : ne plus supprimer (modifier, archiver ou « demande de suppression ») — à décider
 - `sameProduct` : « Beurre de cacahuète » ≈ « Beurre », « Pain d'épices » ≈ « Pain » (placard / frigo)
 
 ### Recettes de démo
@@ -315,7 +316,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 10 : Déploiement prod → **v1.0.0**. Procédure :
   1. Créer le projet Supabase `courses-prod` (même région que test)
   2. Auth : inscriptions fermées, confirmation e-mail, mot de passe ≥ 10 caractères (+ caractères variés), limites de tentatives, URL du site et redirections = adresse GitHub Pages
-  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 14 dans l'ordre (7 après le compte et le foyer)
+  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 15 dans l'ordre (7 après le compte et le foyer)
   4. Requête de contrôle (tables, colonnes, triggers, RLS, publication Realtime, bucket photos)
   5. Variables GitHub `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` → valeurs de prod (clé publishable seulement)
   6. Passer la version à 1.0.0 + CHANGELOG, pousser sur main, vérifier le site, l'onglet Actions (déploiement + contrôle de sécurité), puis étiquette `v1.0.0`

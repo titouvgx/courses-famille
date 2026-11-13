@@ -1,19 +1,24 @@
+import { recipeImageSrc } from './api/recipeImages'
+
 // Les photos Unsplash sont stockées en 800×600. Sur les petites cartes,
 // on demande une version redimensionnée : bien plus léger en 4G.
 
 /**
- * Renvoie l'URL d'une image à la taille voulue (en pixels CSS).
+ * Renvoie l'adresse d'une photo de recette à la taille voulue (en pixels CSS),
+ * ou null si la valeur enregistrée n'est pas une photo autorisée (notre
+ * stockage ou Unsplash) : dans ce cas, ne rien afficher.
  * La densité d'écran (×2 sur la plupart des téléphones) est prise en compte.
- * Les URL qui ne viennent pas d'Unsplash sont renvoyées telles quelles —
- * en particulier les photos envoyées par la famille (Supabase Storage,
- * `…/storage/v1/object/public/recipe-photos/…`) : elles sont déjà réduites à
- * 1600 px / ~400 Ko dans le navigateur, et le redimensionnement à la volée de
- * Supabase (`/render/image/`) est une option payante, donc on n'y touche pas.
+ * Les photos envoyées par la famille (notre stockage Supabase) sont renvoyées
+ * telles quelles : elles sont déjà réduites à 1600 px / ~400 Ko dans le
+ * navigateur, et le redimensionnement à la volée de Supabase (`/render/image/`)
+ * est une option payante.
  */
-export function sizedImage(url: string, cssWidth: number, cssHeight: number): string {
+export function sizedImage(value: string | null | undefined, cssWidth: number, cssHeight: number): string | null {
+  const src = recipeImageSrc(value)
+  if (!src) return null
   try {
-    const u = new URL(url)
-    if (u.hostname !== 'images.unsplash.com') return url
+    const u = new URL(src)
+    if (u.hostname !== 'images.unsplash.com') return src
     const dpr = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2)
     // Arrondi à 50 px près pour profiter du cache du CDN
     const round = (n: number) => Math.ceil((n * dpr) / 50) * 50
@@ -24,6 +29,6 @@ export function sizedImage(url: string, cssWidth: number, cssHeight: number): st
     u.searchParams.set('q', '75')
     return u.toString()
   } catch {
-    return url
+    return null
   }
 }

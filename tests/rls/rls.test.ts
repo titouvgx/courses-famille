@@ -18,6 +18,7 @@ import {
   createBench,
   ID,
   objName,
+  photoPath,
   other,
   OTHER_BUCKET,
   PHOTO_BUCKET,
@@ -959,17 +960,21 @@ describe('Recettes : partagées en lecture, modifiables par le seul foyer propri
 })
 
 // ════════════════════════════════════════════════════════════════════════════
-describe('recipes.image_url : seulement le stockage Supabase ou Unsplash (security_fixes)', () => {
+describe('recipes.image_url : chemin de notre bucket ou Unsplash seulement (security_fixes + photo_paths)', () => {
   const bad: [string, string][] = [
     ['un site quelconque (pixel espion)', 'https://espion.example/pixel.gif'],
     ['Unsplash en http', 'http://images.unsplash.com/photo-1'],
     ['un faux domaine Unsplash', 'https://images.unsplash.com.espion.example/x.jpg'],
+    ['un chemin bizarre chez Unsplash', 'https://images.unsplash.com/../espion/x.gif'],
     ['javascript:', 'javascript:alert(1)'],
     ['data:', 'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4='],
     ['un autre bucket Supabase', 'https://abcdefghijkl.supabase.co/storage/v1/object/public/autre-bucket/x.webp'],
-    // L'en-tête de security_fixes promet « seulement le stockage Supabase DU PROJET » :
-    // un autre projet Supabase (celui d'un attaquant) ne doit pas passer.
+    // Faille corrigée par photo_paths : le stockage d'un AUTRE projet Supabase (celui d'un attaquant)
     ['le stockage d\'un AUTRE projet Supabase (projet d\'un attaquant)', 'https://projetattaquant.supabase.co/storage/v1/object/public/recipe-photos/pixel.webp'],
+    // Plus aucune URL complète, même de notre projet : seulement un chemin
+    ['une URL complète de stockage Supabase (même « recipe-photos »)', `https://abcdefghijkl.supabase.co/storage/v1/object/public/recipe-photos/${ID.recA}/c0ffee00-0000-4000-8000-00000000000a.webp`],
+    ['un chemin qui remonte de dossier', `../${ID.recA}/c0ffee00-0000-4000-8000-00000000000a.webp`],
+    ['un chemin au mauvais format (svg)', `${ID.recA}/c0ffee00-0000-4000-8000-00000000000a.svg`],
   ]
   for (const [label, url] of bad) {
     attaque(`membre A ne crée pas de recette dont l'image pointe vers ${label}`, async (s) => {
@@ -988,12 +993,23 @@ describe('recipes.image_url : seulement le stockage Supabase ou Unsplash (securi
     expectRefused(o, '23514', 'image_url update', /recipes_image_url_origin/)
     expect(await snapshot(s, 'public.recipes', 'id', ID.recA)).toBe(before)
   })
-  controle('image_url Unsplash et stockage Supabase recipe-photos acceptées', async (s) => {
-    for (const url of [
-      'https://images.unsplash.com/photo-1609607285694-e283bd2ea9a0?w=800',
-      `https://abcdefghijkl.supabase.co/storage/v1/object/public/recipe-photos/${ID.recA}/x.webp`,
-      null,
-    ]) {
+  attaque('membre A ne met pas sur sa recette la photo rangée dans le dossier d\'une recette de B', async (s) => {
+    const before = await snapshot(s, 'public.recipes', 'id', ID.recA)
+    const o = await s.as('memberA', `UPDATE public.recipes SET image_url = $2 WHERE id = $1 RETURNING id`, [ID.recA, photoPath.B])
+    expectRefused(o, '23514', 'photo de B', /recipes_image_url_origin/)
+    expect(await snapshot(s, 'public.recipes', 'id', ID.recA)).toBe(before)
+  })
+  attaque('membre A ne met pas sur sa recette un chemin qui ne correspond à aucun fichier envoyé', async (s) => {
+    const before = await snapshot(s, 'public.recipes', 'id', ID.recA)
+    const o = await s.as('memberA', `UPDATE public.recipes SET image_url = $2 WHERE id = $1 RETURNING id`, [
+      ID.recA,
+      `${ID.recA}/deadbeef-0000-4000-8000-000000000000.webp`,
+    ])
+    expectRefused(o, '23514', 'fichier inexistant', /Photo introuvable/)
+    expect(await snapshot(s, 'public.recipes', 'id', ID.recA)).toBe(before)
+  })
+  controle('image_url : photo Unsplash, chemin d\'une photo envoyée dans le dossier de la recette, ou rien', async (s) => {
+    for (const url of ['https://images.unsplash.com/photo-1609607285694-e283bd2ea9a0?w=800&h=600&fit=crop&auto=format', photoPath.A, null]) {
       expectOk(await s.as('memberA', `UPDATE public.recipes SET image_url = $2 WHERE id = $1 RETURNING id`, [ID.recA, url]), String(url), 1)
     }
   })
@@ -1065,7 +1081,7 @@ describe('Photos : storage.objects, bucket recipe-photos', () => {
       expectOk(await s.as(member[X], `DELETE FROM storage.objects WHERE id = $1 RETURNING id`, [obj[X]]), 'suppression', 1)
     })
     controle(`membre ${X} liste les photos (lecture partagée entre membres, voulue)`, async (s) => {
-      expectOk(await s.as(member[X], `SELECT name FROM storage.objects WHERE bucket_id = $1`, [PHOTO_BUCKET]), 'liste', 2)
+      expectOk(await s.as(member[X], `SELECT name FROM storage.objects WHERE bucket_id = $1`, [PHOTO_BUCKET]), 'liste', 4) // 2 photos par foyer (objName + photoPath)
     })
   }
   attaque('membre A n\'écrase pas sa propre photo (pas de règle UPDATE)', async (s) => {

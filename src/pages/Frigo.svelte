@@ -426,8 +426,8 @@
         <li class="card" class:ready={m.missing.length === 0}>
           <a href={href('recette', m.recipeId)} class="card-main">
             <div class="thumb">
-              {#if r?.image_url}
-                <img src={sizedImage(r.image_url, 84, 84)} alt="" loading="lazy" decoding="async" />
+              {#if sizedImage(r?.image_url, 84, 84)}
+                <img src={sizedImage(r?.image_url, 84, 84)} alt="" loading="lazy" decoding="async" />
               {:else}
                 <span class="initial" aria-hidden="true">{title.trim().charAt(0)}</span>
               {/if}

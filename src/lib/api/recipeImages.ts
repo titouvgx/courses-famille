@@ -6,6 +6,14 @@
 // (voir supabase/migrations/20261113120000_recipe_photos_storage.sql).
 // Nom unique à chaque envoi : l'URL ne change jamais de contenu, elle peut
 // donc être mise en cache très longtemps.
+//
+// SÉCURITÉ (v0.9.0, migration photo_paths) : la base n'enregistre plus une URL
+// mais le CHEMIN de la photo dans notre bucket (`<recipeId>/<uuid>.webp`).
+// L'adresse complète est reconstruite ici avec l'adresse de NOTRE projet
+// (VITE_SUPABASE_URL) : une recette ne peut donc plus pointer vers le
+// stockage d'un autre projet Supabase (« pixel espion »). Seule autre origine
+// acceptée : les photos Unsplash des recettes de démo. Tout le reste n'est
+// jamais affiché, même si la base le contenait.
 
 import { supabase } from '../supabase'
 
@@ -207,7 +215,8 @@ function newUuid(): string {
 }
 
 /**
- * Envoie la photo sous `<recipeId>/<uuid>.<ext>` et renvoie son URL publique.
+ * Envoie la photo sous `<recipeId>/<uuid>.<ext>` et renvoie ce CHEMIN
+ * (c'est lui qui est enregistré dans recipes.image_url).
  * La recette doit déjà exister (la règle RLS vérifie le foyer propriétaire).
  */
 export async function uploadRecipeImage(recipeId: string, image: CompressedImage): Promise<string> {
@@ -220,7 +229,7 @@ export async function uploadRecipeImage(recipeId: string, image: CompressedImage
     upsert: false,
   })
   if (error) throw uploadErrorToFrench(error)
-  return bucket.getPublicUrl(path).data.publicUrl
+  return path
 }
 
 function uploadErrorToFrench(error: unknown): PhotoError {
@@ -242,29 +251,50 @@ function uploadErrorToFrench(error: unknown): PhotoError {
   return new PhotoError('La photo n\u2019a pas pu être envoyée. Vérifie ta connexion et réessaie.')
 }
 
+// ────────── Valeur enregistrée → image affichée ──────────
+
+/** Photo de notre bucket, telle qu'enregistrée en base : `<recipeId>/<uuid>.webp|jpg`. */
+const STORAGE_PATH_RE = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(webp|jpg)$/
+/** Photo Unsplash (recettes de démo) : même règle que la contrainte en base. */
+const UNSPLASH_RE = /^https:\/\/images\.unsplash\.com\/photo-[A-Za-z0-9_-]+(\?[A-Za-z0-9=&%._-]*)?$/
+
 /**
- * Chemin dans le bucket si l'URL est une photo de NOTRE bucket, sinon null
- * (URL Unsplash ou autre : on n'y touche jamais).
+ * Chemin dans notre bucket, ou null si la valeur ne désigne pas une de nos photos.
+ * Accepte aussi l'ancien format (URL complète de NOTRE projet, avant v0.9.0),
+ * qui peut encore traîner dans un cache hors ligne.
  */
-export function storagePathFromUrl(url: string | null | undefined): string | null {
-  if (!url) return null
+export function storagePathOf(value: string | null | undefined): string | null {
+  if (!value) return null
+  if (STORAGE_PATH_RE.test(value)) return value
   const base = import.meta.env.VITE_SUPABASE_URL as string | undefined
   if (!base) return null
   try {
-    const u = new URL(url)
+    const u = new URL(value)
     if (u.origin !== new URL(base).origin) return null
     const prefix = `/storage/v1/object/public/${RECIPE_PHOTOS_BUCKET}/`
     if (!u.pathname.startsWith(prefix)) return null
     const path = decodeURIComponent(u.pathname.slice(prefix.length))
-    return path && !path.includes('..') ? path : null
+    return STORAGE_PATH_RE.test(path) ? path : null
   } catch {
     return null
   }
 }
 
-/** true si l'URL pointe vers notre bucket de photos. */
-export function isStoredRecipeImage(url: string | null | undefined): boolean {
-  return storagePathFromUrl(url) !== null
+/** true si la valeur désigne une photo de notre bucket. */
+export function isStoredRecipeImage(value: string | null | undefined): boolean {
+  return storagePathOf(value) !== null
+}
+
+/**
+ * Adresse à mettre dans <img src> pour la valeur enregistrée, ou null si elle
+ * ne vient ni de notre bucket ni d'Unsplash (dans ce cas : rien n'est chargé).
+ */
+export function recipeImageSrc(value: string | null | undefined): string | null {
+  if (!value) return null
+  if (UNSPLASH_RE.test(value)) return value
+  const path = storagePathOf(value)
+  if (!path || !supabase) return null
+  return supabase.storage.from(RECIPE_PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl
 }
 
 /**
@@ -272,8 +302,8 @@ export function isStoredRecipeImage(url: string | null | undefined): boolean {
  * Ne lève jamais d'erreur : au pire un fichier orphelin reste (sans impact pour
  * l'utilisateur), ce n'est pas une raison pour faire échouer l'enregistrement.
  */
-export async function deleteRecipeImage(url: string | null | undefined): Promise<void> {
-  const path = storagePathFromUrl(url)
+export async function deleteRecipeImage(value: string | null | undefined): Promise<void> {
+  const path = storagePathOf(value)
   if (!path || !supabase) return
   try {
     const { error } = await supabase.storage.from(RECIPE_PHOTOS_BUCKET).remove([path])
