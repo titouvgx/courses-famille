@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { router, href, navigate } from '../lib/router.svelte'
   import { auth } from '../lib/auth.svelte'
   import { profileState } from '../lib/profile.svelte'
@@ -276,7 +277,7 @@
 
         <div class="row-2">
           <label class="field">
-            <span class="label-text">🍽️ Portions</span>
+            <span class="label-text"><Icon name="users" size={14} /> Portions</span>
             <input
               type="number"
               class="input"
@@ -286,7 +287,7 @@
             />
           </label>
           <label class="field">
-            <span class="label-text">⏱️ Prépa (min)</span>
+            <span class="label-text"><Icon name="clock" size={14} /> Prépa (min)</span>
             <input
               type="number"
               class="input"
@@ -379,7 +380,7 @@
 
       <!-- ── Étapes ── -->
       <div class="card">
-        <h2 class="section-title">👩‍🍳 Préparation</h2>
+        <h2 class="section-title">Préparation</h2>
 
         <div class="step-list">
           {#each steps as step, i (i)}
@@ -418,7 +419,7 @@
         {#if saving}
           Enregistrement…
         {:else}
-          {isEdit ? '✅ Enregistrer les modifications' : '✅ Créer la recette'}
+          <Icon name="check" /> {isEdit ? 'Enregistrer les modifications' : 'Créer la recette'}
         {/if}
       </button>
     </form>
@@ -522,7 +523,7 @@
   .chip-option.selected {
     background: var(--primary);
     border-color: var(--primary);
-    color: white;
+    color: var(--on-primary);
   }
 
   /* ── Ingrédients ── */
@@ -628,7 +629,7 @@
     height: 28px;
     border-radius: 50%;
     background: var(--primary);
-    color: white;
+    color: var(--on-primary);
     font-size: 13px;
     font-weight: 700;
     display: flex;

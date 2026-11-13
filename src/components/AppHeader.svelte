@@ -39,7 +39,7 @@
     height: 36px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, var(--accent)));
-    color: white;
+    color: var(--on-primary);
     font-size: 15px;
     font-weight: 700;
     display: flex;
@@ -53,6 +53,6 @@
   .avatar-btn:hover,
   .avatar-btn.active {
     transform: scale(1.08);
-    box-shadow: 0 3px 12px rgba(26, 83, 92, 0.3);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
   }
 </style>

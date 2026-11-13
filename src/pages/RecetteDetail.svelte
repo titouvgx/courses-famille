@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { router, href, navigate } from '../lib/router.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { fetchRecipe, deleteRecipe } from '../lib/api/recipes'
@@ -210,9 +211,9 @@
       {/if}
       <h1>{recipe.title}</h1>
       <div class="meta">
-        <span class="meta-item">🍽️ {recipe.default_portions} portions</span>
+        <span class="meta-item"><Icon name="users" size={16} /> {recipe.default_portions} portions</span>
         {#if recipe.prep_time_min}
-          <span class="meta-item">⏱️ {formatTime(recipe.prep_time_min)}</span>
+          <span class="meta-item"><Icon name="clock" size={16} /> {formatTime(recipe.prep_time_min)}</span>
         {/if}
       </div>
     </div>
@@ -251,20 +252,20 @@
     <!-- Actions rapides -->
     <div class="quick-actions">
       <button class="btn btn-add-cart" onclick={openCartPicker}>
-        🛒 Ajouter au panier
+        <Icon name="cart" /> Ajouter au panier
       </button>
       <button class="btn btn-add-week" onclick={() => (showWeekPicker = true)}>
-        📅 Ajouter à ma semaine
+        <Icon name="calendar" /> Ajouter à ma semaine
       </button>
     </div>
 
     {#if isAdmin}
       <div class="actions">
         <a href={href('editer-recette', recipe.id)} class="btn btn-outline">
-          ✏️ Modifier
+          <Icon name="pencil" /> Modifier
         </a>
         <button class="btn btn-danger" onclick={() => (showDeleteConfirm = true)}>
-          🗑️ Supprimer
+          <Icon name="trash" /> Supprimer
         </button>
       </div>
     {/if}
@@ -300,7 +301,7 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="cart-picker" onclick={(e) => e.stopPropagation()}>
           <div class="cp-header">
-            <h2>🛒 Ajouter au panier</h2>
+            <h2>Ajouter au panier</h2>
             <button class="picker-close" onclick={() => (showCartPicker = false)} aria-label="Fermer">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
@@ -372,7 +373,7 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="week-picker" onclick={(e) => e.stopPropagation()}>
           <div class="wp-header">
-            <h2>📅 Ajouter à la semaine</h2>
+            <h2>Ajouter à la semaine</h2>
             <button class="picker-close" onclick={() => (showWeekPicker = false)} aria-label="Fermer">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
@@ -391,12 +392,12 @@
                     class="wp-meal-btn"
                     disabled={addingToWeek}
                     onclick={() => addToWeek(dayIdx, 'midi')}
-                  >☀️ Midi</button>
+                  ><Icon name="sun" size={15} /> Midi</button>
                   <button
                     class="wp-meal-btn"
                     disabled={addingToWeek}
                     onclick={() => addToWeek(dayIdx, 'soir')}
-                  >🌙 Soir</button>
+                  ><Icon name="moon" size={15} /> Soir</button>
                 </div>
               </div>
             {/each}
@@ -529,7 +530,7 @@
     height: 28px;
     border-radius: 50%;
     background: var(--primary);
-    color: white;
+    color: var(--on-primary);
     font-size: 14px;
     font-weight: 700;
     display: flex;
@@ -581,7 +582,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 200; /* au-dessus de la barre d'onglets (100) */
     padding: var(--gutter);
   }
 
@@ -621,6 +622,7 @@
   /* ── Actions rapides ── */
   .quick-actions {
     display: flex;
+    flex-wrap: wrap; /* sur les petits écrans, les deux boutons passent l'un sous l'autre */
     gap: 8px;
     margin-top: 24px;
     margin-bottom: 8px;
@@ -628,8 +630,9 @@
 
   .btn-add-cart,
   .btn-add-week {
-    flex: 1;
-    padding: 12px 8px;
+    flex: 1 1 170px;
+    white-space: nowrap;
+    padding: 13px 12px;
     border-radius: var(--radius-lg);
     font-size: 14px;
     font-weight: 700;
@@ -651,7 +654,7 @@
 
   .btn-add-week {
     background: var(--primary);
-    color: white;
+    color: var(--on-primary);
   }
 
   /* ── Cart picker modal ── */

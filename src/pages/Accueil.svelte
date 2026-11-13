@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   // Page d'accueil : 5 recettes tirées au hasard chaque jour, qui flottent à l'écran.
   // - Le tirage dépend de la date → même sélection pour toute la famille, change à minuit.
   // - Le placement est calculé (lib/floatLayout.ts) pour tenir dans l'écran sans chevauchement.
@@ -8,7 +9,6 @@
   import { fetchDailyRecipes, todayKey, DAILY_RECIPES_COUNT } from '../lib/api/recipes'
   import { computeFloatLayout, MIN_ZONE_HEIGHT } from '../lib/floatLayout'
   import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
-  import HomeBackdrop from '../components/HomeBackdrop.svelte'
   import type { RecipeWithCategory } from '../lib/types'
 
   // ────────── Données ──────────
@@ -104,13 +104,11 @@
 </script>
 
 <div class="page accueil">
-  <HomeBackdrop />
 
   <header class="hero">
     <span class="date-chip">{dateLabel}</span>
     <h1>
       {greeting}{firstName ? ` ${firstName}` : ''}
-      <span class="wave" aria-hidden="true">👋</span>
     </h1>
     <p class="subtitle">
       Tes <strong>{DAILY_RECIPES_COUNT} idées</strong> du jour
@@ -124,7 +122,7 @@
     </div>
   {:else if !loading && recipes.length === 0}
     <div class="state">
-      <p class="state-icon">🍳</p>
+      <p class="state-icon"><Icon name="book" size={48} strokeWidth={1.5} /></p>
       <p>Aucune recette pour le moment.</p>
       <a href="#/nouvelle-recette" class="btn btn-primary state-cta">Créer la première recette</a>
     </div>
@@ -205,19 +203,7 @@
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 
-  .wave {
-    display: inline-block;
-    transform-origin: 70% 70%;
-    animation: wave 2.4s ease-in-out 0.5s 2;
-  }
 
-  @keyframes wave {
-    0%, 60%, 100% { transform: rotate(0deg); }
-    10%, 30% { transform: rotate(16deg); }
-    20%      { transform: rotate(-8deg); }
-    40%      { transform: rotate(-4deg); }
-    50%      { transform: rotate(10deg); }
-  }
 
   .subtitle {
     margin-top: 4px;
@@ -312,7 +298,7 @@
   }
 
   .state-icon {
-    font-size: 56px;
+    color: var(--text-secondary);
   }
 
   .state-detail {

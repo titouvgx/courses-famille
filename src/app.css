@@ -1,41 +1,49 @@
 /* ============================================================
-   Design System — « Frais & Bold »
-   Teal #1A535C · Coral #FF6B35 · Outfit + DM Sans
+   Design System — « Mer »
+   Palette « mer » (bleu nuit) · Cyan #5CC8D8 · Corail #FF6B35 · Outfit + DM Sans
    ============================================================ */
 
 :root {
+  /* Palette « mer » : l'appli est posée sur une photo de mer sombre
+     (AppBackdrop), elle est donc toujours en tons bleu nuit, texte clair. */
+
   /* Couleurs principales */
-  --primary: #1A535C;
-  --primary-light: #EAF3F5;
+  --primary: #5CC8D8;
+  --primary-light: rgba(92, 200, 216, 0.14);
+  --on-primary: #06223A;      /* texte posé SUR le cyan (le blanc y serait illisible) */
   --accent: #FF6B35;
   --accent-shadow: rgba(255, 107, 53, 0.35);
 
-  /* Surfaces */
-  --bg: #FFFFFF;
-  --bg-raised: #FFFFFF;
-  --surface: #F3F5F7;
-  --surface-hover: #ECEEF1;
+  /* Surfaces
+     --bg        : opaque (fenêtres, champs de saisie)
+     --bg-raised : barre d'onglets, pastilles
+     --surface   : cartes posées sur la photo (translucides) */
+  --bg: #10264A;
+  --bg-raised: rgba(9, 24, 50, 0.88);
+  --surface: rgba(255, 255, 255, 0.14);
+  --surface-hover: rgba(255, 255, 255, 0.2);
 
   /* Texte */
-  --text: #1A1E23;
-  --text-secondary: #5A6470;
-  --text-placeholder: #8A94A0;
+  --text: #EEF3FA;
+  --text-secondary: #B9C7DA;
+  --text-placeholder: #6F819C;
 
   /* Bordures */
-  --border: #F0F2F4;
-  --border-strong: #E0E4E8;
+  --border: rgba(255, 255, 255, 0.16);
+  --border-strong: rgba(255, 255, 255, 0.26);
 
   /* Feedback */
-  --success: #1B9B53;
-  --success-bg: #E8F8EF;
-  --error: #D63B3B;
-  --error-bg: #FDF0F0;
+  --success: #3DD97A;
+  --success-bg: rgba(61, 217, 122, 0.13);
+  --on-success: #052B16;
+  --error: #E5484D;
+  --error-bg: rgba(229, 72, 77, 0.15);
 
   /* Catégories recettes */
-  --cat-entree: #5A7FA0;
-  --cat-plat: #D97B3A;
-  --cat-accomp: #4A8A6A;
-  --cat-dessert: #9A4A7A;
+  --cat-entree: #7AA0C4;
+  --cat-plat: #E8994A;
+  --cat-accomp: #5EAA84;
+  --cat-dessert: #BA6A9A;
 
   /* Typographie */
   --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
@@ -53,7 +61,7 @@
   --tap: 48px;
 
   /* État */
-  color-scheme: light;
+  color-scheme: dark;
   font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
@@ -61,74 +69,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Dark mode ─────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --primary: #3ABAC8;
-    --primary-light: #1A2E32;
-    --accent: #FF8555;
-    --accent-shadow: rgba(255, 133, 85, 0.3);
-
-    --bg: #0E1A1D;
-    --bg-raised: #142428;
-    --surface: #1A2E32;
-    --surface-hover: #213A3F;
-
-    --text: #E8ECF0;
-    --text-secondary: #9AABB4;
-    --text-placeholder: #5E7680;
-
-    --border: #1E3338;
-    --border-strong: #2A4248;
-
-    --success: #3DD97A;
-    --success-bg: #0E2818;
-    --error: #F06060;
-    --error-bg: #2A1010;
-
-    --cat-entree: #7AA0C4;
-    --cat-plat: #E8994A;
-    --cat-accomp: #5EAA84;
-    --cat-dessert: #BA6A9A;
-
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --primary: #3ABAC8;
-  --primary-light: #1A2E32;
-  --accent: #FF8555;
-  --accent-shadow: rgba(255, 133, 85, 0.3);
-
-  --bg: #0E1A1D;
-  --bg-raised: #142428;
-  --surface: #1A2E32;
-  --surface-hover: #213A3F;
-
-  --text: #E8ECF0;
-  --text-secondary: #9AABB4;
-  --text-placeholder: #5E7680;
-
-  --border: #1E3338;
-  --border-strong: #2A4248;
-
-  --success: #3DD97A;
-  --success-bg: #0E2818;
-  --error: #F06060;
-  --error-bg: #2A1010;
-
-  --cat-entree: #7AA0C4;
-  --cat-plat: #E8994A;
-  --cat-accomp: #5EAA84;
-  --cat-dessert: #BA6A9A;
-
-  color-scheme: dark;
-}
-
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100dvh; background: var(--bg); }
+html, body { margin: 0; min-height: 100dvh; }
+/* Seul <html> a une couleur de fond (visible le temps que la photo charge).
+   <body> doit rester transparent : sinon il se peint PAR-DESSUS la photo
+   de fond (AppBackdrop, en z-index négatif). */
+html { background: var(--bg); }
+body { background: transparent; }
 body { font-size: 16px; line-height: 1.5; }
 
 h1, h2, h3 {

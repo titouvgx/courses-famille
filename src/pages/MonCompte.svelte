@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { auth, signOut } from '../lib/auth.svelte'
   import { profileState, loadProfile, clearProfile } from '../lib/profile.svelte'
   import { supabase } from '../lib/supabase'
@@ -90,7 +91,7 @@
       {#if displayName}
         {displayName.charAt(0).toUpperCase()}
       {:else}
-        👤
+        <Icon name="user" size={26} />
       {/if}
     </div>
     <div class="profile-info">
@@ -102,7 +103,7 @@
 
   <!-- Nom d'affichage -->
   <div class="card">
-    <h2 class="section-title">✏️ Nom d'affichage</h2>
+    <h2 class="section-title"><Icon name="pencil" /> Nom d'affichage</h2>
     <label class="field">
       <span class="label-text">Comment les autres te voient</span>
       <input
@@ -119,7 +120,7 @@
 
   <!-- Changer le mot de passe -->
   <div class="card">
-    <h2 class="section-title">🔒 Changer le mot de passe</h2>
+    <h2 class="section-title"><Icon name="lock" /> Changer le mot de passe</h2>
     <label class="field">
       <span class="label-text">Nouveau mot de passe</span>
       <input
@@ -147,7 +148,7 @@
 
   <!-- Déconnexion -->
   <button class="btn btn-danger-outline btn-logout" onclick={handleSignOut}>
-    🚪 Se déconnecter
+    <Icon name="logout" /> Se déconnecter
   </button>
 </div>
 
@@ -189,8 +190,8 @@
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    color: white;
+    background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, var(--accent)));
+    color: var(--on-primary);
     font-size: 22px;
     font-weight: 700;
     display: flex;

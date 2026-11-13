@@ -15,18 +15,14 @@
 </script>
 
 <div class="login-page">
-  <!-- Formes évanescentes en arrière-plan -->
-  <div class="blobs" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="blob blob-4"></div>
-  </div>
 
   <div class="login-card">
     <div class="logo">
       <div class="logo-circle">
-        <span class="logo-icon">🛒</span>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
       </div>
     </div>
 
@@ -97,78 +93,8 @@
     align-items: center;
     justify-content: center;
     padding: var(--gutter);
-    background: var(--bg);
     position: relative;
     overflow: hidden;
-  }
-
-  /* ── Formes évanescentes ── */
-  .blobs {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.4;
-    animation: drift 18s ease-in-out infinite alternate;
-  }
-
-  .blob-1 {
-    width: 340px;
-    height: 340px;
-    background: var(--primary);
-    top: -80px;
-    right: -60px;
-    animation-duration: 16s;
-  }
-
-  .blob-2 {
-    width: 280px;
-    height: 280px;
-    background: var(--accent);
-    bottom: -50px;
-    left: -40px;
-    animation-duration: 20s;
-    animation-delay: -4s;
-  }
-
-  .blob-3 {
-    width: 180px;
-    height: 180px;
-    background: #a78bfa;
-    top: 30%;
-    left: 15%;
-    opacity: 0.25;
-    animation-duration: 22s;
-    animation-delay: -8s;
-  }
-
-  .blob-4 {
-    width: 220px;
-    height: 220px;
-    background: var(--primary);
-    bottom: 20%;
-    right: 10%;
-    opacity: 0.2;
-    animation-duration: 24s;
-    animation-delay: -12s;
-  }
-
-  @keyframes drift {
-    0% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(30px, -20px) scale(1.1);
-    }
-    100% {
-      transform: translate(-20px, 30px) scale(0.95);
-    }
   }
 
   /* ── Card ── */
@@ -178,13 +104,13 @@
     width: 100%;
     max-width: 380px;
     text-align: center;
-    background: color-mix(in srgb, var(--surface) 85%, transparent);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+    /* Pas de backdrop-filter : la photo derrière bouge, le flou serait recalculé
+       à chaque image. Un fond presque opaque suffit à rester lisible. */
+    background: rgba(9, 24, 50, 0.82);
+    border: 1px solid var(--border-strong);
     border-radius: 20px;
     padding: 32px 24px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
   }
 
   .logo {
@@ -199,12 +125,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(26, 83, 92, 0.25);
-  }
-
-  .logo-icon {
-    font-size: 32px;
-    display: inline-block;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    color: var(--on-primary);
   }
 
   h1 {
@@ -297,21 +219,4 @@
     text-align: center;
   }
 
-  /* ── Dark mode blob adjustments ── */
-  @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme="light"])) .blob {
-      opacity: 0.2;
-    }
-    :global(:root:not([data-theme="light"])) .login-card {
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  :global(:root[data-theme="dark"]) .blob {
-    opacity: 0.2;
-  }
-
-  :global(:root[data-theme="dark"]) .login-card {
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-  }
 </style>

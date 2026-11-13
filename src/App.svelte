@@ -7,6 +7,7 @@
   import TabBar from './components/TabBar.svelte'
   import AppHeader from './components/AppHeader.svelte'
   import ToastContainer from './components/ToastContainer.svelte'
+  import AppBackdrop from './components/AppBackdrop.svelte'
   import Login from './pages/Login.svelte'
   import Accueil from './pages/Accueil.svelte'
   import Recettes from './pages/Recettes.svelte'
@@ -46,6 +47,8 @@
   }
 </script>
 
+<!-- Fond photo commun à toutes les pages (y compris connexion et chargement) -->
+<AppBackdrop variant={auth.user && router.current === 'accueil' ? 'home' : 'page'} />
 <ToastContainer />
 
 {#if auth.loading}
@@ -95,7 +98,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg);
   }
 
   .spinner {

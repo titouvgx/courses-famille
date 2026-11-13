@@ -1,5 +1,9 @@
 <script lang="ts">
-  // Fond de la page d'accueil : photo de mer, légèrement floutée.
+  // Fond de TOUTE l'appli : photo de mer, légèrement floutée.
+  // Monté une seule fois dans App.svelte (la photo n'est pas rechargée à
+  // chaque changement de page).
+  //   variant 'home'  : accueil, voile léger au milieu (on voit l'eau)
+  //   variant 'page'  : autres pages, voile plus sombre et uniforme (lisibilité des listes)
   // Photo : James Eades — Unsplash (licence Unsplash, usage libre).
   //
   //   - Deux tailles (640 px mobile / 1280 px grand écran), en WebP : ~120 Ko sur téléphone
@@ -10,6 +14,11 @@
   const base = import.meta.env.BASE_URL
   const src640 = `${base}bg/mer-640.webp`
   const src1280 = `${base}bg/mer-1280.webp`
+
+  interface Props {
+    variant?: 'home' | 'page'
+  }
+  let { variant = 'page' }: Props = $props()
 
   let loaded = $state(false)
 </script>
@@ -28,7 +37,8 @@
       onload={() => (loaded = true)}
     />
   </div>
-  <div class="shade"></div>
+  <div class="shade shade-home" class:visible={variant === 'home'}></div>
+  <div class="shade shade-page" class:visible={variant === 'page'}></div>
 </div>
 
 <style>
@@ -70,10 +80,21 @@
     opacity: 1;
   }
 
-  /* Voile : sombre en haut (titre), plus léger au milieu (cartes), sombre en bas (boutons) */
+  /* Deux voiles superposés : on passe de l'un à l'autre en fondu (opacity)
+     quand on change de page, sans recalcul coûteux. */
   .shade {
     position: absolute;
     inset: 0;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .shade.visible {
+    opacity: 1;
+  }
+
+  /* Accueil : sombre en haut (titre), plus léger au milieu (cartes), sombre en bas (boutons) */
+  .shade-home {
     background:
       linear-gradient(
         to bottom,
@@ -81,6 +102,18 @@
         rgba(4, 14, 40, 0.35) 28%,
         rgba(4, 14, 40, 0.25) 60%,
         rgba(4, 14, 40, 0.7) 100%
+      );
+  }
+
+  /* Autres pages : voile plus dense et régulier, les listes et formulaires restent nets */
+  .shade-page {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(4, 14, 40, 0.86) 0%,
+        rgba(4, 14, 40, 0.72) 35%,
+        rgba(4, 14, 40, 0.72) 70%,
+        rgba(4, 14, 40, 0.84) 100%
       );
   }
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { onDestroy } from 'svelte'
   import { profileState } from '../lib/profile.svelte'
   import { auth } from '../lib/auth.svelte'
@@ -118,7 +119,7 @@
   $effect(() => {
     if (allDone && !celebrated) {
       celebrated = true
-      toast.success('Tous les articles sont cochés ! 🎉')
+      toast.success('Tous les articles sont cochés !')
     }
     if (!allDone) {
       celebrated = false
@@ -127,7 +128,10 @@
 
   // ── Real-time : abonnement aux changements de la liste ──
 
-  let realtimeChannel: RealtimeChannel | null = $state(null)
+  // Variable NON réactive (pas de $state) : elle n'est jamais affichée, et l'effet
+  // qui s'abonne la lit puis la modifie. En $state, l'effet se relançait en boucle
+  // (abonnement / désabonnement Supabase en rafale → « effect_update_depth_exceeded »).
+  let realtimeChannel: RealtimeChannel | null = null
 
   /** S'abonne aux changements sur les items de la liste active. */
   function subscribeToList(listId: string) {
@@ -304,7 +308,7 @@
       list = null
       items = []
       showCompleteConfirm = false
-      toast.success('Courses terminées ! 🛒✅')
+      toast.success('Courses terminées !')
     } catch (e: any) {
       error = e.message
     } finally {
@@ -337,7 +341,7 @@
   {:else if !list}
     <!-- Pas de liste active : proposer d'en générer une -->
     <div class="empty-state">
-      <span class="empty-icon">🛒</span>
+      <span class="empty-icon"><Icon name="cart" size={44} strokeWidth={1.5} /></span>
       <p class="empty-title">Pas de liste en cours</p>
       <p class="empty-hint">Génère ta liste de courses à partir du planning de la semaine.</p>
       <button
@@ -349,7 +353,7 @@
           <span class="btn-spinner"></span>
           Génération…
         {:else}
-          📋 Générer la liste
+          <Icon name="list" /> Générer la liste
         {/if}
       </button>
     </div>
@@ -366,7 +370,7 @@
       </div>
       <span class="progress-text" class:done={allDone}>
         {#if allDone}
-          ✅ Tout est coché !
+          <Icon name="check-circle" size={15} /> Tout est coché !
         {:else}
           {checkedItems}/{totalItems} articles
         {/if}
@@ -462,13 +466,13 @@
     <!-- Actions liste -->
     <div class="list-actions">
       <button class="btn btn-outline" onclick={handleRegenerate}>
-        🔄 Régénérer
+        <Icon name="refresh" /> Régénérer
       </button>
       <button
         class="btn btn-primary"
         onclick={() => { showCompleteConfirm = true }}
       >
-        ✅ Terminer les courses
+        <Icon name="check" /> Terminer les courses
       </button>
     </div>
   {/if}
@@ -524,9 +528,9 @@
   }
 
   .empty-icon {
-    font-size: 56px;
     display: block;
     margin-bottom: 12px;
+    color: var(--text-secondary);
   }
 
   .empty-title {
@@ -694,7 +698,7 @@
     display: block;
     width: 6px;
     height: 10px;
-    border: solid white;
+    border: solid var(--on-primary);
     border-width: 0 2.5px 2.5px 0;
     transform: translate(5.5px, 2px) rotate(45deg);
     animation: check-stroke 0.2s ease-out 0.05s;
@@ -867,7 +871,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 200; /* au-dessus de la barre d'onglets (100) */
     padding: var(--gutter);
     animation: overlay-in 0.2s ease-out;
   }

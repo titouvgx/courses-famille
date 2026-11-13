@@ -7,7 +7,7 @@
     {#each toast.items as t (t.id)}
       <div class="toast toast-{t.type}" role="status">
         <span class="toast-icon">
-          {#if t.type === 'success'}✓{:else if t.type === 'error'}!{:else}ℹ{/if}
+          {#if t.type === 'success'}✓{:else if t.type === 'error'}!{:else}i{/if}
         </span>
         <span class="toast-msg">{t.message}</span>
       </div>
@@ -78,7 +78,7 @@
 
   .toast-success .toast-icon {
     background: var(--success);
-    color: white;
+    color: var(--on-success);
   }
 
   .toast-error .toast-icon {
@@ -88,7 +88,7 @@
 
   .toast-info .toast-icon {
     background: var(--primary);
-    color: white;
+    color: var(--on-primary);
   }
 
   .toast-msg {

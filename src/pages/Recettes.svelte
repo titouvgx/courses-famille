@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { href } from '../lib/router.svelte'
   import { fetchRecipes, fetchRecipeCategories, RECIPES_PAGE_SIZE } from '../lib/api/recipes'
@@ -135,7 +136,7 @@
   {:else if filtered.length === 0}
     <div class="empty">
       {#if recipes.length === 0}
-        <p class="empty-icon">📖</p>
+        <p class="empty-icon"><Icon name="book" size={44} strokeWidth={1.5} /></p>
         <p>Aucune recette pour le moment.</p>
         <p class="empty-hint">Ajoute ta première recette !</p>
       {:else}
@@ -155,7 +156,7 @@
                 loading="lazy"
               />
             {:else}
-              <span class="card-emoji">🍽️</span>
+              <span class="card-emoji" aria-hidden="true">{recipe.title.trim().charAt(0)}</span>
             {/if}
           </div>
           <div class="card-body">
@@ -167,9 +168,9 @@
             {/if}
             <h2 class="card-title">{recipe.title}</h2>
             <div class="card-meta">
-              <span>🍽️ {recipe.default_portions} parts</span>
+              <span><Icon name="users" size={13} /> {recipe.default_portions} parts</span>
               {#if recipe.prep_time_min}
-                <span>⏱️ {formatTime(recipe.prep_time_min)}</span>
+                <span><Icon name="clock" size={13} /> {formatTime(recipe.prep_time_min)}</span>
               {/if}
             </div>
           </div>
@@ -288,7 +289,7 @@
   .chip.active {
     background: var(--primary);
     border-color: var(--primary);
-    color: white;
+    color: var(--on-primary);
   }
 
   /* Grille recettes */
@@ -323,6 +324,16 @@
     background: color-mix(in srgb, var(--primary) 8%, transparent);
     font-size: 36px;
     overflow: hidden;
+  }
+
+  /* Pas de photo : grande initiale (même style que l'accueil) */
+  .card-emoji {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 56px;
+    line-height: 1;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--primary) 75%, white);
   }
 
   .card-img {
@@ -400,8 +411,8 @@
   }
 
   .empty-icon {
-    font-size: 48px;
     margin-bottom: 8px;
+    color: var(--text-secondary);
   }
 
   .empty-hint {

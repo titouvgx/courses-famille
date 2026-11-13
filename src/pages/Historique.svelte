@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { profileState } from '../lib/profile.svelte'
   import {
     fetchCompletedLists,
@@ -164,7 +165,7 @@
     <div class="center-msg error-msg">{error}</div>
   {:else if lists.length === 0}
     <div class="empty-state">
-      <span class="empty-icon">📜</span>
+      <span class="empty-icon"><Icon name="archive" size={44} strokeWidth={1.5} /></span>
       <p class="empty-title">Aucun historique</p>
       <p class="empty-hint">Les listes de courses terminées apparaîtront ici.</p>
     </div>
@@ -251,7 +252,7 @@
                     class="btn btn-sm btn-outline btn-delete-trigger"
                     onclick={() => { deleteConfirmId = list.id }}
                   >
-                    🗑 Supprimer
+                    <Icon name="trash" size={15} /> Supprimer
                   </button>
                 {/if}
               </div>
@@ -285,9 +286,9 @@
   }
 
   .empty-icon {
-    font-size: 56px;
     display: block;
     margin-bottom: 12px;
+    color: var(--text-secondary);
   }
 
   .empty-title {

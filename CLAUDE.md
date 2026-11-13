@@ -75,19 +75,33 @@ Pour que le temps réel fonctionne sur la liste de courses :
 ALTER PUBLICATION supabase_realtime ADD TABLE shopping_list_items;
 ```
 
-## Design System — « Frais & Bold »
+## Design System — « Mer »
 
-### Couleurs
+L'appli entière est posée sur une **photo de mer floutée** (`AppBackdrop`, montée une fois dans `App.svelte`).
+Elle est donc **toujours en tons bleu nuit, texte clair** : il n'y a plus de mode clair (le texte foncé serait illisible sur la photo).
 
-| Token | Light | Dark |
-|-------|-------|------|
-| `--primary` | `#1A535C` (teal) | `#3ABAC8` |
-| `--accent` | `#FF6B35` (coral) | `#FF8555` |
-| `--bg` | `#FFFFFF` | `#0E1A1D` |
-| `--surface` | `#F3F5F7` | `#1A2E32` |
-| `--text` | `#1A1E23` | `#E8ECF0` |
-| `--success` | `#1B9B53` | `#3DD97A` |
-| `--error` | `#D63B3B` | `#F06060` |
+### Couleurs (tokens dans `src/app.css`)
+
+| Token | Valeur | Usage |
+|-------|--------|-------|
+| `--primary` | `#5CC8D8` (cyan) | liens, onglet actif, boutons secondaires |
+| `--on-primary` | `#06223A` | texte posé SUR du cyan (le blanc y est illisible) |
+| `--accent` | `#FF6B35` (corail) | boutons principaux, FAB |
+| `--bg` | `#10264A` | opaque : fenêtres, champs de saisie |
+| `--bg-raised` | navy 88 % | barre d'onglets, pastilles |
+| `--surface` | blanc 14 % | cartes translucides posées sur la photo |
+| `--text` / `--text-secondary` | `#EEF3FA` / `#B9C7DA` | |
+| `--success` / `--error` | `#3DD97A` / `#E5484D` | |
+
+### Fond
+- `AppBackdrop` : `variant="home"` sur l'accueil (voile léger), `"page"` ailleurs (voile plus dense pour les listes)
+- `html` a une couleur de fond, **`body` doit rester transparent** (sinon il masque la photo)
+- Fenêtres modales (`.overlay`) : `z-index: 200` (au-dessus de la tab bar à 100)
+
+### Icônes et émojis
+- **Émojis uniquement pour les rayons** (icônes des `shopping_categories`) **et l'ingrédient** (🥕 du formulaire)
+- Partout ailleurs : composant `Icon.svelte` (icônes au trait, `currentColor`)
+- Recette sans photo : grande **initiale** du titre (pas d'émoji)
 
 ### Typographie
 
@@ -115,7 +129,8 @@ src/
 ├── app.css                       # Design system complet (tokens, dark mode, reset)
 ├── components/
 │   ├── AppHeader.svelte          # Header avec titre
-│   ├── HomeBackdrop.svelte       # Fond de l'accueil : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile sombre
+│   ├── AppBackdrop.svelte        # Fond de TOUTES les pages : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile (variant home/page)
+│   ├── Icon.svelte               # Icônes au trait (remplacent les émojis décoratifs)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
@@ -139,7 +154,7 @@ src/
 │   ├── Recettes.svelte           # Liste des recettes (paginée)
 │   ├── RecetteDetail.svelte      # Détail recette + ajout semaine/panier
 │   ├── RecetteForm.svelte        # Formulaire création/édition
-│   ├── Semaine.svelte            # Planning 7 jours (midi/soir)
+│   ├── Semaine.svelte            # Planning : cartes jour + tuiles Midi/Soir (téléphone), 2 col (tablette), 7 colonnes (≥ 1100 px)
 │   ├── Courses.svelte            # Liste de courses active (realtime)
 │   ├── Historique.svelte         # Listes terminées
 │   └── MonCompte.svelte          # Profil + mot de passe
@@ -180,7 +195,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 9 : Polish (toasts, animations, micro-interactions)
 - Bonus : « Ajouter à ma semaine » depuis une recette
 - Bonus : « Ajouter au panier » avec sélection d'ingrédients et portions ajustables
-- Refonte UI (en cours) : page d'accueil avec 5 recettes du jour flottantes ✅ — autres pages à suivre
+- Refonte UI (en cours) : accueil flottant ✅, fond « mer » sur toutes les pages ✅, émojis décoratifs → icônes ✅, page Semaine ✅ — autres pages à affiner
 
 ### Règles UI mobile-first (refonte)
 - Animer uniquement `transform` / `opacity` (pas de `filter: blur` animé, trop coûteux sur téléphone)
@@ -189,6 +204,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Hauteur d'écran en `svh` (stable quand la barre d'adresse se replie)
 - Zones de tap ≥ 44 px, `touch-action: manipulation`
 - `prefers-reduced-motion` respecté (règle globale dans `app.css`)
+- Pas de `backdrop-filter` au-dessus de la photo animée (flou recalculé à chaque image) : fonds rgba suffisamment opaques
 
 ### Restant ⬜
 - Étape 10 : Déploiement prod (brancher `courses-prod`, variables d'env, Realtime)

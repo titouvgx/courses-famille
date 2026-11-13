@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from './Icon.svelte'
   // Carte recette « flottante » de la page d'accueil.
   // Couches imbriquées, chacune avec UNE seule transformation,
   // pour que les animations ne se marchent pas dessus :
@@ -76,7 +77,7 @@
         {/if}
 
         {#if featured}
-          <span class="sticker" aria-hidden="true">⭐<span class="sticker-label">Coup de cœur</span></span>
+          <span class="sticker" aria-hidden="true"><Icon name="star" size={12} strokeWidth={2.5} /><span class="sticker-label">Coup de cœur</span></span>
         {/if}
 
         <div class="card-overlay" aria-hidden="true">
@@ -85,7 +86,7 @@
           {/if}
           <span class="card-title">{recipe.title}</span>
           {#if recipe.prep_time_min}
-            <span class="card-meta">⏱️ {formatTime(recipe.prep_time_min)}</span>
+            <span class="card-meta"><Icon name="clock" size={12} /> {formatTime(recipe.prep_time_min)}</span>
           {/if}
         </div>
       </a>
@@ -283,6 +284,8 @@
   }
 
   .sticker {
+    display: inline-flex;
+    align-items: center;
     position: absolute;
     top: 8px;
     left: 8px;

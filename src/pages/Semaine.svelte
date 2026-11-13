@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Icon from '../components/Icon.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { href } from '../lib/router.svelte'
   import {
@@ -12,6 +13,7 @@
     updateSlotPortions,
   } from '../lib/api/meals'
   import { fetchRecipes } from '../lib/api/recipes'
+  import { sizedImage } from '../lib/images'
   import type { MealSlotWithRecipe, RecipeWithCategory } from '../lib/types'
 
   // ── État principal ──
@@ -192,22 +194,61 @@
   function cancelEditPortions() {
     editingSlotId = null
   }
+
+  // ── Affichage ──
+
+  const MEALS: { key: 'midi' | 'soir'; label: string; icon: 'sun' | 'moon' }[] = [
+    { key: 'midi', label: 'Midi', icon: 'sun' },
+    { key: 'soir', label: 'Soir', icon: 'moon' },
+  ]
+
+  /** Nombre de repas déjà prévus sur les 14 de la semaine. */
+  const plannedCount = $derived(slots.length)
+
+  const isCurrentWeek = $derived(toISODate(weekMonday) === toISODate(getMonday(new Date())))
+
+  /** Jour déjà passé (uniquement dans la semaine en cours) : affiché en retrait. */
+  function isPast(dayIndex: number): boolean {
+    const d = new Date(weekMonday)
+    d.setDate(d.getDate() + dayIndex)
+    d.setHours(23, 59, 59, 999)
+    return d.getTime() < Date.now()
+  }
+
+  function dayNumber(dayIndex: number): number {
+    const d = new Date(weekMonday)
+    d.setDate(d.getDate() + dayIndex)
+    return d.getDate()
+  }
 </script>
 
 <div class="page">
-  <!-- En-tête avec navigation semaine -->
+  <!-- En-tête : titre + navigation semaine -->
   <header class="week-header">
-    <h1>Semaine</h1>
-    <div class="week-nav">
-      <button class="nav-btn" onclick={prevWeek} aria-label="Semaine précédente">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-      </button>
-      <button class="week-label" onclick={goToday}>
-        {weekLabel()}
-      </button>
-      <button class="nav-btn" onclick={nextWeek} aria-label="Semaine suivante">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
+    <div class="title-row">
+      <h1>Semaine</h1>
+      <div class="week-nav">
+        <button class="nav-btn" onclick={prevWeek} aria-label="Semaine précédente">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <span class="week-label">{isCurrentWeek ? 'Cette semaine' : weekLabel()}</span>
+        <button class="nav-btn" onclick={nextWeek} aria-label="Semaine suivante">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="summary">
+      <span class="summary-text">
+        <strong>{plannedCount}</strong>/14 repas prévus
+        {#if isCurrentWeek}<span class="summary-range">· {weekLabel()}</span>{/if}
+      </span>
+      {#if !isCurrentWeek}
+        <button class="today-btn" onclick={goToday}>Revenir à cette semaine</button>
+      {/if}
+    </div>
+    <div class="summary-bar" aria-hidden="true">
+      <div class="summary-fill" style:width="{(plannedCount / 14) * 100}%"></div>
     </div>
   </header>
 
@@ -216,116 +257,74 @@
   {:else if error}
     <div class="center-msg error-msg">{error}</div>
   {:else}
-    <!-- Grille des jours -->
     <div class="days-grid">
       {#each Array(7) as _, dayIdx}
         {@const today = isToday(dayIdx)}
-        {@const midiSlot = getSlot(dayIdx, 'midi')}
-        {@const soirSlot = getSlot(dayIdx, 'soir')}
-        <div class="day-card" class:is-today={today}>
+        {@const past = isCurrentWeek && !today && isPast(dayIdx)}
+        <section class="day-card" class:is-today={today} class:is-past={past} aria-label={DAY_NAMES_FULL[dayIdx]}>
           <div class="day-header">
-            <span class="day-name">{DAY_NAMES[dayIdx]}</span>
-            <span class="day-date">{dayDate(dayIdx)}</span>
+            <div class="day-badge">
+              <span class="day-name">{DAY_NAMES[dayIdx]}</span>
+              <span class="day-num">{dayNumber(dayIdx)}</span>
+            </div>
+            <span class="day-full">{DAY_NAMES_FULL[dayIdx]} {dayDate(dayIdx)}</span>
+            {#if today}<span class="today-chip">Aujourd'hui</span>{/if}
           </div>
 
-          <!-- Midi -->
-          <div class="meal-section">
-            <span class="meal-label">☀️ Midi</span>
-            {#if midiSlot}
-              <div class="meal-card">
-                {#if midiSlot.recipes.image_url}
-                  <img
-                    src={midiSlot.recipes.image_url}
-                    alt={midiSlot.recipes.title}
-                    class="meal-img"
-                    loading="lazy"
-                  />
-                {/if}
-                <div class="meal-info">
-                  <a href={href('recette', midiSlot.recipes.id)} class="meal-title">
-                    {midiSlot.recipes.title}
-                  </a>
-                  <div class="meal-meta">
-                    {#if editingSlotId === midiSlot.id}
-                      <div class="portions-edit">
-                        <button class="portions-btn" onclick={() => { if (editingPortions > 1) editingPortions-- }}>−</button>
-                        <span class="portions-val">{editingPortions}</span>
-                        <button class="portions-btn" onclick={() => editingPortions++}>+</button>
-                        <button class="portions-save" onclick={savePortions}>✓</button>
-                        <button class="portions-cancel" onclick={cancelEditPortions}>✗</button>
-                      </div>
-                    {:else}
-                      <button class="portions-display" onclick={() => startEditPortions(midiSlot)}>
-                        🍽️ {midiSlot.portions}
-                      </button>
-                    {/if}
-                  </div>
-                </div>
-                <button
-                  class="remove-btn"
-                  onclick={() => handleRemoveSlot(midiSlot.id)}
-                  aria-label="Retirer"
-                >×</button>
-              </div>
-            {:else}
-              <button class="add-btn" onclick={() => openPicker(dayIdx, 'midi')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                Ajouter
-              </button>
-            {/if}
+          <div class="slots">
+            {#each MEALS as meal (meal.key)}
+              {@const slot = getSlot(dayIdx, meal.key)}
+              {@render slotTile(dayIdx, meal, slot)}
+            {/each}
           </div>
-
-          <!-- Soir -->
-          <div class="meal-section">
-            <span class="meal-label">🌙 Soir</span>
-            {#if soirSlot}
-              <div class="meal-card">
-                {#if soirSlot.recipes.image_url}
-                  <img
-                    src={soirSlot.recipes.image_url}
-                    alt={soirSlot.recipes.title}
-                    class="meal-img"
-                    loading="lazy"
-                  />
-                {/if}
-                <div class="meal-info">
-                  <a href={href('recette', soirSlot.recipes.id)} class="meal-title">
-                    {soirSlot.recipes.title}
-                  </a>
-                  <div class="meal-meta">
-                    {#if editingSlotId === soirSlot.id}
-                      <div class="portions-edit">
-                        <button class="portions-btn" onclick={() => { if (editingPortions > 1) editingPortions-- }}>−</button>
-                        <span class="portions-val">{editingPortions}</span>
-                        <button class="portions-btn" onclick={() => editingPortions++}>+</button>
-                        <button class="portions-save" onclick={savePortions}>✓</button>
-                        <button class="portions-cancel" onclick={cancelEditPortions}>✗</button>
-                      </div>
-                    {:else}
-                      <button class="portions-display" onclick={() => startEditPortions(soirSlot)}>
-                        🍽️ {soirSlot.portions}
-                      </button>
-                    {/if}
-                  </div>
-                </div>
-                <button
-                  class="remove-btn"
-                  onclick={() => handleRemoveSlot(soirSlot.id)}
-                  aria-label="Retirer"
-                >×</button>
-              </div>
-            {:else}
-              <button class="add-btn" onclick={() => openPicker(dayIdx, 'soir')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                Ajouter
-              </button>
-            {/if}
-          </div>
-        </div>
+        </section>
       {/each}
     </div>
   {/if}
 </div>
+
+<!-- Une tuile repas (remplie ou vide) -->
+{#snippet slotTile(dayIdx: number, meal: (typeof MEALS)[number], slot: MealSlotWithRecipe | undefined)}
+  {#if slot}
+    <div class="slot filled">
+      <a href={href('recette', slot.recipes.id)} class="slot-visual" aria-label={slot.recipes.title}>
+        {#if slot.recipes.image_url}
+          <img src={sizedImage(slot.recipes.image_url, 260, 110)} alt="" loading="lazy" />
+        {:else}
+          <span class="slot-monogram" aria-hidden="true">{slot.recipes.title.trim().charAt(0)}</span>
+        {/if}
+        <span class="meal-chip"><Icon name={meal.icon} size={12} /> {meal.label}</span>
+      </a>
+      <div class="slot-body">
+        <a href={href('recette', slot.recipes.id)} class="slot-title">{slot.recipes.title}</a>
+        <div class="slot-actions">
+          {#if editingSlotId === slot.id}
+            <div class="portions-edit">
+              <button class="portions-btn" onclick={() => { if (editingPortions > 1) editingPortions-- }} aria-label="Moins">−</button>
+              <span class="portions-val">{editingPortions}</span>
+              <button class="portions-btn" onclick={() => editingPortions++} aria-label="Plus">+</button>
+              <button class="portions-save" onclick={savePortions} aria-label="Valider"><Icon name="check" size={14} strokeWidth={2.5} /></button>
+            </div>
+          {:else}
+            <button class="portions-display" onclick={() => startEditPortions(slot)} aria-label="Modifier les portions">
+              <Icon name="users" size={14} /> {slot.portions}
+            </button>
+            <button class="remove-btn" onclick={() => handleRemoveSlot(slot.id)} aria-label="Retirer {slot.recipes.title}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          {/if}
+        </div>
+      </div>
+    </div>
+  {:else}
+    <button class="slot empty" onclick={() => openPicker(dayIdx, meal.key)} aria-label="Ajouter un repas : {DAY_NAMES_FULL[dayIdx]} {meal.label}">
+      <span class="empty-meal"><Icon name={meal.icon} size={14} /> {meal.label}</span>
+      <span class="empty-plus">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </button>
+  {/if}
+{/snippet}
 
 <!-- Modal picker de recettes -->
 {#if pickerOpen}
@@ -336,7 +335,7 @@
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="picker" onclick={(e) => e.stopPropagation()}>
       <div class="picker-header">
-        <h2>{DAY_NAMES_FULL[pickerDay]} · {pickerMeal === 'midi' ? '☀️ Midi' : '🌙 Soir'}</h2>
+        <h2>{DAY_NAMES_FULL[pickerDay]} · {pickerMeal === 'midi' ? 'Midi' : 'Soir'}</h2>
         <button class="picker-close" onclick={closePicker} aria-label="Fermer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
@@ -369,7 +368,7 @@
               {#if recipe.image_url}
                 <img src={recipe.image_url} alt="" class="picker-thumb" loading="lazy" />
               {:else}
-                <span class="picker-emoji">🍽️</span>
+                <span class="picker-emoji" aria-hidden="true">{recipe.title.trim().charAt(0)}</span>
               {/if}
               <div class="picker-item-info">
                 <span class="picker-item-title">{recipe.title}</span>
@@ -381,7 +380,7 @@
                 {/if}
               </div>
               {#if recipe.prep_time_min}
-                <span class="picker-item-time">⏱️ {recipe.prep_time_min} min</span>
+                <span class="picker-item-time"><Icon name="clock" size={13} /> {recipe.prep_time_min} min</span>
               {/if}
             </button>
           {/each}
@@ -395,176 +394,358 @@
   .page {
     padding: var(--gutter);
     padding-top: calc(var(--gutter) + env(safe-area-inset-top, 0px));
+    max-width: 1600px;
+    margin: 0 auto;
   }
 
-  /* ── En-tête semaine ── */
+  /* ── En-tête ── */
   .week-header {
     margin-bottom: 16px;
   }
 
-  .week-header h1 {
+  /* Téléphone : titre, puis navigation sur toute la largeur (évite l'avatar) */
+  .title-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .title-row h1 {
+    padding-right: 48px; /* avatar en haut à droite */
+  }
+
+  @media (min-width: 640px) {
+    .title-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding-right: 52px;
+    }
+  }
+
+  .title-row h1 {
     font-size: 28px;
-    margin-bottom: 12px;
   }
 
   .week-nav {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
   }
 
   .nav-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
+    border: none;
+    background: transparent;
     color: var(--text);
     cursor: pointer;
-    transition: all 0.15s;
-    flex-shrink: 0;
+    touch-action: manipulation;
+    transition: background 0.15s;
   }
 
-  .nav-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+  .nav-btn:active {
+    background: var(--surface-hover);
   }
 
   .week-label {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text);
-    padding: 6px 16px;
-    border-radius: 20px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: var(--font-body);
+    padding: 0 6px;
     white-space: nowrap;
+    min-width: 140px;
+    text-align: center;
   }
 
-  .week-label:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  /* ── Grille des jours ── */
-  .days-grid {
+  .summary {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .summary strong {
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  .summary-range {
+    margin-left: 2px;
+  }
+
+  .today-btn {
+    border: none;
+    background: none;
+    color: var(--primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 6px 0;
+  }
+
+  .summary-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .summary-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, white));
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* ── Grille des jours ──
+     Téléphone : une carte par ligne, Midi et Soir côte à côte
+     Tablette  : 2 colonnes de jours
+     Ordinateur: les 7 jours en colonnes (Midi au-dessus de Soir) */
+  .days-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .days-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 1100px) {
+    .days-grid { grid-template-columns: repeat(7, 1fr); gap: 10px; }
   }
 
   .day-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     padding: 12px;
-    transition: border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fade-up 0.35s ease-out backwards;
   }
 
   .day-card.is-today {
     border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
+    box-shadow: 0 0 0 1px var(--primary), 0 8px 24px -12px var(--primary);
+  }
+
+  /* Jour passé : seule la date passe en retrait (la carte reste lisible) */
+  .is-past .day-badge,
+  .is-past .day-full {
+    opacity: 0.5;
   }
 
   .day-header {
     display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .day-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .is-today .day-name {
-    color: var(--primary);
-  }
-
-  .day-date {
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  /* ── Section repas (midi / soir) ── */
-  .meal-section {
-    margin-top: 6px;
-  }
-
-  .meal-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  /* ── Carte repas remplie ── */
-  .meal-card {
-    display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px;
-    background: color-mix(in srgb, var(--primary) 5%, transparent);
-    border-radius: var(--radius-md);
-    position: relative;
   }
 
-  .meal-img {
+  .day-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: var(--radius-sm);
-    object-fit: cover;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    line-height: 1;
     flex-shrink: 0;
   }
 
-  .meal-info {
-    flex: 1;
-    min-width: 0;
+  .is-today .day-badge {
+    background: var(--primary);
+    color: var(--on-primary);
   }
 
-  .meal-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: none;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .day-name {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.8;
   }
 
-  .meal-title:hover {
-    color: var(--primary);
-  }
-
-  .meal-meta {
+  .day-num {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
     margin-top: 2px;
   }
 
-  .portions-display {
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: var(--font-body);
+  .day-full {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: capitalize;
   }
 
-  .portions-display:hover {
+  .today-chip {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--primary-light);
     color: var(--primary);
+  }
+
+  /* Midi / Soir : côte à côte sur téléphone et tablette, l'un sous l'autre en 7 colonnes */
+  .slots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex: 1;
+  }
+
+  @media (min-width: 1100px) {
+    .slots { grid-template-columns: 1fr; grid-auto-rows: 1fr; }
+    .day-full { display: none; }
+    .today-chip { margin-left: 0; }
+    /* sélecteurs plus précis : ces règles passent devant celles de base, écrites plus bas */
+    .slots .slot-visual { height: 120px; }
+    .slots .slot { min-height: 150px; }
+    .slots .slot.empty { flex-direction: column; justify-content: center; gap: 10px; }
+  }
+
+  .slot {
+    border-radius: var(--radius-lg);
+    min-height: 64px;
+  }
+
+  /* ── Tuile remplie ── */
+  .slot.filled {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .slot-visual {
+    position: relative;
+    display: block;
+    height: 76px;
+    background: linear-gradient(150deg, color-mix(in srgb, var(--primary) 45%, #0B1D3A), #0B1D3A);
+    overflow: hidden;
+  }
+
+  .slot-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .slot-monogram {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .meal-chip {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(6, 20, 45, 0.78);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .slot-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px 8px;
+    flex: 1;
+  }
+
+  .slot-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .slot-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+
+  .portions-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .remove-btn:active {
+    background: var(--error-bg);
+    color: var(--error);
   }
 
   .portions-edit {
@@ -573,14 +754,15 @@
     gap: 4px;
   }
 
-  .portions-btn {
-    width: 22px;
-    height: 22px;
+  .portions-btn,
+  .portions-save {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    background: transparent;
     color: var(--text);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
@@ -589,88 +771,71 @@
     padding: 0;
     font-family: var(--font-body);
     line-height: 1;
-  }
-
-  .portions-val {
-    font-size: 13px;
-    font-weight: 600;
-    min-width: 20px;
-    text-align: center;
-    color: var(--text);
-  }
-
-  .portions-save,
-  .portions-cancel {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: none;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-family: var(--font-body);
+    touch-action: manipulation;
   }
 
   .portions-save {
     background: var(--primary);
-    color: white;
+    border-color: var(--primary);
+    color: var(--on-primary);
   }
 
-  .portions-cancel {
-    background: var(--border);
-    color: var(--text-secondary);
+  .portions-val {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+    color: var(--text);
   }
 
-  .remove-btn {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 18px;
-    cursor: pointer;
+  /* ── Tuile vide ── */
+  .slot.empty {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    padding: 0;
-    font-family: var(--font-body);
-    line-height: 1;
-  }
-
-  .remove-btn:hover {
-    background: var(--error);
-    color: white;
-  }
-
-  /* ── Bouton ajouter ── */
-  .add-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 8px;
-    border: 1.5px dashed var(--border);
-    border-radius: var(--radius-md);
-    background: transparent;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px;
+    border: 1.5px dashed var(--border-strong);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
     font-family: var(--font-body);
-    transition: all 0.15s;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
 
-  .add-btn:hover {
+  .slot.empty:active {
+    background: var(--primary-light);
     border-color: var(--primary);
     color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 5%, transparent);
+  }
+
+  .empty-meal {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .empty-plus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nav-btn:hover { background: var(--surface-hover); }
+    .slot.empty:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+    .slot.filled:hover { border-color: var(--border-strong); }
+    .slot-title:hover { color: var(--primary); }
+    .portions-display:hover { color: var(--primary); border-color: var(--primary); }
+    .remove-btn:hover { background: var(--error-bg); color: var(--error); }
   }
 
   /* ── Overlay / Modal ── */
@@ -681,7 +846,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    z-index: 100;
+    z-index: 200; /* au-dessus de la barre d'onglets (100) */
     padding: 0;
   }
 
@@ -815,7 +980,11 @@
     justify-content: center;
     background: color-mix(in srgb, var(--primary) 8%, transparent);
     border-radius: var(--radius-sm);
-    font-size: 22px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: var(--primary);
     flex-shrink: 0;
   }
 
