@@ -2,6 +2,8 @@
   import { router, href, navigate } from '../lib/router.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { fetchRecipe, deleteRecipe } from '../lib/api/recipes'
+  import { getMonday, toISODate, fetchOrCreatePlan, setSlot } from '../lib/api/meals'
+  import { toast } from '../lib/toast.svelte'
   import type { RecipeDetail } from '../lib/types'
 
   let recipe: RecipeDetail | null = $state(null)
@@ -9,6 +11,52 @@
   let error = $state<string | null>(null)
   let deleting = $state(false)
   let showDeleteConfirm = $state(false)
+
+  // ── Ajouter à la semaine ──
+  let showWeekPicker = $state(false)
+  let addingToWeek = $state(false)
+
+  const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+
+  function weekDayDate(dayIdx: number): string {
+    const monday = getMonday(new Date())
+    const d = new Date(monday)
+    d.setDate(d.getDate() + dayIdx)
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  }
+
+  function isDayToday(dayIdx: number): boolean {
+    const monday = getMonday(new Date())
+    const d = new Date(monday)
+    d.setDate(d.getDate() + dayIdx)
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear()
+      && d.getMonth() === now.getMonth()
+      && d.getDate() === now.getDate()
+  }
+
+  async function addToWeek(dayIdx: number, meal: 'midi' | 'soir') {
+    if (!recipe || addingToWeek) return
+    const familyId = profileState.profile?.family_id
+    if (!familyId) {
+      toast.error('Profil introuvable.')
+      return
+    }
+
+    addingToWeek = true
+    try {
+      const monday = getMonday(new Date())
+      const plan = await fetchOrCreatePlan(familyId, toISODate(monday))
+      await setSlot(plan.id, dayIdx, meal, recipe.id, recipe.default_portions)
+      showWeekPicker = false
+      const mealLabel = meal === 'midi' ? 'midi' : 'soir'
+      toast.success(`${recipe.title} ajoutée ${DAY_NAMES[dayIdx]} ${mealLabel} !`)
+    } catch (e: any) {
+      toast.error(e.message)
+    } finally {
+      addingToWeek = false
+    }
+  }
 
   $effect(() => {
     const id = router.recipeId
@@ -121,6 +169,13 @@
       </section>
     {/if}
 
+    <!-- Ajouter à la semaine -->
+    <div class="add-week-section">
+      <button class="btn btn-add-week" onclick={() => (showWeekPicker = true)}>
+        📅 Ajouter à ma semaine
+      </button>
+    </div>
+
     {#if isAdmin}
       <div class="actions">
         <a href={href('editer-recette', recipe.id)} class="btn btn-outline">
@@ -148,6 +203,48 @@
             <button class="btn btn-danger" disabled={deleting} onclick={handleDelete}>
               {deleting ? 'Suppression…' : 'Supprimer'}
             </button>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Picker « Ajouter à la semaine » -->
+    {#if showWeekPicker}
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div class="overlay overlay-bottom" onclick={() => (showWeekPicker = false)}>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="week-picker" onclick={(e) => e.stopPropagation()}>
+          <div class="wp-header">
+            <h2>📅 Ajouter à la semaine</h2>
+            <button class="picker-close" onclick={() => (showWeekPicker = false)} aria-label="Fermer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <p class="wp-sub">Choisis le créneau pour « {recipe.title} »</p>
+          <div class="wp-grid">
+            {#each Array(7) as _, dayIdx}
+              {@const today = isDayToday(dayIdx)}
+              <div class="wp-day" class:wp-today={today}>
+                <div class="wp-day-label">
+                  <span class="wp-day-name">{DAY_NAMES[dayIdx]}</span>
+                  <span class="wp-day-date">{weekDayDate(dayIdx)}</span>
+                </div>
+                <div class="wp-meals">
+                  <button
+                    class="wp-meal-btn"
+                    disabled={addingToWeek}
+                    onclick={() => addToWeek(dayIdx, 'midi')}
+                  >☀️ Midi</button>
+                  <button
+                    class="wp-meal-btn"
+                    disabled={addingToWeek}
+                    onclick={() => addToWeek(dayIdx, 'soir')}
+                  >🌙 Soir</button>
+                </div>
+              </div>
+            {/each}
           </div>
         </div>
       </div>
@@ -333,6 +430,11 @@
     padding: var(--gutter);
   }
 
+  .overlay-bottom {
+    align-items: flex-end;
+    padding: 0;
+  }
+
   .confirm-dialog {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -359,6 +461,158 @@
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+  }
+
+  /* ── Ajouter à la semaine ── */
+  .add-week-section {
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+
+  .btn-add-week {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-lg);
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .btn-add-week:active {
+    transform: scale(0.97);
+  }
+
+  /* ── Week picker modal ── */
+  .week-picker {
+    background: var(--bg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+    animation: picker-in 0.25s ease-out;
+  }
+
+  @keyframes picker-in {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .wp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .wp-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .picker-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .wp-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wp-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .wp-day {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    gap: 8px;
+  }
+
+  .wp-today {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+
+  .wp-day-label {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .wp-day-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .wp-today .wp-day-name {
+    color: var(--primary);
+  }
+
+  .wp-day-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .wp-meals {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .wp-meal-btn {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .wp-meal-btn:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    color: var(--primary);
+  }
+
+  .wp-meal-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .center-msg {
