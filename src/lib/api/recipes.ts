@@ -2,6 +2,7 @@
 // Toutes les requêtes Supabase pour le CRUD recettes.
 
 import { supabase } from '../supabase'
+import { pickSeeded } from '../random'
 import type {
   RecipeWithCategory,
   RecipeDetail,
@@ -275,4 +276,51 @@ export async function deleteRecipe(recipeId: string): Promise<void> {
     .delete()
     .eq('id', recipeId)
   if (error) throw error
+}
+
+// ────────── Recettes du jour (page d'accueil) ──────────
+
+export const DAILY_RECIPES_COUNT = 5
+
+/** Date locale au format AAAA-MM-JJ (pas l'heure UTC, sinon ça change à 1h du matin). */
+export function todayKey(d = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+/**
+ * Les 5 recettes du jour.
+ * Le tirage dépend uniquement de la date : toute la famille voit les mêmes
+ * recettes toute la journée, et la sélection change à minuit.
+ * Deux requêtes légères : la liste des id, puis les 5 recettes choisies.
+ */
+export async function fetchDailyRecipes(
+  dateKey = todayKey(),
+  count = DAILY_RECIPES_COUNT,
+): Promise<RecipeWithCategory[]> {
+  if (!supabase) return []
+
+  const { data: idRows, error: idErr } = await supabase
+    .from('recipes')
+    .select('id')
+    .order('id') // ordre stable, indispensable pour que le tirage soit reproductible
+
+  if (idErr) throw idErr
+  const ids = (idRows ?? []).map((r: { id: string }) => r.id)
+  if (ids.length === 0) return []
+
+  const picked = pickSeeded(ids, count, `courses-famille:${dateKey}`)
+
+  const { data, error } = await supabase
+    .from('recipes')
+    .select('*, recipe_categories(*)')
+    .in('id', picked)
+
+  if (error) throw error
+
+  // Remettre les recettes dans l'ordre du tirage
+  const byId = new Map((data ?? []).map((r) => [r.id, r as RecipeWithCategory]))
+  return picked.map((id) => byId.get(id)).filter((r): r is RecipeWithCategory => !!r)
 }

@@ -8,6 +8,7 @@
   import AppHeader from './components/AppHeader.svelte'
   import ToastContainer from './components/ToastContainer.svelte'
   import Login from './pages/Login.svelte'
+  import Accueil from './pages/Accueil.svelte'
   import Recettes from './pages/Recettes.svelte'
   import RecetteDetail from './pages/RecetteDetail.svelte'
   import RecetteForm from './pages/RecetteForm.svelte'
@@ -28,14 +29,14 @@
     }
   })
 
-  // Redirection : si pas connecté → login, si connecté et sur login → recettes
+  // Redirection : si pas connecté → login, si connecté et sur login → accueil
   $effect(() => {
     if (auth.loading) return
 
     if (!auth.user && router.current !== 'login') {
       navigate('login')
     } else if (auth.user && router.current === 'login') {
-      navigate('recettes')
+      navigate('accueil')
     }
   })
 
@@ -58,7 +59,9 @@
   <!-- Connecté : app shell -->
   <AppHeader />
   <div class="app-shell">
-    {#if router.current === 'recettes'}
+    {#if router.current === 'accueil'}
+      <Accueil />
+    {:else if router.current === 'recettes'}
       <Recettes />
     {:else if router.current === 'recette'}
       <RecetteDetail />
@@ -78,7 +81,7 @@
       <div class="page-404">
         <h1>Page introuvable</h1>
         <p>Cette adresse n'existe pas.</p>
-        <a href="#/recettes" class="btn btn-outline">Retour aux recettes</a>
+        <a href="#/accueil" class="btn btn-outline">Retour à l'accueil</a>
       </div>
     {/if}
   </div>

@@ -1,0 +1,378 @@
+<script lang="ts">
+  // Page d'accueil : 5 recettes tirées au hasard chaque jour, qui flottent à l'écran.
+  // - Le tirage dépend de la date → même sélection pour toute la famille, change à minuit.
+  // - Le placement est calculé (lib/floatLayout.ts) pour tenir dans l'écran sans chevauchement.
+  import { onDestroy } from 'svelte'
+  import { profileState } from '../lib/profile.svelte'
+  import { href } from '../lib/router.svelte'
+  import { fetchDailyRecipes, todayKey, DAILY_RECIPES_COUNT } from '../lib/api/recipes'
+  import { computeFloatLayout, MIN_ZONE_HEIGHT } from '../lib/floatLayout'
+  import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
+  import type { RecipeWithCategory } from '../lib/types'
+
+  // ────────── Données ──────────
+
+  let recipes: RecipeWithCategory[] = $state([])
+  let loading = $state(true)
+  let error = $state<string | null>(null)
+
+  /** Date du jour (AAAA-MM-JJ). Quand elle change, l'effet ci-dessous refait le tirage. */
+  let dateKey = $state(todayKey())
+  let now = $state(new Date())
+
+  $effect(() => {
+    if (profileState.loading) return
+    const key = dateKey
+    let cancelled = false // évite qu'une vieille requête écrase une plus récente
+
+    loading = true
+    error = null
+    fetchDailyRecipes(key)
+      .then((r) => { if (!cancelled) recipes = r })
+      .catch((e) => { if (!cancelled) error = e?.message ?? 'Erreur de chargement' })
+      .finally(() => { if (!cancelled) loading = false })
+
+    return () => { cancelled = true }
+  })
+
+  // Horloge : compte à rebours + détection de minuit (aussi au retour sur l'app)
+  function tick() {
+    now = new Date()
+    const k = todayKey(now)
+    if (k !== dateKey) dateKey = k
+  }
+  const clock = setInterval(tick, 30_000)
+  const onVisible = () => { if (document.visibilityState === 'visible') tick() }
+  document.addEventListener('visibilitychange', onVisible)
+  onDestroy(() => {
+    clearInterval(clock)
+    document.removeEventListener('visibilitychange', onVisible)
+  })
+
+  // ────────── Textes ──────────
+
+  const firstName = $derived(profileState.profile?.display_name?.trim().split(/\s+/)[0] ?? '')
+  const greeting = $derived(now.getHours() >= 18 ? 'Bonsoir' : 'Bonjour')
+  const dateLabel = $derived(
+    now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }),
+  )
+  const countdown = $derived.by(() => {
+    const midnight = new Date(now)
+    midnight.setHours(24, 0, 0, 0)
+    const mins = Math.max(1, Math.ceil((midnight.getTime() - now.getTime()) / 60000))
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return h > 0 ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`
+  })
+
+  // ────────── Placement ──────────
+
+  let zoneW = $state(0)
+  let zoneH = $state(0)
+
+  const cardCount = $derived(loading ? DAILY_RECIPES_COUNT : recipes.length)
+  const layout = $derived(computeFloatLayout(zoneW, zoneH, cardCount, `layout:${dateKey}`))
+
+  // ────────── Parallaxe (souris uniquement) ──────────
+  // Au doigt, pointermove se déclenche pendant le défilement : les cartes
+  // sauteraient. On la réserve donc à la souris / au trackpad.
+
+  let px = $state(0)
+  let py = $state(0)
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  let frame = 0
+
+  function onPointerMove(e: PointerEvent) {
+    if (reduceMotion || e.pointerType !== 'mouse') return
+    const el = e.currentTarget as HTMLElement
+    cancelAnimationFrame(frame)
+    frame = requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect()
+      px = ((e.clientX - r.left) / r.width - 0.5) * 2 // −1 → 1
+      py = ((e.clientY - r.top) / r.height - 0.5) * 2
+    })
+  }
+
+  function resetParallax() {
+    cancelAnimationFrame(frame)
+    px = 0
+    py = 0
+  }
+
+  onDestroy(() => cancelAnimationFrame(frame))
+</script>
+
+<div class="page accueil">
+  <!-- Fond animé : dégradés radiaux (pas de filter: blur, trop coûteux sur mobile) -->
+  <div class="blobs" aria-hidden="true">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <header class="hero">
+    <span class="date-chip">{dateLabel}</span>
+    <h1>
+      {greeting}{firstName ? ` ${firstName}` : ''}
+      <span class="wave" aria-hidden="true">👋</span>
+    </h1>
+    <p class="subtitle">
+      Tes <strong>{DAILY_RECIPES_COUNT} idées</strong> du jour
+    </p>
+  </header>
+
+  {#if error}
+    <div class="state error-msg" role="alert">
+      <p>Impossible de charger les recettes du jour.</p>
+      <p class="state-detail">{error}</p>
+    </div>
+  {:else if !loading && recipes.length === 0}
+    <div class="state">
+      <p class="state-icon">🍳</p>
+      <p>Aucune recette pour le moment.</p>
+      <a href="#/nouvelle-recette" class="btn btn-primary state-cta">Créer la première recette</a>
+    </div>
+  {:else}
+    <section
+      class="float-zone"
+      aria-label="Recettes du jour"
+      aria-busy={loading}
+      bind:clientWidth={zoneW}
+      bind:clientHeight={zoneH}
+      style:min-height="{MIN_ZONE_HEIGHT}px"
+      style:--px={px}
+      style:--py={py}
+      onpointermove={onPointerMove}
+      onpointerleave={resetParallax}
+    >
+      {#each layout.slots as slot, i (i)}
+        <FloatingRecipeCard
+          {slot}
+          index={i}
+          recipe={loading ? null : (recipes[i] ?? null)}
+          featured={i === 0}
+        />
+      {/each}
+    </section>
+
+    <footer class="accueil-footer">
+      <p class="countdown">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Nouvelles idées dans <strong>{countdown}</strong></span>
+      </p>
+      <a href={href('recettes')} class="see-all">Toutes les recettes →</a>
+    </footer>
+  {/if}
+</div>
+
+<style>
+  .accueil {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* svh = hauteur stable : ne bouge pas quand la barre d'adresse se replie,
+       sinon les cartes seraient recalculées pendant le défilement */
+    min-height: calc(100vh - 76px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100svh - 76px - env(safe-area-inset-bottom, 0px));
+    padding: var(--gutter);
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    padding-bottom: 8px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* ── Fond animé ─────────────────────────────── */
+  .blobs {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform;
+    animation: blob-move 20s ease-in-out infinite alternate;
+  }
+
+  .blob-1 {
+    width: 380px; height: 380px;
+    top: -140px; right: -150px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 38%, transparent) 0%, transparent 68%);
+  }
+
+  .blob-2 {
+    width: 360px; height: 360px;
+    bottom: 0; left: -170px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--primary) 34%, transparent) 0%, transparent 68%);
+    animation-duration: 24s;
+    animation-delay: -8s;
+  }
+
+  .blob-3 {
+    width: 280px; height: 280px;
+    top: 38%; right: -60px;
+    background: radial-gradient(circle, rgba(255, 209, 102, 0.3) 0%, transparent 68%);
+    animation-duration: 28s;
+    animation-delay: -14s;
+  }
+
+  @keyframes blob-move {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(30px, 24px, 0) scale(1.12); }
+    100% { transform: translate3d(-24px, 40px, 0) scale(0.95); }
+  }
+
+  /* ── En-tête ────────────────────────────────── */
+  .hero {
+    padding-right: 48px; /* place pour l'avatar en haut à droite */
+  }
+
+  .date-chip {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .date-chip::first-letter {
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 8vw, 44px);
+    font-weight: 800;
+  }
+
+  .wave {
+    display: inline-block;
+    transform-origin: 70% 70%;
+    animation: wave 2.4s ease-in-out 0.5s 2;
+  }
+
+  @keyframes wave {
+    0%, 60%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(16deg); }
+    20%      { transform: rotate(-8deg); }
+    40%      { transform: rotate(-4deg); }
+    50%      { transform: rotate(10deg); }
+  }
+
+  .subtitle {
+    margin-top: 4px;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+
+  .subtitle strong {
+    color: var(--accent);
+  }
+
+  /* ── Zone flottante ─────────────────────────── */
+  .float-zone {
+    position: relative;
+    flex: 1;
+    /* bord à bord : on récupère les marges latérales pour des cartes plus grandes */
+    margin: 4px calc(var(--gutter) * -1) 0;
+  }
+
+  /* ── Pied de page ───────────────────────────── */
+  .accueil-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 6px;
+  }
+
+  .countdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--text-secondary);
+  }
+
+  .countdown strong {
+    white-space: nowrap; /* « 15 h 39 » ne doit jamais être coupé */
+    color: var(--text);
+  }
+
+  .dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: ping 2s ease-out infinite;
+  }
+
+  @keyframes ping {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 60%, transparent); }
+    100% { box-shadow: 0 0 0 9px transparent; }
+  }
+
+  .see-all {
+    flex-shrink: 0;
+    min-height: 44px; /* zone de tap confortable */
+    display: inline-flex;
+    align-items: center;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--bg-raised);
+    border: 1.5px solid var(--border-strong);
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 700;
+    touch-action: manipulation;
+  }
+
+  .see-all:active {
+    transform: scale(0.96);
+  }
+
+  /* ── États ──────────────────────────────────── */
+  .state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+  }
+
+  .state-icon {
+    font-size: 56px;
+  }
+
+  .state-detail {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  .error-msg {
+    color: var(--error);
+  }
+
+  .state-cta {
+    margin-top: 16px;
+    width: auto;
+    padding: 14px 24px;
+  }
+
+  /* Très petits écrans (iPhone SE, vieux Android) */
+  @media (max-width: 359px) {
+    .countdown { font-size: 12px; }
+    .see-all { padding: 0 10px; font-size: 13px; }
+  }
+</style>

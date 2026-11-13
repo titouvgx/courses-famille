@@ -4,6 +4,7 @@
 
 export type Route =
   | 'login'
+  | 'accueil'          // page d'accueil : 5 recettes du jour
   | 'recettes'
   | 'recette'          // détail : #/recette/<id>
   | 'nouvelle-recette' // création : #/nouvelle-recette
@@ -14,12 +15,12 @@ export type Route =
   | 'compte'           // page profil / mon compte
   | 'introuvable'
 
-/** Les 4 onglets de la tab bar. */
-export const TAB_ROUTES = ['recettes', 'semaine', 'courses', 'historique'] as const
+/** Les 5 onglets de la tab bar. */
+export const TAB_ROUTES = ['accueil', 'recettes', 'semaine', 'courses', 'historique'] as const
 export type TabRoute = (typeof TAB_ROUTES)[number]
 
-const STATIC_ROUTES: string[] = ['login', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
-const DEFAULT_ROUTE: Route = 'recettes'
+const STATIC_ROUTES: string[] = ['login', 'accueil', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
+const DEFAULT_ROUTE: Route = 'accueil'
 
 interface RouterState {
   current: Route

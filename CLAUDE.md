@@ -29,10 +29,10 @@ Ce projet utilise exclusivement les **runes Svelte 5** :
 ### Routeur hash
 
 Le routeur (`src/lib/router.svelte.ts`) utilise le hash (`#/recettes`, `#/recette/<id>`) pour la compatibilité GitHub Pages. Les routes :
-- `login`, `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`
+- `login`, `accueil` (route par défaut), `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`
 - `semaine`, `courses`, `historique`, `compte`
 
-Tab bar : Recettes | Semaine | Courses | Historique
+Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 
 ## Architecture Supabase
 
@@ -115,6 +115,7 @@ src/
 ├── app.css                       # Design system complet (tokens, dark mode, reset)
 ├── components/
 │   ├── AppHeader.svelte          # Header avec titre
+│   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
 ├── lib/
@@ -124,12 +125,16 @@ src/
 │   ├── router.svelte.ts          # Hash router
 │   ├── toast.svelte.ts           # Store toast (success/error/info)
 │   ├── types.ts                  # Interfaces TypeScript (miroir Supabase)
+│   ├── random.ts                 # Hasard reproductible (graine = date) : pickSeeded
+│   ├── floatLayout.ts            # Placement « en vrac » des cartes (fonction pure, tirage seedé, sans chevauchement)
+│   ├── images.ts                 # sizedImage() : redimensionne les URL Unsplash pour le mobile
 │   └── api/
 │       ├── recipes.ts            # CRUD recettes
 │       ├── meals.ts              # CRUD planning (plans + slots)
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
 │   ├── Login.svelte              # Connexion / inscription
+│   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
 │   ├── Recettes.svelte           # Liste des recettes (paginée)
 │   ├── RecetteDetail.svelte      # Détail recette + ajout semaine/panier
 │   ├── RecetteForm.svelte        # Formulaire création/édition
@@ -174,12 +179,20 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 9 : Polish (toasts, animations, micro-interactions)
 - Bonus : « Ajouter à ma semaine » depuis une recette
 - Bonus : « Ajouter au panier » avec sélection d'ingrédients et portions ajustables
+- Refonte UI (en cours) : page d'accueil avec 5 recettes du jour flottantes ✅ — autres pages à suivre
+
+### Règles UI mobile-first (refonte)
+- Animer uniquement `transform` / `opacity` (pas de `filter: blur` animé, trop coûteux sur téléphone)
+- Effets `:hover` uniquement dans `@media (hover: hover) and (pointer: fine)`
+- Parallaxe / effets au pointeur : souris uniquement (`pointerType === 'mouse'`)
+- Hauteur d'écran en `svh` (stable quand la barre d'adresse se replie)
+- Zones de tap ≥ 44 px, `touch-action: manipulation`
+- `prefers-reduced-motion` respecté (règle globale dans `app.css`)
 
 ### Restant ⬜
 - Étape 10 : Déploiement prod (brancher `courses-prod`, variables d'env, Realtime)
 
 ### Idées futures (PAS à implémenter maintenant)
-- Suggestions aléatoires de recettes (3-5/jour)
 - Nutri-Score (A à E) par recette
 - Table nutritionnelle (calories, protéines, glucides, lipides) via Open Food Facts API
 
