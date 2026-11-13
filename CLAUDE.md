@@ -115,6 +115,7 @@ src/
 ├── app.css                       # Design system complet (tokens, dark mode, reset)
 ├── components/
 │   ├── AppHeader.svelte          # Header avec titre
+│   ├── HomeBackdrop.svelte       # Fond animé de l'accueil (thème mer : écailles seigaiha nettes sur les côtés / floues au centre, vagues, bulles)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast

@@ -71,7 +71,8 @@
             draggable="false"
           />
         {:else}
-          <span class="card-emoji" aria-hidden="true">🍽️</span>
+          <!-- Pas de photo : grande initiale graphique plutôt qu'un émoji -->
+          <span class="card-monogram" aria-hidden="true">{recipe.title.trim().charAt(0)}</span>
         {/if}
 
         {#if featured}
@@ -216,13 +217,24 @@
     pointer-events: none;
   }
 
-  .card-emoji {
+  .card-monogram {
     position: absolute;
-    inset: 0 0 35% 0;
+    inset: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    font-size: 44px;
+    padding-top: 10cqw;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 52cqw; /* proportionnelle à la largeur de la carte */
+    line-height: 1;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 6px 6px 0 rgba(0, 0, 0, 0.18);
+    /* fines rayures diagonales derrière la lettre */
+    background:
+      repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 0 10px, transparent 10px 20px),
+      linear-gradient(150deg, var(--cat), color-mix(in srgb, var(--cat) 55%, #000));
   }
 
   .card-overlay {

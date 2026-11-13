@@ -8,6 +8,7 @@
   import { fetchDailyRecipes, todayKey, DAILY_RECIPES_COUNT } from '../lib/api/recipes'
   import { computeFloatLayout, MIN_ZONE_HEIGHT } from '../lib/floatLayout'
   import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
+  import HomeBackdrop from '../components/HomeBackdrop.svelte'
   import type { RecipeWithCategory } from '../lib/types'
 
   // ────────── Données ──────────
@@ -103,12 +104,7 @@
 </script>
 
 <div class="page accueil">
-  <!-- Fond animé : dégradés radiaux (pas de filter: blur, trop coûteux sur mobile) -->
-  <div class="blobs" aria-hidden="true">
-    <span class="blob blob-1"></span>
-    <span class="blob blob-2"></span>
-    <span class="blob blob-3"></span>
-  </div>
+  <HomeBackdrop />
 
   <header class="hero">
     <span class="date-chip">{dateLabel}</span>
@@ -179,49 +175,6 @@
     padding-bottom: 8px;
     overflow: hidden;
     isolation: isolate;
-  }
-
-  /* ── Fond animé ─────────────────────────────── */
-  .blobs {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    will-change: transform;
-    animation: blob-move 20s ease-in-out infinite alternate;
-  }
-
-  .blob-1 {
-    width: 380px; height: 380px;
-    top: -140px; right: -150px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 38%, transparent) 0%, transparent 68%);
-  }
-
-  .blob-2 {
-    width: 360px; height: 360px;
-    bottom: 0; left: -170px;
-    background: radial-gradient(circle, color-mix(in srgb, var(--primary) 34%, transparent) 0%, transparent 68%);
-    animation-duration: 24s;
-    animation-delay: -8s;
-  }
-
-  .blob-3 {
-    width: 280px; height: 280px;
-    top: 38%; right: -60px;
-    background: radial-gradient(circle, rgba(255, 209, 102, 0.3) 0%, transparent 68%);
-    animation-duration: 28s;
-    animation-delay: -14s;
-  }
-
-  @keyframes blob-move {
-    0%   { transform: translate3d(0, 0, 0) scale(1); }
-    50%  { transform: translate3d(30px, 24px, 0) scale(1.12); }
-    100% { transform: translate3d(-24px, 40px, 0) scale(0.95); }
   }
 
   /* ── En-tête ────────────────────────────────── */
@@ -295,6 +248,10 @@
     align-items: center;
     gap: 8px;
     min-width: 0;
+    padding: 6px 12px 6px 10px;
+    border-radius: 14px;
+    /* pastille opaque : lisible sur le motif, sans flou (coûteux sur mobile) */
+    background: color-mix(in srgb, var(--bg-raised) 88%, transparent);
     font-size: 13px;
     line-height: 1.3;
     color: var(--text-secondary);
