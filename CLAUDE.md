@@ -78,7 +78,7 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 14. `more_ingredients.sql` — environ 200 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
 
 **État des bases** (à tenir à jour) :
-- `courses-test` : migrations 1 à 13 vérifiées le 13/11/2026 (requête de contrôle) ; 14 à exécuter
+- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes)
 - `courses-prod` : pas encore créée
 
 **Règle** : une migration est exécutée dans la base **avant** de pousser le code qui en dépend, puis vérifiée par une requête de contrôle (tables, colonnes, triggers, RLS actif). Toute nouvelle table : RLS par foyer + attaques ajoutées dans `tests/rls` avant de pousser.
