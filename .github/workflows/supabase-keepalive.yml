@@ -1,0 +1,64 @@
+# Empêche la base Supabase de s'endormir.
+#
+# Sur l'offre gratuite, Supabase met en pause un projet sans activité pendant
+# 7 jours (il faut ensuite le réveiller à la main dans le tableau de bord).
+# Cette tâche interroge la base tous les 3 jours pour qu'elle reste active.
+#
+# - Utilise les mêmes variables publiques que le déploiement
+#   (Settings → Secrets and variables → Actions → Variables) :
+#   VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY. Aucune clé secrète.
+# - Sans connexion, les règles RLS renvoient une liste vide : aucune donnée
+#   n'est lue, mais la requête compte bien comme une activité.
+# - Si la base ne répond pas (déjà en pause, panne), la tâche échoue et GitHub
+#   t'envoie un e-mail : c'est aussi une alerte gratuite.
+# - Attention : sur un dépôt public, GitHub désactive les tâches planifiées
+#   après 60 jours sans aucun commit. Si ça arrive : onglet Actions →
+#   « Garder Supabase éveillé » → « Enable workflow ».
+name: Garder Supabase éveillé
+
+on:
+  schedule:
+    # Tous les 3 jours à 6 h 17 UTC (minute décalée : à l'heure pile, GitHub retarde souvent)
+    - cron: '17 6 */3 * *'
+  workflow_dispatch: # bouton « Run workflow » pour tester à la main
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Interroger la base
+        env:
+          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::Variables VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY absentes du dépôt"
+            exit 1
+          fi
+
+          # 1. Base de données (API REST) — 3 essais, la base peut mettre un instant à répondre
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+              -H "apikey: $SUPABASE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_KEY" \
+              "$SUPABASE_URL/rest/v1/recipe_categories?select=id&limit=1")
+            echo "Base de données : HTTP $code (essai $i)"
+            [ "$code" = "200" ] && break
+            sleep 15
+          done
+          if [ "$code" != "200" ]; then
+            echo "::error::La base ne répond pas (HTTP $code). Le projet est peut-être en pause : tableau de bord Supabase → Resume project."
+            exit 1
+          fi
+
+          # 2. Service de connexion (Auth)
+          auth=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 \
+            -H "apikey: $SUPABASE_KEY" "$SUPABASE_URL/auth/v1/health")
+          echo "Connexion (Auth) : HTTP $auth"
+          [ "$auth" = "200" ] || echo "::warning::Le service de connexion répond HTTP $auth"
+
+          echo "Supabase est bien éveillé."
