@@ -1,0 +1,1409 @@
+{
+  "kind": "nouvelles",
+  "recettes": [
+    {
+      "title": "Pot-au-feu",
+      "category": "Plat",
+      "prep_time_min": 220,
+      "default_portions": 6,
+      "ingredients": [
+        {
+          "name": "Viande à pot-au-feu",
+          "quantity": 1800,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Os à moelle",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Carotte",
+          "quantity": 6,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Poireau",
+          "quantity": 3,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Navet",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Céleri",
+          "quantity": 2,
+          "unit": "branche",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Clou de girofle",
+          "quantity": 3,
+          "unit": "pièce",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Bouquet garni",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Pomme de terre à chair ferme",
+          "quantity": 1500,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Gros sel",
+          "quantity": 1,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre noir en grains",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Moutarde",
+          "quantity": 4,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Cornichons (bocal)",
+          "quantity": 1,
+          "unit": "pot",
+          "rayon": "Épicerie salée"
+        }
+      ],
+      "steps": [
+        "Mettre les morceaux de viande dans un grand faitout, couvrir d'environ 4 l d'eau froide et porter doucement à ébullition.",
+        "Retirer l'écume qui se forme à la surface avec une écumoire pendant 10 min, jusqu'à ce que le liquide soit clair.",
+        "Piquer chaque oignon épluché avec les clous de girofle, puis les ajouter avec l'ail pelé, le bouquet garni, le gros sel et le poivre en grains. Laisser cuire 2 h à petits frémissements, à couvert entrouvert.",
+        "Pendant ce temps, éplucher les carottes et les navets, couper les poireaux en deux dans la longueur, les laver et les ficeler en botte, et couper le céleri en tronçons de 5 cm.",
+        "Ajouter tous ces légumes dans le faitout et poursuivre la cuisson 1 h à petits frémissements, en complétant avec un peu d'eau chaude si la viande n'est plus couverte.",
+        "Frotter les extrémités des os à moelle avec un peu de gros sel et les plonger dans le bouillon pour les 20 dernières minutes de cuisson.",
+        "Pendant ce temps, éplucher les pommes de terre et les cuire 25 min dans une casserole de bouillon prélevé dans le faitout (ou d'eau salée), jusqu'à ce que la pointe d'un couteau s'y enfonce sans résistance.",
+        "Vérifier que la viande se détache à la fourchette, la trancher et la servir avec les légumes, la moelle, la moutarde et les cornichons. Dégraisser le bouillon restant et le servir en soupe ou le garder pour une autre recette."
+      ],
+      "sources": [
+        "https://www.hachette-vins.com/cuisine-vins/316/pot-au-feu/",
+        "https://meilleurduchef.com/fr/recette/pot-au-feu.html"
+      ]
+    },
+    {
+      "title": "Poulet basquaise",
+      "category": "Plat",
+      "prep_time_min": 80,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Cuisse de poulet",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Poivron rouge",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Poivron vert",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 3,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Tomates pelées (conserve)",
+          "quantity": 800,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Jambon cru",
+          "quantity": 2,
+          "unit": "tranche",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Vin blanc",
+          "quantity": 15,
+          "unit": "cl",
+          "rayon": "Boissons"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 3,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Piment d'Espelette",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Thym frais",
+          "quantity": 2,
+          "unit": "branche",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Laurier",
+          "quantity": 2,
+          "unit": "feuille",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Couper chaque cuisse de poulet en deux à l'articulation (haut de cuisse et pilon), puis saler et poivrer les morceaux.",
+        "Épépiner les poivrons et les tailler en lanières, émincer les oignons, hacher l'ail et couper le jambon cru en petites lanières.",
+        "Chauffer 2 c. à soupe d'huile d'olive dans une cocotte à feu moyen-vif et dorer les morceaux de poulet 8 à 10 min en les retournant, côté peau d'abord. Les réserver sur une assiette.",
+        "Dans la même cocotte, ajouter le reste d'huile, puis les oignons, les poivrons et le jambon. Faire revenir 10 min à feu moyen en remuant, jusqu'à ce que les poivrons ramollissent, puis ajouter l'ail 1 min.",
+        "Verser le vin blanc et laisser réduire de moitié 2 à 3 min en grattant le fond de la cocotte.",
+        "Ajouter les tomates pelées en les écrasant à la cuillère, le piment d'Espelette, le thym et le laurier. Remettre le poulet dans la sauce.",
+        "Couvrir et laisser mijoter 40 min à feu doux en remuant de temps en temps. Le poulet est cuit quand le jus qui s'écoule près de l'os est clair, sans trace rosée (75 °C à cœur avec un thermomètre).",
+        "Retirer le thym et le laurier, goûter et rectifier l'assaisonnement. Si la sauce est trop liquide, la laisser réduire 5 min sans couvercle avant de servir."
+      ],
+      "sources": [
+        "https://www.hachette-vins.com/cuisine-vins/158/poulet-basquaise",
+        "https://www.zwilling.com/fr/magazine/recettes/recipe-culinary-world-staub-cast-iron-basque-chicken.html"
+      ]
+    },
+    {
+      "title": "Chili con carne",
+      "category": "Plat",
+      "prep_time_min": 85,
+      "default_portions": 6,
+      "ingredients": [
+        {
+          "name": "Viande hachée de bœuf",
+          "quantity": 750,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Haricots rouges",
+          "quantity": 800,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Tomates pelées (conserve)",
+          "quantity": 800,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Concentré de tomate",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 3,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Poivron rouge",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Cumin",
+          "quantity": 2,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Paprika",
+          "quantity": 2,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Piment de Cayenne",
+          "quantity": 0.5,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Origan",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Bouillon de bœuf",
+          "quantity": 1,
+          "unit": "cube",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Riz",
+          "quantity": 450,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Émincer les oignons, hacher l'ail et couper le poivron épépiné en petits dés. Dissoudre le cube de bouillon dans 30 cl d'eau chaude.",
+        "Chauffer l'huile dans une grande cocotte à feu vif et y faire dorer la viande hachée 8 min en l'émiettant à la spatule, jusqu'à ce qu'il ne reste plus de partie rosée.",
+        "Ajouter les oignons et le poivron, baisser à feu moyen et cuire 5 min en remuant.",
+        "Ajouter l'ail, le cumin, le paprika, le piment de Cayenne et l'origan, puis remuer 1 min pour torréfier les épices.",
+        "Incorporer le concentré de tomate, les tomates pelées écrasées et le bouillon. Porter à ébullition, couvrir et laisser mijoter 45 min à feu doux en remuant de temps en temps.",
+        "Égoutter et rincer les haricots rouges, les ajouter dans la cocotte et poursuivre la cuisson 15 min sans couvercle, jusqu'à obtenir une sauce épaisse. Saler, poivrer et ajuster le piment.",
+        "Pendant ce temps, cuire le riz dans une grande casserole d'eau bouillante salée le temps indiqué sur le paquet (10 à 12 min environ), puis l'égoutter.",
+        "Servir le chili bien chaud avec le riz."
+      ],
+      "sources": [
+        "https://ricardocuisine.com/en/recipes/9764-chili-con-carne-the-best",
+        "https://www.soscuisine.fr/recipe/chili-con-carne"
+      ]
+    },
+    {
+      "title": "Curry de poulet au lait de coco",
+      "category": "Plat",
+      "prep_time_min": 45,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Blanc de poulet",
+          "quantity": 600,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Lait de coco",
+          "quantity": 40,
+          "unit": "cl",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Gingembre frais",
+          "quantity": 20,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Curry",
+          "quantity": 1,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Concentré de tomate",
+          "quantity": 1,
+          "unit": "c. à soupe",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile de tournesol",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Citron vert",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Coriandre fraîche",
+          "quantity": 0.5,
+          "unit": "botte",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Riz basmati",
+          "quantity": 320,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Couper les blancs de poulet en cubes de 3 cm. Émincer l'oignon, hacher l'ail et râper le gingembre pelé.",
+        "Rincer le riz basmati à l'eau froide, puis le cuire dans une casserole d'eau bouillante salée 10 à 12 min (ou selon le paquet). L'égoutter et le garder au chaud.",
+        "Chauffer l'huile dans une sauteuse à feu moyen-vif et faire dorer les cubes de poulet 5 min en remuant. Les réserver.",
+        "Dans la même sauteuse, faire fondre l'oignon 5 min à feu moyen, puis ajouter l'ail, le gingembre et le curry et remuer 1 min.",
+        "Ajouter le concentré de tomate et le lait de coco, bien mélanger et porter à frémissement.",
+        "Remettre le poulet dans la sauce et laisser mijoter 12 à 15 min à feu doux, à découvert. Couper un gros morceau : la chair doit être blanche jusqu'au centre, sans trace rosée (75 °C à cœur).",
+        "Hors du feu, ajouter le jus du citron vert, saler, puis parsemer de coriandre ciselée. Servir avec le riz."
+      ],
+      "sources": [
+        "https://exceldor.ca/en/recipes/chicken-with-coconut-milk-and-red-curry",
+        "https://ileauxepices.com/blog/2014/04/14/recette-poulet-korma-indien-facile-et-rapide/wpid4724/"
+      ]
+    },
+    {
+      "title": "Gratin de pâtes au jambon",
+      "category": "Plat",
+      "prep_time_min": 45,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Macaroni",
+          "quantity": 350,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Jambon blanc",
+          "quantity": 4,
+          "unit": "tranche",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 45,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Farine",
+          "quantity": 40,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Lait",
+          "quantity": 60,
+          "unit": "cl",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Muscade",
+          "quantity": 1,
+          "unit": "pincée",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Emmental râpé",
+          "quantity": 120,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C et beurrer un plat à gratin avec 5 g de beurre.",
+        "Cuire les macaronis dans une grande casserole d'eau bouillante salée 2 min de moins que le temps indiqué sur le paquet, puis les égoutter : ils finiront de cuire au four.",
+        "Pendant ce temps, préparer la béchamel : faire fondre le reste du beurre dans une casserole à feu moyen, ajouter la farine et remuer 1 à 2 min sans laisser colorer.",
+        "Verser le lait froid petit à petit en fouettant sans arrêt, puis cuire 5 min en continuant de fouetter, jusqu'à ce que la sauce nappe la cuillère. Saler, poivrer et ajouter la muscade.",
+        "Couper le jambon en petits carrés et le mélanger avec les pâtes, la béchamel et la moitié de l'emmental.",
+        "Verser le tout dans le plat, parsemer du reste d'emmental et enfourner 20 min, jusqu'à ce que le dessus soit bien doré."
+      ],
+      "sources": [
+        "https://www.demotivateur.fr/food/gratin-de-pates-au-jambon-et-aux-champignons-34490"
+      ]
+    },
+    {
+      "title": "Endives au jambon",
+      "category": "Plat",
+      "prep_time_min": 60,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Endive",
+          "quantity": 8,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Jambon blanc",
+          "quantity": 8,
+          "unit": "tranche",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 45,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Farine",
+          "quantity": 40,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Lait",
+          "quantity": 60,
+          "unit": "cl",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Gruyère râpé",
+          "quantity": 100,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Muscade",
+          "quantity": 1,
+          "unit": "pincée",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sucre",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Épicerie sucrée"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Retirer les feuilles abîmées des endives et creuser un petit cône à la base avec un couteau pour ôter la partie la plus amère.",
+        "Plonger les endives dans une grande casserole d'eau bouillante salée et sucrée et les cuire 15 min, jusqu'à ce qu'elles soient tendres.",
+        "Les égoutter tête en bas dans une passoire au moins 10 min, puis les presser délicatement entre les mains pour extraire un maximum d'eau. Préchauffer le four à 200 °C.",
+        "Préparer la béchamel : faire fondre 40 g de beurre dans une casserole, ajouter la farine et remuer 1 à 2 min, puis verser le lait froid en fouettant et cuire 5 min jusqu'à épaississement.",
+        "Hors du feu, incorporer la moitié du gruyère râpé, la muscade, du sel et du poivre.",
+        "Beurrer un plat à gratin avec le reste du beurre. Enrouler chaque endive dans une tranche de jambon et les ranger côte à côte dans le plat.",
+        "Napper de béchamel, parsemer du reste de gruyère et enfourner 25 min, jusqu'à ce que le dessus soit doré et que la sauce bouillonne sur les bords."
+      ],
+      "sources": [
+        "https://www.quiveutdufromage.com/r-endives-au-jambon-gratinees-au-fromage",
+        "https://www.demotivateur.fr/food/endives-au-jambon-12856"
+      ]
+    },
+    {
+      "title": "Boulettes de bœuf à la sauce tomate",
+      "category": "Plat",
+      "prep_time_min": 55,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Viande hachée de bœuf",
+          "quantity": 500,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Œuf",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Chapelure",
+          "quantity": 40,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Lait",
+          "quantity": 5,
+          "unit": "cl",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Parmesan râpé",
+          "quantity": 30,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Persil",
+          "quantity": 0.5,
+          "unit": "botte",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Tomates pelées (conserve)",
+          "quantity": 800,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 3,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sucre",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Épicerie sucrée"
+        },
+        {
+          "name": "Origan",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Spaghetti",
+          "quantity": 350,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Émincer l'oignon, hacher l'ail et ciseler le persil. Dans un saladier, mélanger la chapelure avec le lait et laisser gonfler pendant la préparation de la sauce.",
+        "Chauffer 1 c. à soupe d'huile dans une sauteuse à feu moyen, faire fondre l'oignon 5 min, puis ajouter la moitié de l'ail 1 min.",
+        "Ajouter les tomates pelées écrasées, le sucre et l'origan, saler, poivrer et laisser mijoter 15 min à feu doux, à découvert.",
+        "Ajouter dans le saladier la viande hachée, l'œuf, le parmesan, le reste de l'ail, le persil, du sel et du poivre. Bien mélanger et former environ 16 boulettes de la taille d'une noix avec les mains humides.",
+        "Chauffer le reste d'huile dans une poêle à feu moyen-vif et faire dorer les boulettes 6 à 8 min en les retournant pour les colorer de tous côtés.",
+        "Plonger les boulettes dans la sauce, couvrir et laisser mijoter 15 min à feu doux. Couper une boulette : l'intérieur doit être cuit, sans partie rosée.",
+        "Pendant ce temps, cuire les spaghettis dans une grande casserole d'eau bouillante salée le temps indiqué sur le paquet, puis les égoutter.",
+        "Servir les spaghettis nappés de sauce avec les boulettes."
+      ],
+      "sources": [
+        "https://www.weber.com/BE/fr/recettes/b%C5%93uf/boulettes-de-viande-%C3%A0-la-sauce-tomate/weber-76178.html",
+        "https://www.rtbf.be/article/boulettes-sauce-tomate-9767776"
+      ]
+    },
+    {
+      "title": "Couscous au poulet et merguez",
+      "category": "Plat",
+      "prep_time_min": 95,
+      "default_portions": 6,
+      "ingredients": [
+        {
+          "name": "Cuisse de poulet",
+          "quantity": 6,
+          "unit": "pièce",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Merguez",
+          "quantity": 6,
+          "unit": "pièce",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Couscous (semoule)",
+          "quantity": 500,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Carotte",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Courgette",
+          "quantity": 3,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Navet",
+          "quantity": 3,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Pois chiches",
+          "quantity": 400,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Tomates pelées (conserve)",
+          "quantity": 400,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Concentré de tomate",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Ras el hanout",
+          "quantity": 1,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Bouillon de volaille",
+          "quantity": 1,
+          "unit": "cube",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 4,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 30,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Harissa",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Couper chaque cuisse de poulet en deux à l'articulation. Éplucher les carottes et les navets et les couper en gros tronçons, émincer les oignons, couper les courgettes en tronçons de 4 cm.",
+        "Chauffer 3 c. à soupe d'huile dans un grand faitout à feu moyen-vif et faire dorer les morceaux de poulet 8 à 10 min, puis ajouter les oignons et les faire revenir 5 min.",
+        "Ajouter le ras el hanout et le concentré de tomate et remuer 1 min, puis ajouter les tomates pelées, le cube de bouillon, les carottes, les navets et 2 l d'eau. Saler légèrement, poivrer, porter à ébullition et laisser mijoter 30 min à couvert.",
+        "Ajouter les courgettes et les pois chiches égouttés et rincés, puis poursuivre la cuisson 20 min. Le poulet est cuit quand le jus près de l'os est clair, sans trace rosée (75 °C à cœur).",
+        "Pendant ce temps, cuire les merguez dans une poêle à feu moyen 10 à 12 min en les retournant régulièrement, jusqu'à ce qu'elles soient bien dorées et cuites jusqu'au centre.",
+        "Préparer la semoule : la verser dans un grand saladier avec 1 c. à soupe d'huile et une pincée de sel, puis couvrir de 50 cl d'eau bouillante. Couvrir d'une assiette et laisser gonfler 5 min.",
+        "Égrener la semoule à la fourchette en incorporant le beurre en morceaux.",
+        "Diluer la harissa dans une louche de bouillon pour ceux qui aiment épicé. Servir la semoule avec le poulet, les merguez, les légumes et le bouillon à part."
+      ],
+      "sources": [
+        "https://www.quechoisir.org/conseils-recette-de-cuisine-couscous-au-poulet-potiron-et-chou-n113398",
+        "https://www.weightwatchers.com/be-fr/recipe/couscous-au-poulet-ds-merguez/619f9fbf1c26e54402fead1a"
+      ]
+    },
+    {
+      "title": "Risotto aux champignons",
+      "category": "Plat",
+      "prep_time_min": 45,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Riz arborio",
+          "quantity": 320,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Champignon de Paris",
+          "quantity": 400,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Échalote",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 1,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Vin blanc",
+          "quantity": 10,
+          "unit": "cl",
+          "rayon": "Boissons"
+        },
+        {
+          "name": "Bouillon de légumes",
+          "quantity": 2,
+          "unit": "cube",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Parmesan râpé",
+          "quantity": 60,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 40,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Persil",
+          "quantity": 0.5,
+          "unit": "botte",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Dissoudre les cubes de bouillon dans 1,2 l d'eau dans une casserole et maintenir ce bouillon à petits frémissements pendant toute la cuisson.",
+        "Nettoyer les champignons, les émincer, puis les faire sauter 8 min à feu vif dans une poêle avec 20 g de beurre, jusqu'à ce que leur eau soit évaporée. Saler, poivrer et réserver.",
+        "Hacher finement les échalotes et l'ail. Les faire fondre 3 min à feu moyen dans une sauteuse avec l'huile d'olive, sans les colorer.",
+        "Ajouter le riz et le remuer 2 min, jusqu'à ce que les grains deviennent translucides sur les bords.",
+        "Verser le vin blanc et remuer jusqu'à ce qu'il soit entièrement absorbé.",
+        "Ajouter le bouillon chaud une louche à la fois, en remuant souvent et en attendant que chaque louche soit presque absorbée avant d'ajouter la suivante, pendant 18 à 20 min. Le riz doit rester légèrement ferme au centre et le mélange crémeux.",
+        "Hors du feu, incorporer les champignons, le reste du beurre et le parmesan. Couvrir et laisser reposer 2 min.",
+        "Goûter, rectifier le sel et le poivre, parsemer de persil ciselé et servir aussitôt."
+      ],
+      "sources": [
+        "https://www.quiveutdufromage.com/r-risotto-aux-champignons-et-parmesan",
+        "https://www.e-sante.fr/risotto-champignons-paris/recette/1761"
+      ]
+    },
+    {
+      "title": "Petit salé aux lentilles",
+      "category": "Plat",
+      "prep_time_min": 110,
+      "default_portions": 6,
+      "ingredients": [
+        {
+          "name": "Petit salé",
+          "quantity": 1500,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Lentilles",
+          "quantity": 500,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Carotte",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Clou de girofle",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Bouquet garni",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Pour dessaler la viande, mettre le petit salé dans un grand faitout, le couvrir largement d'eau froide et porter à ébullition. Laisser bouillir 5 min, puis égoutter et rincer la viande.",
+        "Remettre la viande dans le faitout rincé et la couvrir d'environ 3 l d'eau froide. Ajouter un oignon piqué des clous de girofle, l'ail pelé, le bouquet garni et du poivre, sans saler.",
+        "Porter à frémissement, retirer l'écume, couvrir à moitié et laisser cuire 45 min à petits frémissements.",
+        "Pendant ce temps, rincer les lentilles (vertes, idéalement du Puy), éplucher les carottes et les couper en rondelles, et émincer le second oignon.",
+        "Ajouter les lentilles, les carottes et l'oignon émincé dans le faitout, en vérifiant qu'ils sont couverts de 2 cm de bouillon (rajouter de l'eau chaude si besoin). Poursuivre la cuisson 30 à 35 min, jusqu'à ce que les lentilles soient tendres mais encore entières.",
+        "Vérifier que la viande est tendre et se détache facilement à la fourchette (porc bien cuit à cœur, au-delà de 70 °C). Goûter les lentilles et saler seulement si nécessaire, car la viande est déjà salée.",
+        "Retirer le bouquet garni, couper la viande en morceaux et servir sur les lentilles égouttées, avec un peu de bouillon."
+      ],
+      "sources": [
+        "https://hachette-vins.com/cuisine-vins/685/petit-sale-aux-lentilles",
+        "https://www.demotivateur.fr/food/recette/petit-sale-aux-lentilles-1703"
+      ]
+    },
+    {
+      "title": "Rôti de porc aux pommes de terre",
+      "category": "Plat",
+      "prep_time_min": 100,
+      "default_portions": 6,
+      "ingredients": [
+        {
+          "name": "Rôti de porc",
+          "quantity": 1200,
+          "unit": "g",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Pomme de terre à chair ferme",
+          "quantity": 1500,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 4,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Thym frais",
+          "quantity": 4,
+          "unit": "branche",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Laurier",
+          "quantity": 2,
+          "unit": "feuille",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Bouillon de volaille",
+          "quantity": 1,
+          "unit": "cube",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 3,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 20,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Sortir le rôti du réfrigérateur 30 min avant la cuisson. Préchauffer le four à 180 °C et dissoudre le cube de bouillon dans 25 cl d'eau chaude.",
+        "Éplucher les pommes de terre et les couper en quartiers, couper les oignons en quartiers. Dans un grand plat à four, les mélanger avec 2 c. à soupe d'huile, les gousses d'ail entières non pelées, le thym, le laurier, du sel et du poivre.",
+        "Saler et poivrer le rôti. Chauffer le reste d'huile et le beurre dans une poêle à feu moyen-vif et faire dorer le rôti 8 à 10 min en le tournant sur toutes ses faces.",
+        "Poser le rôti au milieu des pommes de terre, verser le bouillon dans le fond du plat et enfourner pour environ 1 h 05.",
+        "Arroser le rôti et retourner les pommes de terre toutes les 20 min, en ajoutant un peu d'eau si le fond du plat accroche.",
+        "Vérifier la cuisson : le rôti est cuit quand un thermomètre planté au centre indique 70 °C, ou quand le jus qui s'écoule en le piquant est clair. Les pommes de terre doivent être dorées et fondantes.",
+        "Envelopper le rôti dans du papier aluminium et le laisser reposer 10 min en gardant les pommes de terre au four éteint, puis le trancher et le servir avec les pommes de terre et le jus du plat."
+      ],
+      "sources": [
+        "https://www.bonial.fr/magazine/comment-cuire-roti-porc-four/",
+        "https://viandesuisse.ch/print/pdf/node/201"
+      ]
+    },
+    {
+      "title": "Galettes de sarrasin complètes",
+      "category": "Plat",
+      "prep_time_min": 50,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Farine de sarrasin",
+          "quantity": 250,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Œuf",
+          "quantity": 9,
+          "unit": "pièce",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Jambon blanc",
+          "quantity": 8,
+          "unit": "tranche",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Emmental râpé",
+          "quantity": 200,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Beurre demi-sel",
+          "quantity": 60,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Dans un saladier, mélanger la farine de sarrasin avec 1 c. à café rase de sel et 1 œuf. Verser progressivement 60 cl d'eau froide en fouettant, jusqu'à obtenir une pâte lisse et assez fluide.",
+        "Couvrir et laisser reposer la pâte au moins 1 h au réfrigérateur (ou toute une nuit). Avant de l'utiliser, bien la remélanger et ajouter un peu d'eau si elle a épaissi.",
+        "Faire fondre le beurre demi-sel. Chauffer une grande poêle ou une crêpière à feu vif, la graisser au pinceau avec un peu de beurre fondu et y verser une louche de pâte en l'étalant finement.",
+        "Laisser cuire 1 à 2 min, jusqu'à ce que les bords se décollent, puis retourner la galette et baisser à feu moyen.",
+        "Casser un œuf au centre et étaler doucement le blanc avec le dos d'une cuillère, sans crever le jaune. Ajouter une tranche de jambon et environ 25 g d'emmental autour du jaune, puis poivrer.",
+        "Cuire 3 à 4 min, jusqu'à ce que le blanc soit bien pris et le fromage fondu. Rabattre les quatre bords vers le centre pour former un carré en laissant le jaune visible.",
+        "Glisser la galette sur une assiette chaude, la badigeonner d'un peu de beurre fondu et recommencer avec le reste de la pâte et de la garniture pour obtenir 8 galettes (2 par personne)."
+      ],
+      "sources": [
+        "https://www.hachette-vins.com/cuisine-vins/869/galettes-au-jambon-et-au-fromage"
+      ]
+    },
+    {
+      "title": "Pizza maison",
+      "category": "Plat",
+      "prep_time_min": 55,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Farine",
+          "quantity": 500,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Levure de boulanger",
+          "quantity": 1,
+          "unit": "sachet",
+          "rayon": "Épicerie sucrée"
+        },
+        {
+          "name": "Huile d'olive",
+          "quantity": 4,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Coulis de tomate",
+          "quantity": 250,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Mozzarella",
+          "quantity": 2,
+          "unit": "pièce",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Jambon blanc",
+          "quantity": 4,
+          "unit": "tranche",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Champignon de Paris",
+          "quantity": 200,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Origan",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Dans un grand saladier, mélanger la farine, la levure de boulanger sèche et 2 c. à café rases de sel. Ajouter 2 c. à soupe d'huile d'olive et 30 cl d'eau tiède, puis mélanger jusqu'à former une boule.",
+        "Pétrir la pâte 10 min sur le plan de travail fariné, jusqu'à ce qu'elle soit lisse et souple.",
+        "Remettre la pâte dans le saladier, couvrir d'un torchon et laisser lever 1 h 30 dans un endroit tiède, jusqu'à ce qu'elle double de volume.",
+        "Préchauffer le four à 250 °C (ou au maximum) avec deux plaques à l'intérieur. Pendant ce temps, émincer les champignons, couper le jambon en morceaux et la mozzarella égouttée en tranches.",
+        "Dégazer la pâte, la partager en deux et étaler chaque moitié sur une feuille de papier cuisson, en un disque ou un rectangle d'environ 3 mm d'épaisseur.",
+        "Étaler le coulis de tomate sur les pâtes en laissant 1 cm de bord, saler, poivrer et parsemer d'origan. Répartir le jambon, les champignons et la mozzarella, puis arroser du reste d'huile.",
+        "Faire glisser les pizzas avec leur papier sur les plaques chaudes et cuire 12 à 15 min, jusqu'à ce que les bords soient dorés et le fromage bien fondu. Si le four ne cuit pas bien sur deux niveaux, cuire les pizzas l'une après l'autre."
+      ],
+      "sources": [
+        "https://www.rtbf.be/article/recette-comment-faire-une-bonne-pizza-maison-10038302",
+        "https://ateliersetsaveurs.com/uploads/recipes/culinary/pdf/pate-a-pizza-traditionnelle-fr-4268-v1.pdf"
+      ]
+    },
+    {
+      "title": "Moules marinières",
+      "category": "Plat",
+      "prep_time_min": 40,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Moule",
+          "quantity": 3,
+          "unit": "kg",
+          "rayon": "Viandes & poissons"
+        },
+        {
+          "name": "Échalote",
+          "quantity": 4,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Vin blanc",
+          "quantity": 25,
+          "unit": "cl",
+          "rayon": "Boissons"
+        },
+        {
+          "name": "Beurre",
+          "quantity": 40,
+          "unit": "g",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Persil",
+          "quantity": 1,
+          "unit": "botte",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Thym frais",
+          "quantity": 2,
+          "unit": "branche",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Laurier",
+          "quantity": 1,
+          "unit": "feuille",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Poivre",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Trier les moules : jeter celles dont la coquille est cassée et celles qui restent ouvertes après avoir été tapotées sur le plan de travail.",
+        "Gratter les moules, retirer les filaments (le byssus) en tirant dessus, puis les rincer à l'eau froide 2 ou 3 fois sans les laisser tremper. Les garder au frais jusqu'à la cuisson.",
+        "Hacher finement les échalotes et l'ail, et ciseler le persil.",
+        "Faire fondre le beurre dans un grand faitout à feu moyen et y faire suer les échalotes et l'ail 3 min, sans coloration.",
+        "Verser le vin blanc, ajouter le thym, le laurier et du poivre, puis porter à ébullition 2 min. Ne pas saler : les moules rendent une eau déjà salée.",
+        "Ajouter les moules, couvrir et cuire 5 à 8 min à feu vif, en remuant ou en secouant le faitout 2 fois, jusqu'à ce que les moules soient grandes ouvertes.",
+        "Jeter les moules restées fermées après la cuisson. Parsemer de persil, mélanger et servir aussitôt dans des assiettes creuses avec le jus de cuisson. Ne pas conserver les restes plus d'une journée au réfrigérateur."
+      ],
+      "sources": [
+        "https://www.routard.com/fr/mag/dossier/a/recette-des-moules-mariniere",
+        "https://www.meilleurduchef.com/fr/recette/moules-marinieres.html"
+      ]
+    },
+    {
+      "title": "Dahl de lentilles corail",
+      "category": "Plat",
+      "prep_time_min": 40,
+      "default_portions": 4,
+      "ingredients": [
+        {
+          "name": "Lentilles corail",
+          "quantity": 250,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Lait de coco",
+          "quantity": 40,
+          "unit": "cl",
+          "rayon": "Produits laitiers & œufs"
+        },
+        {
+          "name": "Tomates pelées (conserve)",
+          "quantity": 400,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Oignon",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Ail",
+          "quantity": 2,
+          "unit": "gousse",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Gingembre frais",
+          "quantity": 15,
+          "unit": "g",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Curry",
+          "quantity": 1,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Curcuma",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Cumin",
+          "quantity": 1,
+          "unit": "c. à café",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Bouillon de légumes",
+          "quantity": 1,
+          "unit": "cube",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Huile de tournesol",
+          "quantity": 2,
+          "unit": "c. à soupe",
+          "rayon": "Condiments & épices"
+        },
+        {
+          "name": "Citron vert",
+          "quantity": 1,
+          "unit": "pièce",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Coriandre fraîche",
+          "quantity": 0.5,
+          "unit": "botte",
+          "rayon": "Fruits & légumes"
+        },
+        {
+          "name": "Riz basmati",
+          "quantity": 300,
+          "unit": "g",
+          "rayon": "Épicerie salée"
+        },
+        {
+          "name": "Sel",
+          "quantity": null,
+          "unit": null,
+          "rayon": "Condiments & épices"
+        }
+      ],
+      "steps": [
+        "Rincer les lentilles corail dans une passoire fine sous l'eau froide jusqu'à ce que l'eau soit claire. Émincer l'oignon, hacher l'ail et râper le gingembre pelé. Dissoudre le cube de bouillon dans 50 cl d'eau chaude.",
+        "Chauffer l'huile dans une cocotte à feu moyen et faire fondre l'oignon 5 min en remuant.",
+        "Ajouter l'ail, le gingembre, le curry, le curcuma et le cumin, puis remuer 1 min sans laisser brûler les épices.",
+        "Ajouter les lentilles, les tomates pelées écrasées, le lait de coco et le bouillon. Porter à ébullition, puis laisser mijoter 20 à 25 min à feu doux, à découvert, en remuant souvent pour que les lentilles n'attachent pas.",
+        "Pendant ce temps, rincer le riz basmati et le cuire dans une casserole d'eau bouillante salée 10 à 12 min (ou selon le paquet), puis l'égoutter.",
+        "Quand les lentilles sont fondantes et le dahl bien épais (ajouter un peu d'eau s'il épaissit trop), saler et ajouter le jus du citron vert.",
+        "Parsemer de coriandre ciselée et servir avec le riz."
+      ],
+      "sources": [
+        "https://recettesdejulie.fr/wprm_print/dahl-de-lentilles-corail-ultra-facile",
+        "https://www.demotivateur.fr/food/recette/dahl-de-lentilles-corail-au-lait-de-coco-1777"
+      ]
+    }
+  ]
+}

@@ -2,8 +2,16 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
-    "types": ["svelte", "vite/client", "node"],
+    "types": [
+      "svelte",
+      "vite/client",
+      "node"
+    ],
     "allowImportingTsExtensions": true
   },
-  "include": ["tests/**/*.ts", "src/globals.d.ts"]
+  "include": [
+    "tests/**/*.ts",
+    "scripts/**/*.ts",
+    "src/globals.d.ts"
+  ]
 }

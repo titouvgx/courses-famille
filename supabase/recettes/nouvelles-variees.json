@@ -1,0 +1,434 @@
+{
+  "kind": "nouvelles",
+  "recettes": [
+    {
+      "title": "Cabillaud au four et sauce vierge",
+      "category": "Plat",
+      "prep_time_min": 35,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Cabillaud", "quantity": 600, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Tomate", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Échalote", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Basilic frais", "quantity": 0.5, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Citron", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 6, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C. Sortir le cabillaud (4 dos ou pavés d'environ 150 g) du réfrigérateur, l'éponger avec du papier absorbant et retirer les éventuelles arêtes du bout des doigts.",
+        "Préparer la sauce vierge : couper les tomates en deux, ôter les graines et tailler la chair en petits dés. Peler l'échalote et la hacher très finement. Effeuiller et ciseler le basilic. Presser le citron.",
+        "Dans un bol, réunir les dés de tomate, l'échalote, 5 c. à soupe d'huile d'olive et 2 c. à soupe de jus de citron. Saler, poivrer et laisser à température ambiante le temps de la cuisson du poisson. Garder le basilic à part pour qu'il reste bien vert.",
+        "Ranger le cabillaud dans un plat allant au four, le badigeonner avec la dernière cuillerée d'huile d'olive, saler et poivrer.",
+        "Enfourner pour 12 à 15 minutes selon l'épaisseur (compter 18 à 20 minutes pour un dos très épais). Le poisson est cuit lorsque sa chair est nacrée et opaque jusqu'au centre et qu'elle se sépare en lamelles quand on la pique avec une fourchette ; si le cœur reste translucide, prolonger de 2 à 3 minutes.",
+        "Pour une sauce tiède, la chauffer 1 à 2 minutes dans une petite casserole sur feu très doux, sans la laisser bouillir. Ajouter le basilic juste avant de servir.",
+        "Servir le cabillaud sans attendre, nappé de sauce vierge."
+      ],
+      "sources": [
+        "https://www.noovomoi.ca/cuisiner/recettes/recette.turbot-sauce-vierge.1.1423555.html",
+        "https://info.fr/comment-cuire-les-filets-de-cabillaud/",
+        "https://cariboumag.com/app/uploads/2021/07/sauce-vierge-locale-version-imprimable.pdf"
+      ]
+    },
+    {
+      "title": "Wok de nouilles au poulet et aux légumes",
+      "category": "Plat",
+      "prep_time_min": 35,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Nouilles chinoises", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Blanc de poulet", "quantity": 500, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Carotte", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Poivron rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Courgette", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Gingembre frais", "quantity": 15, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Sauce soja", "quantity": 4, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Sauce huître", "quantity": 2, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Huile de tournesol", "quantity": 3, "unit": "c. à soupe", "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Tailler le poulet en lanières d'environ 1 cm d'épaisseur. Éplucher les carottes et les couper en fins bâtonnets. Épépiner le poivron et le couper en lanières, détailler la courgette en bâtonnets et l'oignon en lamelles. Hacher l'ail et râper le gingembre après l'avoir pelé.",
+        "Dans un bol, mélanger la sauce soja, la sauce huître et 3 c. à soupe d'eau.",
+        "Cuire les nouilles dans une grande casserole d'eau bouillante en suivant le temps du paquet (souvent 3 à 4 minutes). Les égoutter, les passer sous l'eau froide, puis les mélanger avec 1 c. à soupe d'huile pour éviter qu'elles ne collent.",
+        "Chauffer 1 c. à soupe d'huile dans un wok ou une grande poêle à feu vif. Faire sauter le poulet 5 à 6 minutes en remuant souvent, jusqu'à ce qu'il soit doré et cuit à cœur : en coupant le morceau le plus épais, la chair doit être blanche, sans trace rosée, avec un jus clair (74 °C à cœur si l'on a un thermomètre). Le réserver dans une assiette propre.",
+        "Verser le reste de l'huile dans le wok. Faire sauter l'oignon et les carottes 3 minutes, puis ajouter le poivron, la courgette, l'ail et le gingembre et poursuivre 3 minutes : les légumes doivent rester un peu croquants.",
+        "Remettre le poulet dans le wok avec les nouilles et la sauce. Faire sauter 2 minutes à feu vif en mélangeant bien pour tout enrober et réchauffer, puis servir aussitôt."
+      ],
+      "sources": [
+        "https://ateliersetsaveurs.com/uploads/recipes/culinary/pdf/wok-de-legumes-et-poulet-nouilles-pimentees-et-sucrees-fr-2444-v1.pdf",
+        "https://www.boulanger.com/plaisir-partage/cuisine/recette-nouilles-sautees-poulet",
+        "https://www.rtbf.be/article/recette-wok-de-poulet-saute-au-soja-poireaux-et-carottes-10034233"
+      ]
+    },
+    {
+      "title": "Tomates farcies",
+      "category": "Plat",
+      "prep_time_min": 75,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Tomate", "quantity": 8, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Chair à saucisse", "quantity": 250, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Viande hachée de bœuf", "quantity": 250, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Persil", "quantity": 0.5, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Pain de mie", "quantity": 2, "unit": "tranche", "rayon": "Épicerie salée" },
+        { "name": "Lait", "quantity": 5, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Œuf", "quantity": 1, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Huile d'olive", "quantity": 2, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C. Choisir des tomates moyennes et fermes (environ 150 g chacune). Les laver, découper un chapeau côté pédoncule et les vider à la petite cuillère sans abîmer la peau. Saler légèrement l'intérieur et les poser à l'envers sur du papier absorbant 10 minutes pour qu'elles perdent leur eau. Hacher grossièrement la pulpe retirée et la garder.",
+        "Émietter le pain de mie dans un bol, l'arroser avec le lait, laisser imbiber 5 minutes puis l'écraser à la fourchette.",
+        "Peler et hacher finement l'oignon et l'ail. Laver, sécher et hacher le persil.",
+        "Dans un saladier, mélanger la chair à saucisse, la viande hachée, le pain imbibé, l'œuf, l'oignon, l'ail et le persil. Saler avec modération (la chair à saucisse est déjà assaisonnée) et poivrer. Malaxer jusqu'à obtenir une farce bien homogène.",
+        "Huiler un plat à four avec 1 c. à soupe d'huile d'olive et y étaler la pulpe hachée. Placer les tomates dessus, les remplir de farce en tassant un peu et en formant un léger dôme, puis reposer les chapeaux. Arroser avec le reste de l'huile.",
+        "Enfourner pour 45 minutes à 1 heure selon la grosseur des tomates, en les arrosant de jus à mi-cuisson. Vérifier la cuisson de la viande : en piquant le centre d'une tomate, le jus qui sort doit être clair et la farce ne doit plus être rosée (70 °C à cœur au thermomètre). Sinon, prolonger de 10 minutes.",
+        "Laisser reposer 5 minutes hors du four et servir avec le jus de cuisson."
+      ],
+      "sources": [
+        "https://meilleurduchef.com/fr/recette/tomate-farcie.html",
+        "https://cariboumag.com/app/uploads/2023/09/tomates-farcies.pdf"
+      ]
+    },
+    {
+      "title": "Soupe poireaux-pommes de terre",
+      "category": "Entrée",
+      "prep_time_min": 45,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Poireau", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Pomme de terre", "quantity": 500, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 30, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Bouillon de légumes", "quantity": 1, "unit": "cube", "rayon": "Épicerie salée" },
+        { "name": "Crème fraîche", "quantity": 10, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Retirer la partie vert foncé des poireaux, les fendre en deux dans la longueur et les rincer sous l'eau en écartant les feuilles pour chasser la terre, puis les émincer. Éplucher les pommes de terre et les couper en cubes d'environ 2 cm. Peler et émincer l'oignon.",
+        "Faire fondre le beurre dans un faitout à feu moyen. Ajouter les poireaux et l'oignon et les faire suer 5 minutes en remuant, sans les laisser colorer.",
+        "Ajouter les pommes de terre, émietter le cube de bouillon et verser 1,2 litre d'eau. Porter à ébullition, puis couvrir et laisser cuire 25 minutes à petits frémissements, jusqu'à ce que les pommes de terre s'écrasent sans effort.",
+        "Mixer finement au mixeur plongeant (ou laisser des morceaux pour une soupe plus rustique). Incorporer la crème fraîche, goûter puis saler et poivrer (le bouillon est déjà salé). Si la soupe est trop épaisse, l'allonger d'un peu d'eau chaude.",
+        "Servir bien chaud."
+      ],
+      "sources": [
+        "https://ba38.banquealimentaire.org/sites/default/files/2024-01/Soupe%20poireaux%20Pommes%20de%20Terre.pdf",
+        "https://www.cuisineculinaire.com/soupe-poireaux-pommes-de-terre-potage-parmentier"
+      ]
+    },
+    {
+      "title": "Taboulé",
+      "category": "Entrée",
+      "prep_time_min": 30,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Couscous (semoule)", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Tomate", "quantity": 4, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Concombre", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Persil", "quantity": 1, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Menthe fraîche", "quantity": 1, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Citron", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 6, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Verser la semoule dans un grand saladier, ajouter 1 c. à soupe d'huile d'olive et une pincée de sel, puis mélanger du bout des doigts. Couvrir de 25 cl d'eau bouillante, poser une assiette dessus et laisser gonfler 5 minutes. Égrainer à la fourchette et laisser refroidir complètement.",
+        "Couper les tomates en petits dés (retirer les graines si elles sont très juteuses). Peler le concombre, l'ouvrir en deux, ôter les graines à la cuillère et le couper en dés. Peler l'oignon rouge et le hacher finement.",
+        "Laver et bien sécher le persil et la menthe, les effeuiller puis les ciseler finement.",
+        "Presser les citrons. Ajouter à la semoule froide les légumes, les herbes, le jus de citron et le reste de l'huile d'olive. Saler, poivrer et mélanger soigneusement.",
+        "Couvrir et réfrigérer au moins 1 heure pour que la semoule s'imprègne des jus. Remuer et goûter avant de servir pour ajuster le citron et le sel. Le taboulé se garde 2 jours au réfrigérateur."
+      ],
+      "sources": [
+        "https://ateliersetsaveurs.com/uploads/recipes/culinary/pdf/taboule-aux-herbes-et-citron-fr-2224-v1.pdf",
+        "https://www.routard.com/contenu-dossier/cid139307-recette-du-taboule.html"
+      ]
+    },
+    {
+      "title": "Œufs mimosa",
+      "category": "Entrée",
+      "prep_time_min": 30,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Œuf", "quantity": 6, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Mayonnaise", "quantity": 3, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Moutarde", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Ciboulette", "quantity": 0.5, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Porter une casserole d'eau à ébullition. Y descendre doucement les œufs à l'aide d'une cuillère (s'ils sortent du réfrigérateur, le faire sans les cogner pour éviter qu'ils se fêlent) et les cuire 10 minutes à petits bouillons.",
+        "Les transférer aussitôt dans un saladier d'eau très froide, avec des glaçons si possible, et les y laisser au moins 10 minutes : ils doivent être froids jusqu'au jaune. Ce refroidissement arrête la cuisson et facilite l'écalage.",
+        "Écaler les œufs, les rincer, puis les couper en deux dans la longueur. Sortir délicatement les jaunes.",
+        "Mettre 2 jaunes de côté. Écraser les 4 autres à la fourchette avec la mayonnaise et la moutarde, ajouter la moitié de la ciboulette ciselée, saler et poivrer.",
+        "Remplir les demi-blancs de cette crème à la petite cuillère. Émietter les 2 jaunes réservés au-dessus, à la fourchette ou en les frottant contre une passoire fine, pour obtenir l'effet mimosa, puis parsemer du reste de ciboulette.",
+        "Servir tout de suite ou garder au réfrigérateur, couverts, 24 heures au maximum. Ne pas les laisser plus de 2 heures à température ambiante."
+      ],
+      "sources": [
+        "https://www.thefrenchcookingacademy.com/recipes/oeufs-mimosa",
+        "https://aufilduthym.fr/oeufs-mimosa-herbes/?print=pdf"
+      ]
+    },
+    {
+      "title": "Salade de pâtes",
+      "category": "Entrée",
+      "prep_time_min": 30,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Farfalle", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Thon en conserve", "quantity": 1, "unit": "boîte", "rayon": "Épicerie salée" },
+        { "name": "Tomate cerise", "quantity": 250, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Maïs en conserve", "quantity": 1, "unit": "boîte", "rayon": "Épicerie salée" },
+        { "name": "Concombre", "quantity": 0.5, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Basilic frais", "quantity": 0.5, "unit": "botte", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 4, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Vinaigre de vin", "quantity": 2, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Moutarde", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Cuire les farfalle dans une grande casserole d'eau bouillante salée, le temps indiqué sur le paquet (environ 10 minutes), pour qu'elles restent légèrement fermes.",
+        "Les égoutter, les rafraîchir sous l'eau froide pour stopper la cuisson, bien les égoutter puis les mélanger avec 1 c. à soupe d'huile d'olive.",
+        "Préparer la vinaigrette dans un grand saladier : fouetter la moutarde, le vinaigre, du sel et du poivre, puis ajouter le reste de l'huile d'olive en fouettant.",
+        "Couper les tomates cerises en deux et le demi-concombre en dés. Égoutter le maïs. Égoutter le thon et l'émietter.",
+        "Verser les pâtes et toute la garniture dans le saladier, mélanger, puis ajouter le basilic ciselé.",
+        "Réfrigérer au moins 30 minutes avant de servir. Garder au frais et consommer dans les 24 heures."
+      ],
+      "sources": [
+        "https://chichoskitchen.blogspot.com/2009/09/ingredients-4-personnes-250-g-de-pates.html",
+        "https://www.e-sante.fr/entrees-salade-de-pates-printaniere.2627025.615122.html"
+      ]
+    },
+    {
+      "title": "Purée de pommes de terre",
+      "category": "Accompagnement",
+      "prep_time_min": 40,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Pomme de terre", "quantity": 1, "unit": "kg", "rayon": "Fruits & légumes" },
+        { "name": "Lait", "quantity": 25, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Beurre", "quantity": 60, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Éplucher les pommes de terre (de préférence une variété pour purée, à chair fondante ou farineuse), les couper en morceaux de taille égale et les rincer.",
+        "Les mettre dans une grande casserole, couvrir d'eau froide et saler. Porter à ébullition puis cuire 20 à 25 minutes à frémissement : la pointe d'un couteau doit s'enfoncer sans résistance.",
+        "Pendant ce temps, chauffer le lait sans le faire bouillir et couper le beurre en dés.",
+        "Égoutter soigneusement les pommes de terre et les remettre 1 à 2 minutes dans la casserole sur feu doux pour évaporer l'eau restante.",
+        "Les écraser au presse-purée ou au moulin à légumes (le mixeur rend la purée collante). Incorporer d'abord le beurre, puis le lait chaud petit à petit en remuant à la spatule jusqu'à la consistance souhaitée.",
+        "Assaisonner de sel, de poivre et de muscade, puis servir bien chaud."
+      ],
+      "sources": [
+        "https://www.slate.fr/story/67609/robuchon-puree-recette-secrets-de-cuisine",
+        "https://www.cuisineculinaire.com/puree-de-pommes-de-terre-meilleure-recette",
+        "https://www.vorwerk.com/fr/fr/c/vorwerk/astuces-recettes/blog/thermomix/recettes-quotidien/recette-puree-de-pommes-de-terre"
+      ]
+    },
+    {
+      "title": "Riz pilaf",
+      "category": "Accompagnement",
+      "prep_time_min": 35,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Riz", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 40, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Bouillon de volaille", "quantity": 1, "unit": "cube", "rayon": "Épicerie salée" },
+        { "name": "Laurier", "quantity": 1, "unit": "feuille", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Chauffer 45 cl d'eau, y dissoudre le cube de bouillon et le garder chaud.",
+        "Peler et hacher finement l'oignon. Dans une casserole à fond épais avec couvercle (ou une cocotte allant au four), faire fondre 30 g de beurre à feu doux et y faire suer l'oignon 3 à 4 minutes, sans coloration.",
+        "Ajouter le riz long, sans le rincer, et remuer 2 minutes : les grains enrobés de beurre deviennent translucides, on dit qu'ils sont nacrés.",
+        "Verser le bouillon chaud (environ une fois et demie le volume du riz), ajouter la feuille de laurier et poivrer. Goûter le bouillon avant de saler, le cube l'étant déjà. Porter à ébullition.",
+        "Couvrir et laisser cuire 17 minutes à feu très doux sans soulever le couvercle. Variante : 18 minutes au four à 200 °C dans la cocotte couverte.",
+        "Hors du feu, laisser reposer 5 minutes à couvert. Retirer le laurier, ajouter le reste du beurre et égrainer le riz à la fourchette avant de servir."
+      ],
+      "sources": [
+        "https://meilleurduchef.com/fr/recette/riz-pilaf.html",
+        "https://www.consoglobe.com/recette-riz-pilaf-cg?amp"
+      ]
+    },
+    {
+      "title": "Légumes rôtis au four",
+      "category": "Accompagnement",
+      "prep_time_min": 55,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Carotte", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Courgette", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Poivron rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 4, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 4, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Herbes de Provence", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C (190 °C en chaleur tournante).",
+        "Éplucher les carottes et les couper en bâtonnets d'environ 1 cm. Couper les courgettes en demi-rondelles de 1,5 cm, le poivron épépiné en morceaux de 3 cm et l'oignon rouge en quartiers. Écraser légèrement les gousses d'ail avec le plat d'un couteau sans les peler.",
+        "Étaler les carottes sur une grande plaque couverte de papier cuisson, les arroser de 1 c. à soupe d'huile d'olive, saler et enfourner 15 minutes : elles demandent plus de temps que les autres légumes.",
+        "Dans un saladier, mélanger les courgettes, le poivron, l'oignon et l'ail avec le reste de l'huile d'olive, les herbes de Provence, du sel et du poivre.",
+        "Ajouter ces légumes sur la plaque avec les carottes, en une seule couche (utiliser deux plaques si nécessaire, sinon ils cuisent à l'étouffée au lieu de rôtir). Poursuivre la cuisson 25 à 30 minutes en les retournant à mi-cuisson, jusqu'à ce qu'ils soient tendres et dorés sur les bords.",
+        "Servir chaud, en pressant la pulpe des gousses d'ail rôties sur les légumes."
+      ],
+      "sources": [
+        "https://www.lanutrition.fr/legumes-rotis",
+        "https://www.noovomoi.ca/cuisiner/recettes/recette.legumes-racines-rotis.1.1070318.html"
+      ]
+    },
+    {
+      "title": "Gâteau au yaourt",
+      "category": "Dessert",
+      "prep_time_min": 55,
+      "default_portions": 8,
+      "ingredients": [
+        { "name": "Yaourt nature", "quantity": 1, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Œuf", "quantity": 3, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre", "quantity": 200, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Farine", "quantity": 210, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Huile de tournesol", "quantity": 6, "unit": "cl", "rayon": "Condiments & épices" },
+        { "name": "Sucre vanillé", "quantity": 1, "unit": "sachet", "rayon": "Épicerie sucrée" },
+        { "name": "Levure chimique", "quantity": 0.5, "unit": "sachet", "rayon": "Épicerie sucrée" },
+        { "name": "Beurre", "quantity": 10, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C. Beurrer un moule à manqué d'environ 24 cm ou un moule à cake.",
+        "Verser le yaourt (pot de 125 g) dans un saladier. Rincer et sécher le pot vide : selon la tradition, il sert de verre doseur. Équivalences : 2 pots de sucre font environ 200 g, 3 pots de farine environ 210 g et un demi-pot d'huile environ 6 cl.",
+        "Ajouter les œufs, le sucre et le sucre vanillé, puis fouetter 1 minute jusqu'à ce que le mélange mousse légèrement.",
+        "Ajouter la farine, la levure et une pincée de sel. Mélanger juste assez pour obtenir une pâte lisse et sans grumeaux, sans trop la travailler.",
+        "Incorporer l'huile et mélanger jusqu'à ce que la pâte soit homogène.",
+        "Verser dans le moule et enfourner pour 35 à 40 minutes (40 à 45 minutes dans un moule à cake). Le gâteau est cuit quand une lame de couteau plantée au centre ressort sèche. S'il dore trop vite, le couvrir d'une feuille d'aluminium après 25 minutes.",
+        "Laisser tiédir 10 minutes dans le moule, puis démouler sur une grille et laisser refroidir."
+      ],
+      "sources": [
+        "https://www.danone.com/fr/fr/recettes/recette/gateau-au-yaourt.html",
+        "https://underdog.shop/blogs/utilisation-tutos/recette-cuisine-gateau-yaourt",
+        "https://gateauetcuisinerachida.com/gateau-au-yaourt-facile-moelleux"
+      ]
+    },
+    {
+      "title": "Clafoutis aux cerises",
+      "category": "Dessert",
+      "prep_time_min": 55,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Cerise", "quantity": 500, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Œuf", "quantity": 3, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 80, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Sucre", "quantity": 80, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Lait", "quantity": 30, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Beurre", "quantity": 30, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre vanillé", "quantity": 1, "unit": "sachet", "rayon": "Épicerie sucrée" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C. Faire fondre 20 g de beurre et beurrer avec le reste un plat à gratin de 24 à 26 cm.",
+        "Laver, équeuter et sécher les cerises. Traditionnellement, on garde les noyaux (plus de goût, moins de jus) ; s'il y a de jeunes enfants à table, les dénoyauter ou bien prévenir tout le monde. Répartir les cerises dans le plat.",
+        "Dans un saladier, fouetter les œufs avec le sucre, le sucre vanillé et une pincée de sel jusqu'à ce que le mélange pâlisse. Ajouter la farine en pluie en fouettant pour éviter les grumeaux.",
+        "Verser le lait petit à petit sans cesser de fouetter, puis le beurre fondu : la pâte doit être fluide, comme une pâte à crêpes.",
+        "Verser la pâte sur les cerises. Enfourner pour 35 à 40 minutes : le clafoutis doit être gonflé et doré, et une lame plantée au centre doit ressortir sans pâte liquide.",
+        "Laisser tiédir au moins 15 minutes avant de servir (il retombe un peu, c'est normal). Il se mange tiède ou froid."
+      ],
+      "sources": [
+        "https://ileauxepices.com/blog/2014/05/30/recette-clafoutis-aux-cerises/wpid4912/",
+        "https://media.hachette.fr/24/pdf-file/2024-09/pdf_clafoutis_cerises_recette.pdf"
+      ]
+    },
+    {
+      "title": "Riz au lait",
+      "category": "Dessert",
+      "prep_time_min": 55,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Riz rond", "quantity": 150, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Lait entier", "quantity": 1, "unit": "l", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre", "quantity": 100, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Gousse de vanille", "quantity": 1, "unit": "pièce", "rayon": "Épicerie sucrée" }
+      ],
+      "steps": [
+        "Porter une casserole d'eau à ébullition, y verser le riz rond et le cuire 3 minutes. L'égoutter et le rincer : cela enlève l'amidon de surface et évite un riz collant.",
+        "Fendre la gousse de vanille en deux dans la longueur et gratter les graines avec la pointe d'un couteau. Dans une grande casserole à fond épais, verser le lait entier, ajouter les graines et la gousse et porter à frémissement à feu moyen en surveillant (le lait monte vite).",
+        "Ajouter le riz et baisser sur feu très doux : le lait doit à peine frémir. Cuire 40 à 45 minutes à découvert en remuant souvent, surtout vers la fin, pour que rien n'attache au fond.",
+        "Quand le riz est très tendre et le mélange crémeux, encore un peu liquide (il épaissit en refroidissant), ajouter le sucre et remuer 2 à 3 minutes pour le dissoudre. Retirer la gousse de vanille.",
+        "Répartir dans 6 ramequins ou un grand bol, laisser refroidir, puis réfrigérer au moins 2 heures. On peut aussi le servir tiède."
+      ],
+      "sources": [
+        "https://aufilduthym.fr/riz-au-lait-ancienne/?print=pdf",
+        "https://www.familinparis.fr/recette-riz-au-lait-cremeux-facile"
+      ]
+    },
+    {
+      "title": "Crumble aux pommes",
+      "category": "Dessert",
+      "prep_time_min": 55,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Pomme", "quantity": 6, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Farine", "quantity": 150, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Beurre", "quantity": 110, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Cassonade", "quantity": 120, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Cannelle", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Citron", "quantity": 0.5, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C. Beurrer un plat à gratin d'environ 24 × 30 cm avec 10 g de beurre.",
+        "Peler les pommes (environ 1 kg), retirer le cœur et les pépins, puis les couper en cubes de 2 cm. Les mélanger directement dans le plat avec le jus du demi-citron, 20 g de cassonade et la cannelle.",
+        "Préparer la pâte à crumble : dans un saladier, mélanger la farine, 100 g de cassonade et une pincée de sel. Ajouter 100 g de beurre froid coupé en dés et frotter le tout du bout des doigts jusqu'à obtenir une sorte de grosse chapelure avec des petits grumeaux, sans former de boule.",
+        "Parsemer la pâte sur les pommes, sans tasser.",
+        "Enfourner pour 35 à 40 minutes : le dessus doit être doré et croustillant, le jus doit bouillonner sur les bords et les pommes se laisser traverser facilement par la pointe d'un couteau.",
+        "Laisser tiédir 10 minutes avant de servir."
+      ],
+      "sources": [
+        "https://www.vorwerk.com/fr/fr/c/vorwerk/astuces-recettes/blog/thermomix/recettes-quotidien/recette-de-crumble-aux-pommes",
+        "https://uneplumedanslacuisine.com/2013/09/crumble-aux-pommes"
+      ]
+    },
+    {
+      "title": "Cookies aux pépites de chocolat",
+      "category": "Dessert",
+      "prep_time_min": 40,
+      "default_portions": 10,
+      "ingredients": [
+        { "name": "Beurre", "quantity": 125, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Cassonade", "quantity": 100, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Sucre", "quantity": 50, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Sucre vanillé", "quantity": 1, "unit": "sachet", "rayon": "Épicerie sucrée" },
+        { "name": "Œuf", "quantity": 1, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 225, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Levure chimique", "quantity": 1, "unit": "c. à café", "rayon": "Épicerie sucrée" },
+        { "name": "Pépites de chocolat", "quantity": 150, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Sortir le beurre 1 heure à l'avance pour qu'il soit bien mou (ou le ramollir quelques secondes au micro-ondes sans le faire fondre). Préchauffer le four à 180 °C et couvrir deux plaques de papier cuisson.",
+        "Dans un saladier, travailler le beurre mou avec la cassonade, le sucre et le sucre vanillé, à la spatule ou au fouet, jusqu'à obtenir une crème homogène. Ajouter l'œuf et bien mélanger.",
+        "Ajouter la farine, la levure et une pincée de sel, et mélanger juste jusqu'à ce que la pâte soit homogène. Incorporer les pépites de chocolat. Éviter de goûter la pâte crue, qui contient de l'œuf et de la farine crus.",
+        "La recette donne environ 20 cookies, soit 2 par portion. Former des boules de la taille d'une noix (35 à 40 g), les poser sur les plaques en les espaçant de 5 cm car elles s'étalent, puis les aplatir légèrement. Si la pâte est trop molle pour être façonnée, la réfrigérer 30 minutes.",
+        "Cuire une plaque à la fois, 10 à 12 minutes : les bords doivent être dorés et le centre encore pâle et tendre, il durcit en refroidissant.",
+        "Laisser reposer 5 minutes sur la plaque, puis faire glisser sur une grille pour refroidir. Conserver dans une boîte hermétique."
+      ],
+      "sources": [
+        "https://www.meilleurduchef.com/fr/recette/cookies-chocolat.html",
+        "https://www.vorwerk.com/fr/fr/c/vorwerk/astuces-recettes/blog/thermomix/recettes-quotidien/recette-de-cookie-au-pepite-de-chocolat"
+      ]
+    }
+  ]
+}

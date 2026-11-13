@@ -28,6 +28,10 @@ import {
   type Outcome,
   type Scenario,
 } from './harness'
+import { lireRecettes } from '../../scripts/recettes/generer.ts'
+
+/** 20 recettes de démo (seed_recipes) + nouvelles recettes livrées (migration recettes_v1). */
+const NB_RECETTES_LIVREES = 20 + lireRecettes().nouvelles.length
 
 // ── Base partagée par tout le fichier ──────────────────────────────────────
 let bench: Bench
@@ -389,12 +393,12 @@ describe('Structure du schéma et fidélité du banc', () => {
     }
   })
 
-  structure('seed_recipes a tourné : 20 recettes de démo dans le foyer A (crochet utilisateurs)', async (s) => {
+  structure('seed_recipes + recettes_v1 ont tourné : recettes livrées dans le foyer A (crochet utilisateurs)', async (s) => {
     const r = await s.su<{ n: number }>(
       `SELECT count(*)::int AS n FROM public.recipes WHERE family_id = $1 AND created_by = $2 AND id <> $3`,
       [ID.famA, ID.adminA, ID.recA],
     )
-    expect(r[0].n).toBe(20)
+    expect(r[0].n).toBe(NB_RECETTES_LIVREES)
   })
 
   structure('chaque table de public contient des données (sinon « ne lit rien » ne prouverait rien)', async (s) => {
@@ -940,7 +944,7 @@ describe('Recettes : partagées en lecture, modifiables par le seul foyer propri
       )
     })
     controle(`membre ${X} voit toutes les recettes (démo + deux foyers)`, async (s) => {
-      expectOk(await s.as(member[X], `SELECT id FROM public.recipes`), 'lecture', 22)
+      expectOk(await s.as(member[X], `SELECT id FROM public.recipes`), 'lecture', NB_RECETTES_LIVREES + 2)
     })
   }
 

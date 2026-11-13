@@ -23,7 +23,7 @@ numérotation [SemVer](https://semver.org/lang/fr/) : **MAJEUR.MINEUR.CORRECTIF*
 
 ## [0.9.0] — 2026-11-13 — Candidate V1 (base `courses-test`)
 
-Migrations nécessaires : **1 à 15** (`supabase/migrations/`, dans l'ordre).
+Migrations nécessaires : **1 à 16** (`supabase/migrations/`, dans l'ordre).
 ⚠️ La migration 15 (`photo_paths`) s'exécute **juste après** le déploiement de cette version.
 
 ### Fonctions (V1)
@@ -43,6 +43,16 @@ Migrations nécessaires : **1 à 15** (`supabase/migrations/`, dans l'ordre).
 - Tests automatiques dans le dépôt : calculs de quantités et banc d'attaque RLS entre foyers
   (rejoue toutes les migrations dans une base PostgreSQL locale).
 - Vérification automatique de chaque proposition de modification (types, tests, build, secrets).
+
+### Recettes
+- Les 20 recettes de démo corrigées : temps réalistes (repos et marinade indiqués à part),
+  quantités (bourguignon, blanquette, gratin, hachis, lasagnes…), repère de cuisson du poulet
+  (75 °C à cœur), avertissement œufs crus (mousse, carbonara), ingrédients manquants ajoutés,
+  rayons et unités harmonisés. Une recette déjà modifiée dans l'appli n'est pas touchée.
+- 30 nouvelles recettes familiales : pot-au-feu, chili, curry, couscous, risotto, pizza,
+  moules, dahl, tomates farcies, taboulé, œufs mimosa, purée, riz pilaf, gâteau au yaourt,
+  clafoutis, crumble, cookies…
+- Recettes tenues dans `supabase/recettes/*.json`, migration générée et vérifiée par les tests.
 
 ### Sécurité
 - **Faille corrigée (migration 15)** : une recette pouvait afficher une image hébergée sur le stockage

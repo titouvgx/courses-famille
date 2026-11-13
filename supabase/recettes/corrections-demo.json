@@ -1,0 +1,658 @@
+{
+  "kind": "corrections",
+  "recettes": [
+    {
+      "original_title": "Bœuf bourguignon",
+      "title": "Bœuf bourguignon",
+      "category": "Plat",
+      "prep_time_min": 240,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Bœuf à braiser", "quantity": 1.5, "unit": "kg", "rayon": "Viandes & poissons" },
+        { "name": "Vin rouge", "quantity": 75, "unit": "cl", "rayon": "Boissons" },
+        { "name": "Carotte", "quantity": 4, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Lardons fumés", "quantity": 150, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Champignon de Paris", "quantity": 300, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Concentré de tomate", "quantity": 2, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Bouquet garni", "quantity": 1, "unit": "pièce", "rayon": "Condiments & épices" },
+        { "name": "Farine", "quantity": 2, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Beurre", "quantity": 30, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Huile d'olive", "quantity": 2, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Couper la viande en cubes de 5 cm environ. Éplucher les carottes et les couper en rondelles épaisses ; éplucher et émincer les oignons.",
+        "Réunir la viande, les carottes, les oignons et le bouquet garni dans un grand saladier, puis couvrir avec le vin rouge. Filmer et laisser mariner au réfrigérateur au moins 2 h, idéalement une nuit.",
+        "Égoutter le tout dans une passoire posée sur un saladier pour garder la marinade. Mettre de côté le bouquet garni et les légumes, puis sécher soigneusement la viande avec du papier absorbant.",
+        "Faire dorer les lardons à sec 5 min dans une cocotte à feu moyen, puis les retirer avec une écumoire et les réserver.",
+        "Ajouter l'huile d'olive dans la cocotte et faire colorer la viande sur toutes ses faces à feu vif, en trois fois pour ne pas la serrer (environ 5 min par fournée).",
+        "Remettre toute la viande dans la cocotte, la saupoudrer de farine et remuer 2 min pour que la farine colore légèrement.",
+        "Ajouter le concentré de tomate, l'ail pelé et écrasé, les carottes et les oignons égouttés ainsi que les lardons, puis mélanger 1 min.",
+        "Verser la marinade en grattant le fond de la cocotte, porter à ébullition, puis remettre le bouquet garni égoutté. Saler légèrement (les lardons sont salés) et poivrer.",
+        "Couvrir et laisser mijoter à feu très doux 2 h 30 à 3 h, en remuant de temps en temps, jusqu'à ce que la viande se défasse à la fourchette. Ajouter un peu d'eau si la sauce réduit trop.",
+        "Environ 45 min avant la fin, nettoyer les champignons, les couper en quartiers et les faire sauter 8 min dans le beurre à feu vif.",
+        "Ajouter les champignons dans la cocotte 30 min avant la fin de la cuisson.",
+        "Retirer le bouquet garni, rectifier l'assaisonnement et servir bien chaud."
+      ],
+      "sources": [
+        "https://www.cordonbleu.edu/news/boeuf-bourguignon/fr"
+      ]
+    },
+    {
+      "original_title": "Poulet rôti",
+      "title": "Poulet rôti",
+      "category": "Plat",
+      "prep_time_min": 105,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Poulet entier", "quantity": 1.5, "unit": "kg", "rayon": "Viandes & poissons" },
+        { "name": "Beurre", "quantity": 50, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Citron", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 4, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Thym frais", "quantity": 4, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Romarin frais", "quantity": 2, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Pomme de terre", "quantity": 800, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 3, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Sortir le poulet et le beurre du réfrigérateur 30 min avant la cuisson. Préchauffer le four à 200 °C.",
+        "Écraser le beurre ramolli à la fourchette avec du sel, du poivre et les feuilles de 2 branches de thym.",
+        "Couper le citron en deux et peler 2 gousses d'ail. Glisser à l'intérieur du poulet un demi-citron, ces 2 gousses et les 2 autres branches de thym.",
+        "Enduire toute la peau du poulet de beurre aromatisé et le poser au centre d'un grand plat allant au four.",
+        "Éplucher les pommes de terre, les couper en quartiers et les disposer autour du poulet avec les 2 gousses d'ail restantes non pelées et le romarin. Arroser d'huile d'olive et du jus du demi-citron restant, saler et poivrer.",
+        "Enfourner pour 1 h à 1 h 15 en arrosant le poulet de son jus toutes les 20 min et en retournant les pommes de terre à mi-cuisson.",
+        "Vérifier la cuisson : le thermomètre planté dans la partie la plus épaisse de la cuisse, sans toucher l'os, doit indiquer 75 °C à cœur ; à défaut, le jus qui s'écoule de la cuisse piquée doit être clair, sans trace rosée. Sinon, prolonger la cuisson par tranches de 10 min.",
+        "Laisser reposer le poulet 10 min hors du four, couvert, avant de le découper. Servir avec les pommes de terre et le jus du plat."
+      ],
+      "sources": [
+        "https://www.croq-kilos.com/actus/comment-savoir-si-son-poulet-est-bien-cuit-5-astuces-infaillibles-pour-ne-plus-jamais-rater-votre-volaille",
+        "https://www.demotivateur.fr/food/comment-reussir-la-cuisson-d-un-poulet-roti-a-la-perfection-27148"
+      ]
+    },
+    {
+      "original_title": "Quiche lorraine",
+      "title": "Quiche lorraine",
+      "category": "Plat",
+      "prep_time_min": 50,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Pâte brisée", "quantity": 1, "unit": "pièce", "rayon": "Épicerie salée" },
+        { "name": "Lardons fumés", "quantity": 200, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Œuf", "quantity": 3, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Crème fraîche épaisse", "quantity": 20, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Lait", "quantity": 10, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Gruyère râpé", "quantity": 80, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C.",
+        "Dérouler la pâte brisée dans un moule à tarte de 26 à 28 cm et en piquer le fond à la fourchette.",
+        "Faire dorer les lardons à sec 5 min dans une poêle à feu moyen, puis les répartir sur le fond de tarte.",
+        "Battre au fouet les œufs avec la crème, le lait, la muscade et le poivre. Saler très peu, les lardons étant déjà salés.",
+        "Verser cette préparation sur les lardons, puis parsemer de gruyère râpé.",
+        "Enfourner 30 à 35 min, jusqu'à ce que la quiche soit gonflée et bien dorée et que la lame d'un couteau plantée au centre ressorte propre.",
+        "Laisser tiédir 5 min avant de démouler et de servir."
+      ],
+      "sources": [
+        "https://lacuisinedebernard.com/en/?p=285744"
+      ]
+    },
+    {
+      "original_title": "Pâte à crêpes",
+      "title": "Pâte à crêpes",
+      "category": "Dessert",
+      "prep_time_min": 60,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Farine", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Œuf", "quantity": 4, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Lait", "quantity": 50, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Beurre", "quantity": 40, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre vanillé", "quantity": 1, "unit": "sachet", "rayon": "Épicerie sucrée" },
+        { "name": "Sel", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Faire fondre 30 g de beurre et le laisser tiédir ; garder le reste du beurre pour graisser la poêle.",
+        "Verser la farine et le sel dans un grand saladier, puis creuser un puits au centre.",
+        "Casser les œufs dans le puits et ajouter le sucre vanillé (l'omettre pour des crêpes salées). Fouetter en ramenant peu à peu la farine vers le centre.",
+        "Verser le lait petit à petit sans cesser de fouetter, pour obtenir une pâte lisse et sans grumeaux.",
+        "Incorporer le beurre fondu tiède.",
+        "Couvrir et laisser reposer la pâte 30 min à 1 h au réfrigérateur, puis la remuer avant de commencer la cuisson.",
+        "Chauffer une poêle à crêpes à feu moyen-vif et la graisser légèrement avec un peu du beurre réservé, étalé au papier absorbant.",
+        "Verser une petite louche de pâte et incliner aussitôt la poêle pour la répartir en couche fine.",
+        "Cuire 1 à 2 min, jusqu'à ce que les bords se décollent et que le dessous soit doré, puis retourner la crêpe et la cuire encore 1 min. Regraisser la poêle toutes les 2 ou 3 crêpes.",
+        "Empiler les crêpes sur une assiette au fur et à mesure et les garnir au choix, en version sucrée ou salée."
+      ],
+      "sources": [
+        "https://www.zwilling.com/fr/magazine/recettes/pate-a-crepes-paul-bocuse.html"
+      ]
+    },
+    {
+      "original_title": "Gratin dauphinois",
+      "title": "Gratin dauphinois",
+      "category": "Accompagnement",
+      "prep_time_min": 85,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Pomme de terre", "quantity": 1.2, "unit": "kg", "rayon": "Fruits & légumes" },
+        { "name": "Crème liquide", "quantity": 40, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Lait", "quantity": 40, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Beurre", "quantity": 20, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 160 °C.",
+        "Éplucher les pommes de terre (de préférence une variété farineuse, type Bintje) et les couper en rondelles fines de 2 à 3 mm. Ne pas les rincer : leur amidon épaissit la sauce.",
+        "Peler les gousses d'ail. Frotter un plat à gratin avec une gousse coupée en deux, puis le beurrer généreusement. Hacher finement l'autre gousse.",
+        "Porter à frémissement le lait et la crème avec l'ail haché, la muscade, du sel et du poivre, puis retirer du feu.",
+        "Disposer les rondelles de pommes de terre en couches régulières dans le plat.",
+        "Verser le mélange lait-crème chaud : il doit arriver juste sous la dernière couche de pommes de terre.",
+        "Enfourner 1 h 10 à 1 h 15, jusqu'à ce que le dessus soit doré et que la pointe d'un couteau s'enfonce sans résistance. Prolonger de 10 min si besoin."
+      ],
+      "sources": [
+        "https://meilleurduchef.com/fr/recette/gratin-dauphinois.html",
+        "https://www.cuisineculinaire.com/gratin-dauphinois"
+      ]
+    },
+    {
+      "original_title": "Hachis parmentier",
+      "title": "Hachis parmentier",
+      "category": "Plat",
+      "prep_time_min": 70,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Viande hachée de bœuf", "quantity": 600, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Pomme de terre", "quantity": 1.3, "unit": "kg", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Concentré de tomate", "quantity": 2, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Beurre", "quantity": 50, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Lait", "quantity": 25, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Gruyère râpé", "quantity": 100, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Persil", "quantity": 4, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 2, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Éplucher les pommes de terre et les couper en gros morceaux. Les mettre dans une casserole d'eau froide salée, porter à ébullition et cuire 20 à 25 min, jusqu'à ce qu'elles soient tendres.",
+        "Pendant ce temps, éplucher et hacher les oignons et l'ail, et ciseler le persil.",
+        "Chauffer l'huile d'olive dans une sauteuse et y faire revenir les oignons 5 min à feu moyen, jusqu'à ce qu'ils soient translucides, puis ajouter l'ail 1 min.",
+        "Ajouter la viande hachée et la cuire 8 à 10 min en l'émiettant, jusqu'à ce qu'elle ne soit plus du tout rosée.",
+        "Incorporer le concentré de tomate et le persil, saler, poivrer et cuire encore 2 min.",
+        "Préchauffer le four à 200 °C et faire chauffer le lait.",
+        "Égoutter les pommes de terre et les écraser au presse-purée avec le beurre et le lait chaud. Saler et poivrer.",
+        "Étaler la viande dans un plat à gratin, la recouvrir de purée et lisser, puis tracer des stries à la fourchette.",
+        "Parsemer de gruyère râpé et enfourner 20 à 25 min, jusqu'à ce que le dessus soit bien doré."
+      ],
+      "sources": [
+        "https://meilleurduchef.com/fr/recette/hachis-parmentier.html"
+      ]
+    },
+    {
+      "original_title": "Tartiflette",
+      "title": "Tartiflette",
+      "category": "Plat",
+      "prep_time_min": 60,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Pomme de terre à chair ferme", "quantity": 1, "unit": "kg", "rayon": "Fruits & légumes" },
+        { "name": "Reblochon", "quantity": 1, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Lardons fumés", "quantity": 200, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Oignon", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Crème fraîche", "quantity": 10, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Vin blanc", "quantity": 10, "unit": "cl", "rayon": "Boissons" },
+        { "name": "Beurre", "quantity": 20, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Laver les pommes de terre et les cuire entières, avec leur peau, 20 à 25 min dans une grande casserole d'eau bouillante salée, jusqu'à ce que la pointe d'un couteau s'y enfonce facilement.",
+        "Les égoutter, les laisser tiédir, puis les éplucher et les couper en rondelles d'environ 1 cm.",
+        "Pendant la cuisson des pommes de terre, éplucher et émincer les oignons.",
+        "Faire revenir les lardons à sec 5 min dans une poêle, ajouter les oignons et cuire 8 à 10 min à feu moyen, jusqu'à ce qu'ils soient fondants.",
+        "Verser le vin blanc sec, laisser réduire 2 min et poivrer. Ne pas saler : lardons et reblochon le sont déjà.",
+        "Préchauffer le four à 200 °C et beurrer un plat à gratin.",
+        "Alterner dans le plat des couches de pommes de terre et de mélange lardons-oignons, puis verser la crème fraîche par-dessus.",
+        "Couper le reblochon en deux dans l'épaisseur et poser les deux moitiés sur le gratin, croûte vers le haut.",
+        "Enfourner 20 à 25 min, jusqu'à ce que le reblochon soit fondu et bien doré."
+      ],
+      "sources": [
+        "https://www.quiveutdufromage.com/r-pommes-de-terre-au-reblochon-notre-recette-de-tartiflette"
+      ]
+    },
+    {
+      "original_title": "Mousse au chocolat",
+      "title": "Mousse au chocolat",
+      "category": "Dessert",
+      "prep_time_min": 30,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Chocolat noir", "quantity": 200, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Œuf", "quantity": 6, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Beurre", "quantity": 20, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre", "quantity": 30, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Sel", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Attention, œufs crus : mousse déconseillée aux femmes enceintes, aux jeunes enfants, aux personnes âgées ou fragiles. Utiliser des œufs très frais et consommer la mousse sous 24 h.",
+        "Casser le chocolat noir (pâtissier, au moins 70 % de cacao) en morceaux et le faire fondre avec le beurre au bain-marie, ou au micro-ondes par séquences de 30 s en remuant entre chaque. Lisser et laisser tiédir.",
+        "Séparer les blancs des jaunes d'œufs.",
+        "Incorporer les jaunes un par un au chocolat tiédi, en mélangeant bien après chaque ajout.",
+        "Monter les blancs en neige ferme avec la pincée de sel, puis ajouter le sucre et fouetter encore 30 s pour les serrer.",
+        "Mélanger vivement un tiers des blancs au chocolat pour l'assouplir, puis incorporer le reste délicatement à la spatule, en soulevant la masse, jusqu'à ce qu'il ne reste plus de traces blanches.",
+        "Répartir dans des ramequins ou des verrines, filmer et réfrigérer au moins 4 h avant de servir."
+      ],
+      "sources": [
+        "https://www.zwilling.com/fr/magazine/recettes/recettes-z-cut/mini-rape/chocolate-mousse.html",
+        "https://www.demotivateur.fr/food/recette/mousse-au-chocolat-traditionnelle-1553"
+      ]
+    },
+    {
+      "original_title": "Pâtes à la carbonara",
+      "title": "Pâtes à la carbonara",
+      "category": "Plat",
+      "prep_time_min": 25,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Spaghetti", "quantity": 400, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Guanciale", "quantity": 150, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Jaune d'œuf", "quantity": 4, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Pecorino", "quantity": 80, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Parmesan râpé", "quantity": 40, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Attention, jaunes d'œufs à peine cuits : plat déconseillé aux femmes enceintes, aux jeunes enfants, aux personnes âgées ou fragiles ; utiliser des œufs très frais.",
+        "Porter à ébullition un grand volume d'eau et la saler.",
+        "Couper le guanciale en lardons d'environ 5 mm.",
+        "Faire rissoler le guanciale à sec 6 à 8 min dans une grande poêle à feu moyen, jusqu'à ce qu'il soit croustillant, puis éteindre le feu.",
+        "Râper finement le pecorino. Dans un bol, mélanger les jaunes avec le pecorino, le parmesan et une généreuse dose de poivre fraîchement moulu, jusqu'à obtenir une crème épaisse.",
+        "Cuire les spaghetti 1 min de moins que le temps indiqué sur le paquet.",
+        "Prélever une tasse d'eau de cuisson (environ 15 cl), puis égoutter les pâtes.",
+        "Verser les pâtes dans la poêle du guanciale, hors du feu, et les enrober de sa graisse pendant 30 s.",
+        "Toujours hors du feu, ajouter le mélange jaunes-fromage et 3 à 4 c. à soupe d'eau de cuisson, puis remuer vivement jusqu'à obtenir une sauce crémeuse qui nappe les pâtes. Servir aussitôt."
+      ],
+      "sources": [
+        "https://guide.michelin.com/fr/fr/article/dining-in/la-veritable-recette-des-pates-a-la-carbonara"
+      ]
+    },
+    {
+      "original_title": "Soupe à l'oignon gratinée",
+      "title": "Soupe à l'oignon gratinée",
+      "category": "Entrée",
+      "prep_time_min": 60,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Oignon", "quantity": 6, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 40, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 1, "unit": "c. à soupe", "rayon": "Épicerie salée" },
+        { "name": "Bouillon de bœuf", "quantity": 2, "unit": "cube", "rayon": "Épicerie salée" },
+        { "name": "Vin blanc", "quantity": 15, "unit": "cl", "rayon": "Boissons" },
+        { "name": "Pain de campagne", "quantity": 4, "unit": "tranche", "rayon": "Épicerie salée" },
+        { "name": "Gruyère râpé", "quantity": 150, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Thym frais", "quantity": 2, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Éplucher les oignons (de préférence jaunes) et les émincer finement.",
+        "Faire fondre le beurre dans une grande casserole et y cuire les oignons à feu doux 25 à 30 min en remuant souvent, jusqu'à ce qu'ils soient fondants et bien dorés.",
+        "Pendant ce temps, délayer les 2 cubes de bouillon dans 1 l d'eau bouillante.",
+        "Saupoudrer les oignons de farine et remuer 1 min.",
+        "Verser le vin blanc sec et laisser réduire 2 min en grattant le fond.",
+        "Ajouter le bouillon et le thym, porter à ébullition, puis laisser mijoter 15 min à feu doux. Retirer le thym, poivrer et saler seulement si nécessaire (le bouillon en cube est déjà salé).",
+        "Faire griller les tranches de pain au grille-pain ou 2 à 3 min sous le gril du four, puis allumer le gril du four.",
+        "Répartir la soupe dans des bols allant au four, poser une tranche de pain grillé sur chacun et la couvrir généreusement de gruyère râpé.",
+        "Passer les bols 3 à 5 min sous le gril, jusqu'à ce que le fromage soit fondu et doré. Servir brûlant, en prévenant que les bols sont très chauds."
+      ],
+      "sources": [
+        "https://www.lebonbon.fr/lyon/recette/recette-soupe-oignon-gratinee-philippe-etchebest/",
+        "https://www.auchan.fr/maggi-bouillon-kub-de-volaille/pr-C1227492"
+      ]
+    },
+    {
+      "original_title": "Ratatouille",
+      "title": "Ratatouille",
+      "category": "Accompagnement",
+      "prep_time_min": 85,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Courgette", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Aubergine", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Poivron rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Poivron jaune", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Tomate", "quantity": 6, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 3, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 6, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Herbes de Provence", "quantity": 2, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Basilic frais", "quantity": 8, "unit": "feuille", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Laver les légumes. Couper les aubergines et les courgettes en cubes de 2 cm environ.",
+        "Épépiner les poivrons et les couper en morceaux de 2 cm.",
+        "Couper les tomates (bien mûres) en dés, émincer les oignons en demi-lunes et hacher l'ail.",
+        "Chauffer 2 c. à soupe d'huile d'olive dans une cocotte et y faire dorer les aubergines 8 min à feu moyen-vif, puis les réserver.",
+        "Ajouter 1 c. à soupe d'huile et faire revenir les courgettes 5 min, puis les réserver.",
+        "Ajouter 1 c. à soupe d'huile et faire revenir les poivrons 5 min, puis les réserver.",
+        "Verser le reste de l'huile, faire fondre les oignons 5 min, ajouter l'ail 1 min, puis les tomates, et cuire 5 min.",
+        "Remettre tous les légumes dans la cocotte, ajouter les herbes de Provence, saler et poivrer.",
+        "Couvrir et laisser mijoter 40 min à feu doux en remuant délicatement de temps en temps, jusqu'à ce que les légumes soient fondants. Découvrir les 10 dernières minutes s'il reste trop de jus.",
+        "Ciseler le basilic et le parsemer au moment de servir. Servir chaud, tiède ou froid."
+      ],
+      "sources": [
+        "https://www.meilleurduchef.com/fr/recette/ratatouille-nicoise.html"
+      ]
+    },
+    {
+      "original_title": "Tarte aux pommes",
+      "title": "Tarte aux pommes",
+      "category": "Dessert",
+      "prep_time_min": 50,
+      "default_portions": 8,
+      "ingredients": [
+        { "name": "Pâte feuilletée", "quantity": 1, "unit": "pièce", "rayon": "Épicerie salée" },
+        { "name": "Pomme", "quantity": 6, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Compote de pomme", "quantity": 200, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Sucre", "quantity": 40, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Beurre", "quantity": 30, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Cannelle", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Confiture d'abricot", "quantity": 3, "unit": "c. à soupe", "rayon": "Épicerie sucrée" }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C.",
+        "Dérouler la pâte feuilletée dans un moule à tarte de 28 cm et en piquer le fond à la fourchette.",
+        "Étaler la compote de pomme en couche régulière sur le fond de pâte.",
+        "Éplucher les pommes (Golden ou Reinette), retirer le cœur et les couper en lamelles fines d'environ 3 mm.",
+        "Disposer les lamelles en rosace sur la compote, en les faisant se chevaucher.",
+        "Mélanger le sucre et la cannelle, en saupoudrer les pommes, puis parsemer de petits morceaux de beurre.",
+        "Enfourner 30 à 35 min, jusqu'à ce que les pommes soient dorées et le dessous de la pâte croustillant.",
+        "À la sortie du four, faire tiédir la confiture d'abricot avec 1 c. à soupe d'eau et en badigeonner les pommes au pinceau pour les faire briller.",
+        "Servir la tarte tiède ou froide."
+      ],
+      "sources": [
+        "https://www.demotivateur.fr/food/tarte-aux-pommes-traditionnelle-28822"
+      ]
+    },
+    {
+      "original_title": "Fondant au chocolat",
+      "title": "Fondant au chocolat",
+      "category": "Dessert",
+      "prep_time_min": 45,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Chocolat noir", "quantity": 200, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Beurre", "quantity": 160, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Sucre", "quantity": 150, "unit": "g", "rayon": "Épicerie sucrée" },
+        { "name": "Œuf", "quantity": 4, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 60, "unit": "g", "rayon": "Épicerie salée" }
+      ],
+      "steps": [
+        "Préchauffer le four à 180 °C. Beurrer un moule à manqué de 22 à 24 cm avec 10 g de beurre, puis le fariner avec 10 g de farine.",
+        "Faire fondre le chocolat avec les 150 g de beurre restants au bain-marie, lisser et laisser tiédir.",
+        "Fouetter les œufs avec le sucre 3 à 4 min, jusqu'à ce que le mélange blanchisse et double de volume.",
+        "Incorporer le chocolat fondu au mélange œufs-sucre.",
+        "Tamiser les 50 g de farine restants au-dessus de la préparation et les incorporer délicatement à la spatule.",
+        "Verser dans le moule et enfourner 20 à 25 min : le centre doit rester légèrement tremblotant.",
+        "Laisser tiédir 10 min avant de démouler."
+      ],
+      "sources": [
+        "https://www.750g.com/fondant-au-chocolat-r3136.htm"
+      ]
+    },
+    {
+      "original_title": "Saumon en papillote",
+      "title": "Saumon en papillote",
+      "category": "Plat",
+      "prep_time_min": 35,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Pavé de saumon", "quantity": 4, "unit": "pièce", "rayon": "Viandes & poissons" },
+        { "name": "Courgette", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Tomate cerise", "quantity": 200, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Citron", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Aneth frais", "quantity": 4, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 4, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Riz", "quantity": 240, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C et préparer 4 grandes feuilles de papier cuisson.",
+        "Cuire le riz dans une grande casserole d'eau bouillante salée selon le temps indiqué sur le paquet, puis l'égoutter et le garder au chaud.",
+        "Pendant ce temps, couper la courgette en fines rondelles, les tomates cerises en deux et le citron en rondelles fines.",
+        "Sur chaque feuille, étaler un lit de rondelles de courgette, poser un pavé de saumon, puis ajouter les tomates cerises, une rondelle de citron et une branche d'aneth.",
+        "Arroser chaque papillote d'un filet d'huile d'olive, saler et poivrer.",
+        "Fermer les papillotes hermétiquement en repliant plusieurs fois les bords du papier.",
+        "Enfourner 15 à 18 min : la chair du saumon doit se détacher en lamelles tout en restant légèrement nacrée au centre (prolonger de 3 à 5 min pour une cuisson complète).",
+        "Servir dans les papillotes ouvertes, accompagnées du riz."
+      ],
+      "sources": [
+        "https://stephanelarue.com/saumon-papillote-legumes-printemps/"
+      ]
+    },
+    {
+      "original_title": "Velouté de potiron",
+      "title": "Velouté de potiron",
+      "category": "Entrée",
+      "prep_time_min": 45,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Potiron", "quantity": 800, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Pomme de terre", "quantity": 150, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Crème fraîche", "quantity": 15, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Bouillon de volaille", "quantity": 1, "unit": "cube", "rayon": "Épicerie salée" },
+        { "name": "Beurre", "quantity": 20, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Croûtons", "quantity": 60, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Éplucher le potiron, retirer les graines et le couper en cubes de 3 cm. Éplucher la pomme de terre et la couper en morceaux, puis émincer l'oignon.",
+        "Délayer le cube de bouillon dans 60 cl d'eau bouillante.",
+        "Faire fondre le beurre dans une cocotte et y faire suer l'oignon 3 à 4 min à feu doux, sans coloration.",
+        "Ajouter le potiron et la pomme de terre, verser le bouillon et porter à ébullition.",
+        "Couvrir et cuire 20 à 25 min à feu moyen, jusqu'à ce que les légumes soient très tendres.",
+        "Mixer au mixeur plongeant jusqu'à obtenir un velouté bien lisse.",
+        "Incorporer 10 cl de crème fraîche et la muscade, puis saler, poivrer et réchauffer 2 min sans faire bouillir.",
+        "Servir bien chaud, avec un trait du reste de crème et les croûtons parsemés au dernier moment."
+      ],
+      "sources": [
+        "https://www.darty.com/darty-et-vous/cuisine/idees-recettes/plats-principaux/veloute-de-potiron",
+        "https://www.auchan.fr/maggi-bouillon-kub-de-volaille/pr-C1227492"
+      ]
+    },
+    {
+      "original_title": "Lasagnes bolognaise",
+      "title": "Lasagnes bolognaise",
+      "category": "Plat",
+      "prep_time_min": 105,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Feuilles de lasagne", "quantity": 250, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Viande hachée de bœuf", "quantity": 500, "unit": "g", "rayon": "Viandes & poissons" },
+        { "name": "Coulis de tomate", "quantity": 750, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Carotte", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 2, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 60, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 60, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Lait", "quantity": 75, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Gruyère râpé", "quantity": 150, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Herbes de Provence", "quantity": 1, "unit": "c. à café", "rayon": "Condiments & épices" },
+        { "name": "Huile d'olive", "quantity": 2, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Éplucher et hacher l'oignon et l'ail ; éplucher les carottes et les couper en petits dés.",
+        "Chauffer l'huile d'olive dans une sauteuse et y faire revenir l'oignon et les carottes 5 min, puis l'ail 1 min.",
+        "Ajouter la viande hachée et la cuire 5 à 7 min en l'émiettant, jusqu'à ce qu'elle ne soit plus du tout rosée.",
+        "Verser le coulis de tomate, ajouter les herbes de Provence, saler, poivrer et laisser mijoter 30 min à feu doux, à demi couvert. La sauce doit rester assez liquide car les feuilles crues l'absorbent : ajouter un peu d'eau si elle épaissit trop.",
+        "Pour la béchamel, faire fondre le beurre dans une casserole, ajouter la farine d'un coup et remuer 2 min sans laisser colorer.",
+        "Verser le lait froid petit à petit en fouettant, puis cuire 8 à 10 min à feu doux sans cesser de remuer, jusqu'à ce que la sauce nappe la cuillère. Ajouter la muscade, saler et poivrer.",
+        "Préchauffer le four à 180 °C.",
+        "Dans un plat à gratin d'environ 30 × 20 cm, étaler une fine couche de béchamel, puis alterner feuilles de lasagne sans précuisson (environ 12 au total), bolognaise et béchamel, sur 3 ou 4 étages.",
+        "Terminer par une couche de béchamel qui recouvre bien les feuilles, puis parsemer de gruyère râpé.",
+        "Enfourner 35 à 40 min, jusqu'à ce que le dessus soit gratiné et que la pointe d'un couteau traverse les pâtes sans résistance.",
+        "Laisser reposer 10 min avant de découper et de servir."
+      ],
+      "sources": [
+        "https://www.demotivateur.fr/food/la-plat-familial-parfait-pour-6-personnes-des-lasagnes-bolognaises-maison-recette-facile-47698"
+      ]
+    },
+    {
+      "original_title": "Salade niçoise",
+      "title": "Salade niçoise",
+      "category": "Entrée",
+      "prep_time_min": 30,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Thon en conserve", "quantity": 2, "unit": "boîte", "rayon": "Épicerie salée" },
+        { "name": "Œuf", "quantity": 4, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Tomate", "quantity": 3, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Haricot vert", "quantity": 200, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Olives noires", "quantity": 80, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Anchois", "quantity": 8, "unit": "filet", "rayon": "Épicerie salée" },
+        { "name": "Poivron vert", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon rouge", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Huile d'olive", "quantity": 4, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Vinaigre de vin", "quantity": 1, "unit": "c. à soupe", "rayon": "Condiments & épices" },
+        { "name": "Basilic frais", "quantity": 6, "unit": "feuille", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Plonger les œufs 10 min dans l'eau bouillante, puis les refroidir dans de l'eau froide et les écaler.",
+        "Équeuter les haricots verts, les cuire 7 à 8 min dans de l'eau bouillante salée pour qu'ils restent croquants, puis les rafraîchir dans de l'eau glacée et les égoutter.",
+        "Couper les tomates en quartiers, épépiner le poivron et le tailler en lamelles, puis émincer l'oignon rouge en fines rondelles.",
+        "Égoutter le thon et l'émietter grossièrement.",
+        "Préparer la vinaigrette en fouettant l'huile d'olive avec le vinaigre, du sel et du poivre.",
+        "Disposer dans un grand plat les haricots verts, les tomates, le poivron et l'oignon, puis répartir le thon, les olives, les filets d'anchois et les œufs coupés en quartiers.",
+        "Arroser de vinaigrette, parsemer de basilic ciselé et servir aussitôt."
+      ],
+      "sources": [
+        "https://www.meilleurduchef.com/fr/recette/salade-nicoise.html"
+      ]
+    },
+    {
+      "original_title": "Croque-monsieur",
+      "title": "Croque-monsieur",
+      "category": "Plat",
+      "prep_time_min": 25,
+      "default_portions": 4,
+      "ingredients": [
+        { "name": "Pain de mie", "quantity": 8, "unit": "tranche", "rayon": "Épicerie salée" },
+        { "name": "Jambon blanc", "quantity": 4, "unit": "tranche", "rayon": "Viandes & poissons" },
+        { "name": "Gruyère râpé", "quantity": 200, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Beurre", "quantity": 40, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 20, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Lait", "quantity": 25, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Muscade", "quantity": 1, "unit": "pincée", "rayon": "Condiments & épices" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Préchauffer le four à 200 °C et sortir 20 g de beurre pour qu'il ramollisse.",
+        "Pour la béchamel, faire fondre les 20 g de beurre restants dans une casserole, ajouter la farine et remuer 1 min sans colorer.",
+        "Verser le lait froid petit à petit en fouettant et cuire 3 à 5 min à feu doux jusqu'à épaississement. Assaisonner de muscade, sel et poivre, puis retirer du feu.",
+        "Beurrer une face de chaque tranche de pain de mie avec le beurre ramolli.",
+        "Poser 4 tranches sur une plaque recouverte de papier cuisson, face beurrée dessous, et les tartiner d'une fine couche de béchamel.",
+        "Ajouter sur chacune une tranche de jambon pliée à la taille du pain et environ la moitié du gruyère râpé.",
+        "Refermer avec les 4 autres tranches, face beurrée vers l'extérieur.",
+        "Napper le dessus avec le reste de béchamel et parsemer du reste de gruyère.",
+        "Enfourner 10 à 12 min, puis passer 2 min sous le gril si nécessaire, jusqu'à ce que le fromage soit fondu et doré."
+      ],
+      "sources": [
+        "https://www.demotivateur.fr/food/recette/croque-monsieur-maison-2990"
+      ]
+    },
+    {
+      "original_title": "Blanquette de veau",
+      "title": "Blanquette de veau",
+      "category": "Plat",
+      "prep_time_min": 135,
+      "default_portions": 6,
+      "ingredients": [
+        { "name": "Veau (blanquette)", "quantity": 1.5, "unit": "kg", "rayon": "Viandes & poissons" },
+        { "name": "Carotte", "quantity": 4, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Poireau", "quantity": 2, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Oignon", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Clou de girofle", "quantity": 2, "unit": "pièce", "rayon": "Condiments & épices" },
+        { "name": "Bouquet garni", "quantity": 1, "unit": "pièce", "rayon": "Condiments & épices" },
+        { "name": "Champignon de Paris", "quantity": 250, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Citron", "quantity": 1, "unit": "pièce", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 50, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Farine", "quantity": 50, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Crème fraîche épaisse", "quantity": 20, "unit": "cl", "rayon": "Produits laitiers & œufs" },
+        { "name": "Jaune d'œuf", "quantity": 2, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Riz", "quantity": 350, "unit": "g", "rayon": "Épicerie salée" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre blanc", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Couper le veau (épaule ou tendron) en morceaux de 5 cm environ, les mettre dans une grande cocotte et les couvrir largement d'eau froide.",
+        "Porter à ébullition, puis écumer soigneusement pendant 5 min.",
+        "Éplucher les carottes et les couper en tronçons, nettoyer les poireaux et les couper en tronçons, puis éplucher l'oignon et le piquer des 2 clous de girofle.",
+        "Ajouter les légumes et le bouquet garni dans la cocotte, saler, puis laisser cuire 1 h 30 à petits frémissements, à couvert, jusqu'à ce que la viande soit tendre.",
+        "Pendant ce temps, nettoyer les champignons et les couper en quartiers. Les cuire 10 min à couvert dans une petite casserole avec une louche du bouillon de cuisson et le jus d'un demi-citron, puis les réserver.",
+        "Cuire le riz dans de l'eau bouillante salée selon le temps indiqué sur le paquet, puis l'égoutter et le garder au chaud.",
+        "Retirer la viande et les carottes à l'écumoire et les garder au chaud. Jeter l'oignon et le bouquet garni, puis filtrer le bouillon et en mesurer 1 l.",
+        "Faire fondre le beurre dans une casserole, ajouter la farine et cuire 2 min en remuant, sans colorer.",
+        "Verser le bouillon chaud petit à petit en fouettant, puis laisser épaissir 10 min à feu doux.",
+        "Dans un bol, mélanger la crème et les jaunes d'œufs, puis tempérer ce mélange en y fouettant une louche de sauce chaude.",
+        "Retirer la casserole du feu et incorporer le mélange crème-jaunes en fouettant, sans faire bouillir. Ajouter le jus du demi-citron restant, saler et poivrer.",
+        "Remettre la viande, les carottes et les champignons égouttés dans la sauce et réchauffer 5 min à feu très doux, sans laisser bouillir. Servir avec le riz."
+      ],
+      "sources": [
+        "https://meilleurduchef.com/fr/recette/blanquette-veau.html"
+      ]
+    },
+    {
+      "original_title": "Omelette aux champignons",
+      "title": "Omelette aux champignons",
+      "category": "Plat",
+      "prep_time_min": 20,
+      "default_portions": 2,
+      "ingredients": [
+        { "name": "Œuf", "quantity": 6, "unit": "pièce", "rayon": "Produits laitiers & œufs" },
+        { "name": "Champignon de Paris", "quantity": 200, "unit": "g", "rayon": "Fruits & légumes" },
+        { "name": "Beurre", "quantity": 30, "unit": "g", "rayon": "Produits laitiers & œufs" },
+        { "name": "Persil", "quantity": 4, "unit": "branche", "rayon": "Fruits & légumes" },
+        { "name": "Ail", "quantity": 1, "unit": "gousse", "rayon": "Fruits & légumes" },
+        { "name": "Sel", "quantity": null, "unit": null, "rayon": "Condiments & épices" },
+        { "name": "Poivre", "quantity": null, "unit": null, "rayon": "Condiments & épices" }
+      ],
+      "steps": [
+        "Nettoyer les champignons et les émincer. Peler et hacher l'ail, puis ciseler le persil.",
+        "Faire fondre la moitié du beurre dans une grande poêle à feu vif et y faire sauter les champignons 5 à 6 min, jusqu'à ce que leur eau soit évaporée et qu'ils soient dorés.",
+        "Ajouter l'ail et le persil, cuire 1 min, saler, poivrer, puis réserver les champignons dans une assiette.",
+        "Battre les œufs à la fourchette avec du sel et du poivre, juste assez pour mélanger les jaunes et les blancs.",
+        "Essuyer la poêle et y faire fondre le reste du beurre à feu moyen-vif jusqu'à ce qu'il mousse.",
+        "Verser les œufs et les cuire 1 à 2 min en ramenant doucement les bords vers le centre avec une spatule.",
+        "Lorsque l'omelette est encore baveuse au centre, répartir les champignons sur une moitié.",
+        "Replier l'omelette, la faire glisser sur une planche, la couper en deux et servir aussitôt."
+      ],
+      "sources": [
+        "https://www.quiveutdufromage.com/r-omelette-aux-champignons-et-fromage"
+      ]
+    }
+  ]
+}

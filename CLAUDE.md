@@ -77,9 +77,10 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
 14. `more_ingredients.sql` — 251 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
 15. `photo_paths.sql` — **`recipes.image_url` = chemin `<id recette>/<uuid>.webp|jpg` de NOTRE bucket** (plus d'URL complète : l'appli reconstruit l'adresse avec `VITE_SUPABASE_URL`) ou photo Unsplash `https://images.unsplash.com/photo-…` ; trigger `trg_recipe_image_exists` : le fichier doit exister dans `recipe-photos`. Convertit les anciennes URL de nos photos, vide le reste (idempotent). ⚠️ **Ordre** : déployer d'abord le code ≥ v0.9.0, puis exécuter cette migration aussitôt (entre les deux, l'envoi de photo est refusé)
+16. `recettes_v1.sql` — **GÉNÉRÉ** par `npm run recettes` depuis `supabase/recettes/*.json` (ne jamais l'éditer à la main) : corrige les 20 recettes de démo **seulement si elles sont encore dans leur état d'origine** (empreinte md5 ; une recette modifiée dans l'appli n'est pas touchée) et ajoute 30 recettes si le titre n'existe pas. Idempotente, indépendante du code
 
 **État des bases** (à tenir à jour) :
-- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes) ; **15 à exécuter juste après le déploiement de la v0.9.0**
+- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes) ; **15 à exécuter juste après le déploiement de la v0.9.0**, puis 16 (n'importe quand)
 - `courses-prod` : pas encore créée
 
 **Règle** : une migration est exécutée dans la base **avant** de pousser le code qui en dépend, puis vérifiée par une requête de contrôle (tables, colonnes, triggers, RLS actif). Toute nouvelle table : RLS par foyer + attaques ajoutées dans `tests/rls` avant de pousser.
@@ -298,7 +299,14 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Supprimer une recette efface les créneaux qui l'utilisent **dans tous les foyers** (`ON DELETE CASCADE`). Piste choisie par l'utilisateur : ne plus supprimer (modifier, archiver ou « demande de suppression ») — à décider
 - `sameProduct` : « Beurre de cacahuète » ≈ « Beurre », « Pain d'épices » ≈ « Pain » (placard / frigo)
 
-### Recettes de démo
+### Recettes livrées avec l'appli
+- Source : `supabase/recettes/*.json` (format et règles : `scripts/recettes/format.ts`) → `npm run recettes` génère la migration 16 ; `tests/unit/recettes.test.ts` refuse un JSON invalide ou une migration pas à jour
+- 50 recettes au 13/11/2026 : 20 de démo corrigées + 30 nouvelles (18 plats, 4 entrées, 3 accompagnements, 5 desserts), rédigées pour l'appli (aucun texte copié), quantités vérifiées sur des références publiques (URL dans le champ `sources`, non enregistré en base)
+- Unités au singulier comme `known_ingredients` (« pièce », « gousse »…), sel/poivre sans quantité, herbes fraîches en Fruits & légumes, bouillon en cubes
+- ⚠️ Dépôt public : n'y mettre QUE des recettes sans droits (écrites pour l'appli, ou sous licence libre en citant la source). Les vraies recettes de la famille se saisissent dans l'appli, jamais dans le dépôt
+- Les 30 nouvelles n'ont pas de photo (initiale affichée) ; les 20 de démo gardent leur photo Unsplash, à vérifier à l'œil
+
+### Recettes de démo (historique)
 - Les 20 recettes de la migration 7 ont été **générées par l'IA** (pas de source externe). Audit du 13/11/2026 : classiques globalement justes, mais temps sous-estimés (~12 recettes), corrections sur bourguignon, poulet rôti, crêpes, croque-monsieur, blanquette ; herbes fraîches à ranger en Fruits & légumes ; avertissement œufs crus (mousse) ; photos Unsplash à vérifier à l'œil
 
 ### Règles UI mobile-first (refonte)
@@ -316,7 +324,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 10 : Déploiement prod → **v1.0.0**. Procédure :
   1. Créer le projet Supabase `courses-prod` (même région que test)
   2. Auth : inscriptions fermées, confirmation e-mail, mot de passe ≥ 10 caractères (+ caractères variés), limites de tentatives, URL du site et redirections = adresse GitHub Pages
-  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 15 dans l'ordre (7 après le compte et le foyer)
+  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 16 dans l'ordre (7 après le compte et le foyer)
   4. Requête de contrôle (tables, colonnes, triggers, RLS, publication Realtime, bucket photos)
   5. Variables GitHub `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` → valeurs de prod (clé publishable seulement)
   6. Passer la version à 1.0.0 + CHANGELOG, pousser sur main, vérifier le site, l'onglet Actions (déploiement + contrôle de sécurité), puis étiquette `v1.0.0`
