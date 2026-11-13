@@ -1,0 +1,52 @@
+# Publication d'une version : quand une étiquette vX.Y.Z est poussée, crée la
+# « Release » GitHub avec les notes du CHANGELOG. Vérifie d'abord que
+# l'étiquette correspond au numéro de package.json.
+# Usage (voir CLAUDE.md, « Sortir une version ») : git tag v1.0.0 && git push origin v1.0.0
+name: Publier une version
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  verifications:
+    uses: ./.github/workflows/verifications.yml
+
+  release:
+    needs: verifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # nécessaire pour créer la Release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: L'étiquette correspond à package.json
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          if [ "$pkg" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Étiquette $GITHUB_REF_NAME ≠ package.json $pkg"; exit 1
+          fi
+
+      - name: Notes de version depuis CHANGELOG.md
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v v="$v" '
+            $0 ~ "^## \\[" v "\\]" { on=1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then echo "::error::Pas de section [$v] dans CHANGELOG.md"; exit 1; fi
+
+      - name: Créer la Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pre=""
+          case "$GITHUB_REF_NAME" in v0.*) pre="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag $pre

@@ -1,4 +1,8 @@
 import { mount } from 'svelte'
+// Polices hébergées avec le site (plus d'appel à Google Fonts : rien n'est envoyé
+// à un tiers, et elles marchent hors connexion)
+import '@fontsource-variable/outfit'
+import '@fontsource-variable/dm-sans'
 import './app.css'
 import App from './App.svelte'
 
@@ -8,8 +12,14 @@ const app = mount(App, {
 
 export default app
 
+/** Pages où un rechargement automatique ferait perdre une saisie en cours. */
+function isEditing(): boolean {
+  return /^#\/(nouvelle-recette|editer-recette)/.test(window.location.hash)
+}
+
 // ── Service Worker (PWA) ──
-if ('serviceWorker' in navigator) {
+// Seulement sur le site construit : en développement, il garderait de vieux fichiers en cache.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('./sw.js', { updateViaCache: 'none' }) // sw.js toujours relu sur le réseau
@@ -23,13 +33,26 @@ if ('serviceWorker' in navigator) {
         // Silencieux : le SW est un bonus, pas critique
       })
 
-    // Quand un nouveau service worker prend la main (nouvelle version déployée),
-    // on recharge une fois pour afficher tout de suite le nouveau code.
+    // Nouvelle version déployée : le nouveau service worker prend la main.
+    // On recharge une fois pour afficher le nouveau code, mais jamais au milieu
+    // d'un formulaire de recette : on attend que l'utilisateur quitte la page.
+    // Une première installation (aucun ancien SW) ne recharge pas.
+    const hadController = !!navigator.serviceWorker.controller
     let reloaded = false
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    const reload = () => {
       if (reloaded) return
       reloaded = true
       window.location.reload()
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) return
+      if (!isEditing()) return reload()
+      const waitForExit = () => {
+        if (isEditing()) return
+        window.removeEventListener('hashchange', waitForExit)
+        reload()
+      }
+      window.addEventListener('hashchange', waitForExit)
     })
   })
 }

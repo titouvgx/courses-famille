@@ -1,0 +1,72 @@
+# Vérifications automatiques — le « contrôle technique » du code.
+# Lancées sur chaque branche et chaque pull request, et AVANT chaque déploiement
+# (deploy.yml appelle ce fichier). Si une étape échoue, rien n'est déployé.
+name: Vérifications
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main] # main : lancé par deploy.yml, pas deux fois
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verif-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    name: Types, tests, sécurité, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Actions épinglées par empreinte (SHA) : une étiquette peut être déplacée
+      # par un pirate, une empreinte non. Dependabot propose les mises à jour.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Aucune clé secrète ni mot de passe dans le dépôt
+        run: |
+          # Clé secrète Supabase, JWT service_role, URL Postgres avec mot de passe, fichier .env
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$'; then
+            echo "::error::Un fichier .env est suivi par Git"; exit 1
+          fi
+          if git grep -nIE 'sb_secret_[A-Za-z0-9_-]{16,}|postgres(ql)?://[^:@/ ]+:[^@/ ]+@' -- . ':!package-lock.json'; then
+            echo "::error::Clé secrète ou mot de passe trouvé ci-dessus"; exit 1
+          fi
+          for jwt in $(git grep -hoIE 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}' -- . ':!package-lock.json' || true); do
+            payload=$(echo "$jwt" | cut -d. -f2 | tr '_-' '/+'); pad=$(( (4 - ${#payload} % 4) % 4 ))
+            payload="$payload$(printf '=%.0s' $(seq 1 $pad))"
+            if echo "$payload" | base64 -d 2>/dev/null | grep -q '"service_role"'; then
+              echo "::error::Jeton service_role trouvé dans le dépôt"; exit 1
+            fi
+          done
+          echo "Aucun secret trouvé."
+
+      - name: Installer les dépendances (versions exactes du package-lock)
+        run: npm ci
+
+      - name: Failles connues des dépendances
+        run: |
+          # Bloquant : faille moyenne ou plus dans ce qui part sur le site,
+          #            faille haute ou critique dans les outils de build.
+          npm audit --omit=dev --audit-level=moderate
+          npm audit --audit-level=high
+
+      - name: Vérifier les types
+        run: npm run check
+
+      - name: Tests (calculs + banc d'attaque RLS entre foyers)
+        run: npm test
+
+      - name: Construire le site (refuse toute clé secrète)
+        run: npm run build

@@ -2,6 +2,7 @@
   import { onMount, tick } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import { auth, signIn } from '../lib/auth.svelte'
+  import { VERSION_LABEL } from '../lib/version'
 
   let email = $state('')
   let password = $state('')
@@ -191,6 +192,8 @@
         Pas encore de compte ? Demande à l'administrateur de la famille de t'en créer un.
       </p>
     </section>
+
+    <p class="app-version">{VERSION_LABEL}</p>
   </div>
 </main>
 
@@ -381,6 +384,16 @@
 
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+
+  /* Version de l'appli (voir src/lib/version.ts) */
+  .app-version {
+    margin: 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    font-variant-numeric: tabular-nums;
   }
 
   .hint {

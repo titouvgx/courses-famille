@@ -46,8 +46,8 @@
   --cat-dessert: #BA6A9A;
 
   /* Typographie */
-  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
-  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit Variable', 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans Variable', 'DM Sans', system-ui, -apple-system, sans-serif;
 
   /* Rayons */
   --radius-sm: 8px;

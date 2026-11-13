@@ -2,15 +2,24 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Politique de sécurité du contenu (CSP) : le navigateur refuse tout script
+      qui ne vient pas du site, et ne contacte que Supabase et Unsplash.
+      Limite une éventuelle injection de code. Toute nouvelle source externe
+      (API, images, polices) doit être ajoutée ici, sinon elle sera bloquée.
+      'unsafe-inline' pour les styles seulement : Svelte pose des attributs style.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- Barre du navigateur / de statut : bleu nuit, comme le fond « mer » -->
     <meta name="theme-color" content="#071531" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" />
     <title>Courses en famille</title>
   </head>
   <body>

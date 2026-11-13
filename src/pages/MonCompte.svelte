@@ -7,6 +7,7 @@
   import { supabase } from '../lib/supabase'
   import { navigate } from '../lib/router.svelte'
   import { toast } from '../lib/toast.svelte'
+  import { VERSION_LABEL } from '../lib/version'
 
   let displayName = $state('')
   let newPassword = $state('')
@@ -291,6 +292,8 @@
       <Icon name="logout" size={18} /> Se déconnecter
     </button>
   </div>
+
+  <p class="app-version">Courses en famille · {VERSION_LABEL}</p>
 </div>
 
 {#if confirmSignOut}
@@ -600,6 +603,16 @@
     color: #FF9A9D;
     font-size: 15px;
     touch-action: manipulation;
+  }
+
+  /* Version de l'appli (voir src/lib/version.ts) */
+  .app-version {
+    margin: 20px 0 4px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    font-variant-numeric: tabular-nums;
   }
 
   .warn {

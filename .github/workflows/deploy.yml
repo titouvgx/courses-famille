@@ -1,5 +1,7 @@
 # Déploiement automatique sur GitHub Pages à chaque push sur la branche main.
 # Prérequis (une seule fois) : Settings → Pages → Source = « GitHub Actions ».
+# Ordre : vérifications complètes (verifications.yml) → build → mise en ligne.
+# Si une vérification échoue, le site en ligne n'est pas touché.
 name: Déployer sur GitHub Pages
 
 on:
@@ -7,10 +9,9 @@ on:
     branches: [main]
   workflow_dispatch: # bouton « Run workflow » pour relancer à la main
 
+# Par défaut : lecture seule. Seul le job « deploy » reçoit le droit de publier.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Un seul déploiement à la fois ; un nouveau push annule le précédent en cours.
 concurrency:
@@ -18,12 +19,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+  verifications:
+    uses: ./.github/workflows/verifications.yml
 
-      - uses: actions/setup-node@v5
+  build:
+    needs: verifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: npm
@@ -31,27 +39,37 @@ jobs:
       - name: Installer les dépendances
         run: npm ci
 
-      - name: Vérifier les types
-        run: npm run check
-
       - name: Construire le site
-        run: npm run build
+        run: |
+          # Sans adresse ni clé, le site afficherait « Supabase non configuré » : on refuse.
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::Variables VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY absentes"; exit 1
+          fi
+          case "$VITE_SUPABASE_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo "::error::La clé du site doit être une clé publishable (sb_publishable_…)"; exit 1 ;;
+          esac
+          npm run build
         env:
           # Variables du dépôt (Settings → Secrets and variables → Actions → Variables).
           # Ce sont des valeurs publiques : on utilise "vars", pas "secrets".
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: ./dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

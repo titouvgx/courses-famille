@@ -22,9 +22,25 @@ npm run dev                  # ouvre l'adresse affichée (http://localhost:5173)
   **jamais** dans ce dépôt, ni dans `.env.local`, ni dans les variables GitHub.
 - Toute table a la RLS activée (étape 2).
 
+## Vérifier avant de pousser
+
+```bash
+npm run check   # types
+npm test        # calculs + banc d'attaque RLS (toutes les migrations rejouées en local)
+npm run build   # refuse toute clé secrète
+```
+
+Les mêmes vérifications tournent automatiquement sur GitHub (`.github/workflows/verifications.yml`)
+sur chaque branche et avant chaque déploiement.
+
+## Versions
+
+Numéro dans `package.json`, affiché dans l'appli (Mon compte, page de connexion).
+Historique et règle de numérotation : [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Déploiement
 
-Automatique à chaque push sur `main` (voir `.github/workflows/deploy.yml`).
+Automatique à chaque push sur `main`, après les vérifications (voir `.github/workflows/deploy.yml`).
 
 Réglages GitHub à faire une fois :
 

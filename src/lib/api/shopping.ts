@@ -124,7 +124,7 @@ export async function fetchListSummaries(
 
 // ────────── Génération depuis le planning ──────────
 
-interface AggregatedIngredient {
+export interface AggregatedIngredient {
   name: string
   quantity: Quantity
   shopping_category_id: string | null
@@ -157,9 +157,24 @@ async function aggregatePlanIngredients(planId: string): Promise<Map<string, Agg
     throw new Error('Le planning est vide. Ajoute des recettes avant de générer la liste.')
   }
 
+  return aggregateSlots(slots as unknown as PlannedSlot[])
+}
+
+/** Un créneau du planning avec sa recette (forme renvoyée par Supabase). */
+export interface PlannedSlot {
+  portions: number
+  recipes: {
+    id: string
+    default_portions: number | null
+    recipe_ingredients: { name: string; quantity: number | null; unit: string | null; shopping_category_id: string | null }[] | null
+  } | null
+}
+
+/** Calcul pur (testé) : additionne les ingrédients des créneaux, ajustés aux portions. */
+export function aggregateSlots(slots: PlannedSlot[]): Map<string, AggregatedIngredient> {
   const aggregated = new Map<string, AggregatedIngredient>()
   for (const slot of slots) {
-    const recipe = slot.recipes as any
+    const recipe = slot.recipes
     if (!recipe?.recipe_ingredients) continue
     const scale = slot.portions / (recipe.default_portions || 4)
 
@@ -218,18 +233,15 @@ export async function generateListFromPlan(
 }
 
 /**
- * Recalcule la liste active depuis le planning SANS rien perdre :
- *   - les articles ajoutés à la main (is_extra) sont gardés tels quels
- *   - les articles issus du planning sont recalculés, et ceux qui étaient
- *     déjà cochés le restent
- * @returns le nombre d'articles issus du planning après recalcul
+ * Calcul pur (testé) de la liste recalculée : articles issus du planning,
+ * cochés s'ils l'étaient déjà, « il en manque » conservé, numérotés après
+ * les articles ajoutés à la main (qui, eux, ne sont pas touchés).
  */
-export async function regenerateList(listId: string, planId: string): Promise<number> {
-  if (!supabase) throw new Error('Supabase non configuré')
-
-  const aggregated = await aggregatePlanIngredients(planId)
-  const current = await fetchListItems(listId)
-
+export function buildRegeneratedItems(
+  listId: string,
+  aggregated: Map<string, AggregatedIngredient>,
+  current: Pick<ShoppingListItemWithCategory, 'name' | 'is_extra' | 'checked' | 'needed' | 'checked_by' | 'checked_at' | 'position'>[],
+) {
   const extras = current.filter((i) => i.is_extra)
   const checkedBefore = new Map(
     current.filter((i) => !i.is_extra && i.checked).map((i) => [ingredientKey(i.name), i]),
@@ -239,7 +251,7 @@ export async function regenerateList(listId: string, planId: string): Promise<nu
   )
   let position = extras.reduce((m, i) => Math.max(m, i.position), -1) + 1
 
-  const fresh = [...aggregated.entries()].map(([key, ing]) => {
+  return [...aggregated.entries()].map(([key, ing]) => {
     const was = checkedBefore.get(key)
     return {
       shopping_list_id: listId,
@@ -257,6 +269,23 @@ export async function regenerateList(listId: string, planId: string): Promise<nu
       position: position++,
     }
   })
+
+}
+
+/**
+ * Recalcule la liste active depuis le planning SANS rien perdre :
+ *   - les articles ajoutés à la main (is_extra) sont gardés tels quels
+ *   - les articles issus du planning sont recalculés, et ceux qui étaient
+ *     déjà cochés le restent
+ * @returns le nombre d'articles issus du planning après recalcul
+ */
+export async function regenerateList(listId: string, planId: string): Promise<number> {
+  if (!supabase) throw new Error('Supabase non configuré')
+
+  const aggregated = await aggregatePlanIngredients(planId)
+  const current = await fetchListItems(listId)
+
+  const fresh = buildRegeneratedItems(listId, aggregated, current)
 
   // Remplacer uniquement les articles issus du planning
   const { error: delErr } = await supabase

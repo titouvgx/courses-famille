@@ -1,8 +1,12 @@
 // Service Worker — Courses en famille
-// Stratégie : cache-first pour les assets statiques, network-first pour les API.
-
-// Changer ce nom vide l'ancien cache chez tout le monde au prochain chargement
-const CACHE_NAME = 'courses-v3'
+// Stratégie : stale-while-revalidate pour les fichiers du site, réseau d'abord
+// pour les pages, rien pour l'API Supabase (données toujours fraîches).
+//
+// MODÈLE : ce fichier n'est pas servi tel quel. Au build, vite.config.ts le copie
+// dans dist/sw.js en remplaçant le marqueur de cache par « version-commit » (ex. 0.9.0-a1b2c3d).
+// Chaque déploiement a donc un nom de cache différent : le nouveau service worker
+// s'installe et efface l'ancien cache chez tout le monde.
+const CACHE_NAME = 'courses-__CACHE_ID__'
 // Photos de recettes : cache séparé et plafonné (les noms de fichiers sont uniques,
 // une photo ne change jamais → on peut servir la copie locale en priorité)
 const IMAGE_CACHE = 'courses-images-v1'
@@ -48,8 +52,11 @@ self.addEventListener('fetch', (event) => {
 
   // Photos de recettes (Supabase Storage public, Unsplash) : cache d'abord.
   // Utile hors connexion et en 4G ; le cache est limité à IMAGE_CACHE_MAX photos.
+  // Domaine Supabase exact (*.supabase.co), pas « contient supabase » :
+  // un site tiers nommé « faux-supabase.com » ne doit pas entrer dans le cache.
+  const isSupabase = url.hostname.endsWith('.supabase.co')
   const isRecipePhoto =
-    (url.hostname.includes('supabase') && url.pathname.includes('/storage/v1/object/public/')) ||
+    (isSupabase && url.pathname.startsWith('/storage/v1/object/public/')) ||
     url.hostname === 'images.unsplash.com'
   if (request.method === 'GET' && isRecipePhoto) {
     event.respondWith(
@@ -75,31 +82,17 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Ne pas intercepter le reste de Supabase (API + realtime) : données toujours fraîches
-  if (url.hostname.includes('supabase')) return
+  if (isSupabase) return
 
   // Ne pas intercepter les requêtes non-GET
   if (request.method !== 'GET') return
 
-  // Google Fonts : cache-first (ne changent jamais)
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone()
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
-          }
-          return response
-        })
-      })
-    )
-    return
-  }
+  // Ne mettre en cache que les fichiers du site lui-même (même origine)
+  if (url.origin !== self.location.origin) return
 
-  // Assets statiques (JS, CSS, images) : stale-while-revalidate
+  // Assets statiques (JS, CSS, images, polices) : stale-while-revalidate
   if (
-    url.pathname.match(/\.(js|css|png|svg|woff2?)$/) ||
+    url.pathname.match(/\.(js|css|png|svg|webp|woff2?)$/) ||
     url.pathname.includes('/assets/')
   ) {
     event.respondWith(

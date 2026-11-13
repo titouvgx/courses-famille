@@ -12,8 +12,10 @@ PWA de gestion de courses en famille. Permet de créer des recettes, planifier l
 - **Frontend** : Svelte 5 (runes) + TypeScript + Vite 8
 - **Backend** : Supabase (PostgreSQL + Auth + Realtime)
 - **Hébergement** : GitHub Pages (SPA avec hash router `#/route`)
-- **PWA** : manifest.json + service worker (stale-while-revalidate)
+- **PWA** : manifest.json + service worker (`pwa/sw.js`, modèle copié au build avec un cache propre à chaque déploiement)
 - **Pas de SSR** — tout est client-side
+- **Version** : `package.json` (source unique), affichée dans l'appli — voir « Versionnement »
+- **Tests** : Vitest (`tests/unit` calculs, `tests/rls` banc d'attaque RLS dans PGlite)
 
 ### Svelte 5 — conventions
 
@@ -41,14 +43,16 @@ Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 - **courses-test** : développement actif
 - **courses-prod** : production (pas encore branché, étape 10)
 
-### Modèle de données (12 tables)
+### Modèle de données (15 tables)
 
 ```
-families, profiles, recipe_categories, shopping_categories,
+families, profiles, super_admins,
+recipe_categories, shopping_categories,
 recipes, recipe_ingredients, recipe_steps,
 meal_plans, meal_slots,
 shopping_lists, shopping_list_items,
-known_ingredients (autocomplétion)
+known_ingredients (autocomplétion, migration 6),
+staples (habituels) et pantry_items (placard) — migration 13
 ```
 
 ### Concept clé : "familles" = foyers
@@ -64,13 +68,20 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 4. `seed_categories.sql` — 4 catégories recettes + 10 rayons courses
 5. `shopping_categories_icon.sql` — icônes emoji par rayon
 6. `known_ingredients.sql` — 262 ingrédients pour autocomplétion
-7. `seed_recipes.sql` — 20 recettes de démo
+7. `seed_recipes.sql` — 20 recettes de démo (générées par l'IA, voir « Recettes de démo »). ⚠️ **Échoue sur une base vide** : créer d'abord au moins 1 compte (Auth) et 1 foyer (`families`)
 8. `shared_recipes.sql` — partage entre foyers
 9. `recipe_images.sql` — images Unsplash
 10. `realtime_publication.sql` — temps réel sur `shopping_list_items` ET `meal_slots` (idempotent)
 11. `recipe_photos_storage.sql` — bucket public `recipe-photos` + politiques RLS Storage (idempotent)
 12. `security_fixes.sql` — audit du 13/11/2026 : rôle et foyer verrouillés dans `profiles` (trigger `guard_profile_update`), admin limité à son foyer, `recipe_exists` fermé aux anonymes, `image_url` limitée au stockage Supabase / Unsplash (idempotent)
 13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
+14. `more_ingredients.sql` — environ 200 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
+
+**État des bases** (à tenir à jour) :
+- `courses-test` : migrations 1 à 13 vérifiées le 13/11/2026 (requête de contrôle) ; 14 à exécuter
+- `courses-prod` : pas encore créée
+
+**Règle** : une migration est exécutée dans la base **avant** de pousser le code qui en dépend, puis vérifiée par une requête de contrôle (tables, colonnes, triggers, RLS actif). Toute nouvelle table : RLS par foyer + attaques ajoutées dans `tests/rls` avant de pousser.
 
 ### Realtime
 
@@ -136,7 +147,7 @@ Elle est donc **toujours en tons bleu nuit, texte clair** : il n'y a plus de mod
 
 - **Display** : Outfit (titres, h1-h3)
 - **Body** : DM Sans (texte, boutons, labels)
-- Chargées via Google Fonts dans `index.html`
+- **Hébergées avec le site** (`@fontsource-variable/outfit` et `dm-sans`, importées dans `main.ts`) : aucun appel à Google Fonts, marchent hors connexion. Noms CSS : `'Outfit Variable'`, `'DM Sans Variable'`
 
 ### Rayons (shopping_categories) avec icônes
 
@@ -157,7 +168,8 @@ Elle est donc **toujours en tons bleu nuit, texte clair** : il n'y a plus de mod
 src/
 ├── App.svelte                    # Shell : auth guard + routing
 ├── main.ts                       # Point d'entrée + SW registration
-├── app.css                       # Design system complet (tokens, dark mode, reset)
+├── app.css                       # Design system complet (tokens « Mer », reset)
+├── globals.d.ts                  # Constantes injectées au build (__APP_VERSION__, __APP_COMMIT__)
 ├── components/
 │   ├── AppHeader.svelte          # Avatar → Mon compte (position absolute : part au défilement)
 │   ├── AppBackdrop.svelte        # Fond de TOUTES les pages : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile (variant home/page)
@@ -184,6 +196,7 @@ src/
 │   ├── offline.ts                # Liste gardée sur le téléphone + cochages en attente
 │   ├── haptics.ts                # tap() : vibration courte (Android)
 │   ├── images.ts                 # sizedImage() : redimensionne les URL Unsplash pour le mobile
+│   ├── version.ts                # APP_VERSION, APP_COMMIT, VERSION_LABEL (« v0.9.0 · a1b2c3d »)
 │   └── api/
 │       ├── recipes.ts            # CRUD recettes + recherche (index léger) + photos
 │       ├── recipeImages.ts       # Photos : compression, envoi Storage, suppression
@@ -191,7 +204,7 @@ src/
 │       ├── household.ts          # Membres, cuisinier, habituels, placard, index des ingrédients, rankByFridge
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
-│   ├── Login.svelte              # Connexion / inscription
+│   ├── Login.svelte              # Connexion seule (pas d'inscription publique) + version
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
 │   ├── Frigo.svelte              # « Qu'est-ce qu'on mange ? » : puces du frigo → recettes triées par ingrédients manquants
 │   ├── Recettes.svelte           # Recherche (toute la base, sans accents) + puces catégories + grille
@@ -200,11 +213,24 @@ src/
 │   ├── Semaine.svelte            # Planning : cartes jour + tuiles Midi/Soir (téléphone), 2 col (tablette), 7 colonnes (≥ 1100 px)
 │   ├── Courses.svelte            # Liste active : rayons, « Dans le chariot », temps réel, hors connexion, mise à jour sans perte
 │   ├── Historique.svelte         # Listes terminées : cartes dépliables par rayon, suppression confirmée
-│   └── MonCompte.svelte          # Profil + mot de passe
+│   └── MonCompte.svelte          # Profil + mot de passe + version de l'appli
 public/
 ├── manifest.json                 # PWA manifest
-├── sw.js                         # Service worker
+├── bg/                           # Photos de mer (WebP 640/1280)
 ├── favicon.svg, icon-192.png, icon-512.png, apple-touch-icon.png
+pwa/
+└── sw.js                         # Modèle du service worker (copié dans dist/ au build, marqueur de cache remplacé)
+tests/
+├── unit/                         # Calculs purs : quantités, liste recalculée, placard, frigo
+└── rls/                          # Banc d'attaque RLS : migrations rejouées dans PGlite + attaques entre foyers
+.github/
+├── workflows/verifications.yml   # Secrets, audit npm, types, tests, build — sur chaque branche/PR et avant déploiement
+├── workflows/deploy.yml          # main → vérifications → build → GitHub Pages
+├── workflows/release.yml         # étiquette vX.Y.Z → vérifications → Release GitHub (notes du CHANGELOG)
+├── workflows/security-check.yml  # vu de l'extérieur : un inconnu ne lit rien (après déploiement + lundi)
+├── workflows/supabase-keepalive.yml
+└── dependabot.yml                # mises à jour npm + actions chaque lundi
+CHANGELOG.md                      # Journal des versions (règle SemVer)
 ```
 
 ## Contraintes de sécurité (OBLIGATOIRES)
@@ -214,13 +240,17 @@ public/
 - **Ne pas lancer** `npm audit fix --force`
 - **E-mail utilisateur** : donnée privée, ne pas partager en externe sans accord explicite
 - Le fichier `src/lib/supabase.ts` contient un garde-fou qui refuse de démarrer si une clé secrète est détectée
+- **CSP** (`index.html`) : scripts du site seulement ; connexions vers `*.supabase.co` et Unsplash seulement. **Toute nouvelle source externe** (API, images, fonction serveur sur un autre domaine, domaine personnalisé Supabase) **doit être ajoutée à la CSP**, sinon le navigateur la bloque
+- Ne jamais réactiver de ressource tierce (Google Fonts, CDN…) sans raison : polices hébergées avec le site
+- Actions GitHub **épinglées par SHA** (commentaire avec la version) ; permissions minimales par job
 
 ### Sécurité — ce qui est en place
 - **Contrôle automatique** `.github/workflows/security-check.yml` : après chaque déploiement, chaque lundi et à la demande, vérifie avec la clé publique seule qu'un inconnu ne lit aucune table ni la liste des photos, et affiche les réglages Auth (inscriptions fermées, etc.). Lecture seule
-- **Garde-fou clé secrète au build** (`vite.config.ts`) : refuse de construire si la clé est `sb_secret_…` ou un JWT `service_role` (celui de `supabase.ts` n'est qu'un filet : à l'exécution, la clé serait déjà publiée)
+- **Garde-fous clé secrète au build** (`vite.config.ts`) : refuse de construire si **n'importe quelle** variable `VITE_…` contient `sb_secret_…` ou un JWT `service_role`, puis scanne les fichiers produits dans `dist/` (celui de `supabase.ts` n'est qu'un filet : à l'exécution, la clé serait déjà publiée)
+- **Vérifications CI** (`verifications.yml`) : aucun `.env` suivi, aucun secret dans le dépôt, `npm audit` (bloquant : moyenne+ en production, haute+ en outils), types, tests, build. Le déploiement en dépend
 - **Droits côté appli = droits de la base** : Modifier = membre du foyer qui a créé la recette ; Supprimer recette / liste = admin de ce foyer. Une suppression filtrée par RLS (0 ligne, pas d'erreur) est signalée, jamais affichée comme réussie
 - RLS : les règles portent sur des **lignes**, pas des colonnes → pour limiter des colonnes (ex. `role`, `family_id`), un trigger. Sur Supabase, `REVOKE … FROM PUBLIC` ne retire pas `anon` : viser `anon` explicitement
-- Banc d'attaque local (hors dépôt pour l'instant) : migrations rejouées dans PGlite + 48 tentatives d'accès entre foyers
+- **Banc d'attaque RLS dans le dépôt** (`tests/rls`, `npm run test:rls`) : stubs Supabase (rôles, `auth.uid()`, storage) + toutes les migrations rejouées dans PGlite + tentatives entre foyers et contrôles positifs. Lancé par la CI à chaque push. Au 13/11/2026 : **373 tentatives d'attaque, 91 contrôles positifs, 9 contrôles de structure** ; un test de mutation (RLS retiré, règle ouverte) est bien détecté. Limites (SQL direct, pas PostgREST/Auth/Realtime) : voir `tests/rls/README.md`
 
 ## Variables d'environnement
 
@@ -252,6 +282,23 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 
 ### Pièges connus
 - `signIn()` ne doit PAS toucher `auth.loading` (réservé au chargement initial) : App.svelte remplacerait la page de connexion par le spinner et la saisie serait perdue
+- Migration 7 (`seed_recipes`) : échoue sans au moins 1 compte et 1 foyer
+- Service worker : chaque déploiement installe un nouveau SW qui recharge l'appli ouverte (pas pendant `nouvelle-recette` / `editer-recette` : rechargement différé à la sortie du formulaire). Enregistré seulement en build (`import.meta.env.PROD`)
+- `regenerateList` supprime puis réinsère les articles du planning en deux requêtes : pas atomique (voir Risques)
+
+### Risques connus (à traiter en 1.0.x)
+- `regenerateList` non atomique : si l'insertion échoue après la suppression (réseau coupé), les articles du planning disparaissent jusqu'à la prochaine mise à jour (cochés perdus, ajouts à la main conservés). Deux membres qui mettent à jour en même temps peuvent créer des doublons. Piste : fonction Postgres (RPC) en une transaction
+- Pas de limite de longueur sur les textes des recettes ; pas de sauvegarde automatique (offre gratuite) ; tâches planifiées GitHub désactivées après 60 jours sans commit sur un dépôt public
+
+### Faiblesses connues relevées par le banc (13/11/2026)
+- ❌ **`image_url`** : le motif accepte le stockage de **n'importe quel** projet Supabase (`[a-z0-9]+.supabase.co`), pas seulement celui du projet → pixel espion possible par un membre (gravité faible). Le test correspondant échoue tant que ce n'est pas corrigé
+- `shopping_lists.meal_plan_id` : une liste peut être rattachée au planning d'un autre foyer (pas de lecture possible, mais incohérent)
+- `created_by` / `checked_by` : un membre peut y mettre l'id de quelqu'un d'autre (usurpation de signature)
+- Supprimer une recette efface les créneaux qui l'utilisent **dans tous les foyers** (`ON DELETE CASCADE`)
+- `sameProduct` : « Beurre de cacahuète » ≈ « Beurre », « Pain d'épices » ≈ « Pain » (placard / frigo)
+
+### Recettes de démo
+- Les 20 recettes de la migration 7 ont été **générées par l'IA** (pas de source externe). Audit du 13/11/2026 : classiques globalement justes, mais temps sous-estimés (~12 recettes), corrections sur bourguignon, poulet rôti, crêpes, croque-monsieur, blanquette ; herbes fraîches à ranger en Fruits & légumes ; avertissement œufs crus (mousse) ; photos Unsplash à vérifier à l'œil
 
 ### Règles UI mobile-first (refonte)
 - Animer uniquement `transform` / `opacity` (pas de `filter: blur` animé, trop coûteux sur téléphone)
@@ -262,8 +309,36 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - `prefers-reduced-motion` respecté (règle globale dans `app.css`)
 - Pas de `backdrop-filter` au-dessus de la photo animée (flou recalculé à chaque image) : fonds rgba suffisamment opaques
 
+- Préparation V1 ✅ (v0.9.0) : version affichée, CHANGELOG, CI/CD (vérifications, release, Dependabot), tests unitaires + banc RLS dans le dépôt, CSP, polices hébergées, migration 14 (ingrédients)
+
 ### Restant ⬜
-- Étape 10 : Déploiement prod (brancher `courses-prod`, variables d'env, Realtime)
+- Étape 10 : Déploiement prod → **v1.0.0**. Procédure :
+  1. Créer le projet Supabase `courses-prod` (même région que test)
+  2. Auth : inscriptions fermées, confirmation e-mail, mot de passe ≥ 10 caractères (+ caractères variés), limites de tentatives, URL du site et redirections = adresse GitHub Pages
+  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 14 dans l'ordre (7 après le compte et le foyer)
+  4. Requête de contrôle (tables, colonnes, triggers, RLS, publication Realtime, bucket photos)
+  5. Variables GitHub `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` → valeurs de prod (clé publishable seulement)
+  6. Passer la version à 1.0.0 + CHANGELOG, pousser sur main, vérifier le site, l'onglet Actions (déploiement + contrôle de sécurité), puis étiquette `v1.0.0`
+  7. Garder `courses-test` pour développer (`.env.local`)
+
+## Versionnement
+
+- **SemVer** MAJEUR.MINEUR.CORRECTIF (règle détaillée en tête de `CHANGELOG.md`) : correctif = bug ; mineur = nouvelle fonction compatible ; majeur = casse l'existant (V2 familles multiples = 2.0.0)
+- **Source unique** : `package.json` → injecté au build (`__APP_VERSION__` + commit court) → affiché dans Mon compte et sur la connexion (`src/lib/version.ts`)
+- Chaque modification notable va dans `CHANGELOG.md`, section `[Non publié]`, avec les **migrations nécessaires**
+
+### Sortir une version
+1. Base(s) Supabase à jour et vérifiées pour les migrations listées
+2. `npm version X.Y.Z --no-git-tag-version` (met à jour `package.json` et `package-lock.json`)
+3. CHANGELOG : renommer `[Non publié]` en `[X.Y.Z] — AAAA-MM-JJ`, recréer un `[Non publié]` vide
+4. `npm run check && npm test && npm run build` + captures mobiles (393×852)
+5. Commit « Version X.Y.Z », push sur main (déploie), vérifier le site et l'onglet Actions
+6. `git tag vX.Y.Z && git push origin vX.Y.Z` → `release.yml` crée la Release GitHub
+
+## Intégration continue
+- Branche de travail → pull request : `verifications.yml` tourne (secrets, audit, types, tests, build)
+- Fusion sur `main` : vérifications puis déploiement ; rien n'est mis en ligne si une étape échoue
+- Réglages GitHub recommandés : protection de `main` (vérifications obligatoires), secret scanning + push protection, e-mail privé (Settings → Emails)
 
 ### V2 (décidé, PAS maintenant)
 - **Familles multiples + invitations en chaîne** (décisions du 13/11/2026) :
@@ -275,9 +350,20 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - **Mot de passe oublié** : `resetPasswordForEmail` de Supabase + page « nouveau mot de passe » (`updateUser`). Piège routeur `#` : faire pointer le lien de l'e-mail vers `?token_hash=…&type=recovery` (paramètre avant le `#`) traité par `verifyOtp`, ajouter l'URL aux redirections autorisées. E-mails intégrés limités (≈ 2/heure pour tout le projet) : suffisant en famille, Resend sinon
 - Importer une recette depuis un lien (fonction serveur, sites autorisés seulement, sans la photo)
 
-### Idées futures (PAS à implémenter maintenant)
-- Nutri-Score (A à E) par recette
-- Table nutritionnelle (calories, protéines, glucides, lipides) via Open Food Facts API
+### Idées en attente (PAS sans feu vert explicite de l'utilisateur)
+- Envoyer la liste de courses par message (WhatsApp, SMS) en un clic
+- Recopier la semaine passée ou une semaine type dans le planning
+- Favoris et notes par recette (étoiles + commentaire du foyer)
+- Minuteurs dans le mode En cuisine (« 20 min » dans une étape = bouton minuteur)
+- Notifications (« la liste a changé », « courses terminées »)
+- Livre de recettes de famille exporté en PDF
+- Figer la liste de la semaine (une recette modifiée ne change plus une liste en cours)
+- Arrondir au supérieur ce qui se compte à la pièce (pas de « 1,5 œuf »)
+- Nutri-Score (A à E) par recette et table nutritionnelle via Open Food Facts
+- Parcours Playwright et sauvegardes automatiques de la base
+
+### Décision produit
+- L'appli **reste familiale** (pas de Play Store pour l'instant). Un plan de migration grand public existe dans les docs Claude de l'utilisateur : ne le ressortir que sur demande
 
 ## Commandes utiles
 
@@ -286,4 +372,7 @@ npm run dev      # Dev server (localhost:5173)
 npm run build    # Build production → dist/
 npm run preview  # Preview du build
 npm run check    # Typecheck Svelte + TypeScript
+npm test         # Tous les tests (unitaires + banc d'attaque RLS)
+npm run test:unit
+npm run test:rls
 ```
