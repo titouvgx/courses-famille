@@ -1,0 +1,81 @@
+# Contrôle de sécurité « vu de l'extérieur »
+# Se met dans la peau d'un inconnu qui n'a QUE la clé publique (visible dans le
+# site) et vérifie qu'il ne peut rien lire. Lecture seule : ne modifie rien.
+# Lancé après chaque déploiement, chaque lundi, et à la demande.
+
+name: Contrôle de sécurité
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Déployer sur GitHub Pages']
+    types: [completed]
+  schedule:
+    - cron: '41 7 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  anonyme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Un inconnu ne doit rien pouvoir lire
+        env:
+          URL: ${{ vars.VITE_SUPABASE_URL }}
+          KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          fail=0
+          sum() { echo "$1" | tee -a "$GITHUB_STEP_SUMMARY"; }
+
+          case "$KEY" in
+            sb_publishable_*) ;;
+            *) sum "❌ La clé du site n'est pas une clé publishable"; exit 1 ;;
+          esac
+
+          sum "### Tables (sans connexion)"
+          for t in families profiles super_admins recipes recipe_ingredients recipe_steps \
+                   meal_plans meal_slots shopping_lists shopping_list_items \
+                   recipe_categories shopping_categories known_ingredients; do
+            body=$(curl -s -w '\n%{http_code}' "$URL/rest/v1/$t?select=*&limit=1" \
+              -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+            code=$(echo "$body" | tail -n1); data=$(echo "$body" | sed '$d')
+            if [ "$code" = "200" ] && [ "$data" != "[]" ]; then
+              sum "- ❌ \`$t\` : lisible sans connexion"; fail=1
+            else
+              sum "- ✅ \`$t\` : rien ($code)"
+            fi
+          done
+
+          sum "### Photos (sans connexion)"
+          list=$(curl -s -X POST "$URL/storage/v1/object/list/recipe-photos" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            -H 'Content-Type: application/json' -d '{"prefix":"","limit":5}')
+          if echo "$list" | grep -q '"name"'; then
+            sum "- ❌ la liste des photos est lisible sans connexion"; fail=1
+          else
+            sum "- ✅ liste des photos fermée"
+          fi
+
+          sum "### Fonctions (sans connexion)"
+          for f in recipe_exists:'{"rid":"x"}' is_member:'{}' user_family_id:'{}'; do
+            name=${f%%:*}; args=${f#*:}
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/rest/v1/rpc/$name" \
+              -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+              -H 'Content-Type: application/json' -d "$args")
+            sum "- \`$name\` : HTTP $code (200 = appelable par un inconnu, à titre d'info)"
+          done
+
+          sum "### Réglages de connexion (à titre d'info)"
+          curl -s "$URL/auth/v1/settings" -H "apikey: $KEY" | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)
+          ext = [k for k, v in d.get("external", {}).items() if v]
+          print("- Inscriptions publiques fermées :", "✅ oui" if d.get("disable_signup") else "⚠️ NON (tout le monde peut créer un compte)")
+          print("- E-mail confirmé automatiquement :", d.get("mailer_autoconfirm"))
+          print("- Connexions anonymes :", d.get("anonymous_users"))
+          print("- Moyens de connexion actifs :", ", ".join(ext) or "aucun")
+          ' | tee -a "$GITHUB_STEP_SUMMARY"
+
+          exit $fail
