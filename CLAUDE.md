@@ -134,7 +134,9 @@ Elle est donc **toujours en tons bleu nuit, texte clair** : il n'y a plus de mod
 
 ### Animations
 
-- `page-in` : fondu + glissement sur toutes les pages
+- Changement de page : **View Transitions** (`router.svelte.ts`) — glisse vers la gauche quand on avance (onglet plus à droite, ouverture d'une fiche), vers la droite quand on recule. Seul `.app-shell` reçoit `view-transition-name: page`, et seulement pendant la navigation (`html[data-nav]`) : en permanence, il créerait un contexte d'empilement et la tab bar passerait au-dessus des fenêtres. Fond photo immobile (il ne doit PAS avoir de nom de transition, sinon il se dessine par-dessus la page). Repli : `page-in` (fondu + glissement) si l'API manque
+- Tab bar : pastille qui glisse sous l'onglet actif + rebond de l'icône
+- Courses : article coché qui sort en glissant (`fly` + `flip`) ; vibration courte via `src/lib/haptics.ts` (Android seulement, Safari iOS l'ignore)
 - `check-pop` : animation checkbox
 - `toast-in` : notifications glassmorphism
 - `prefers-reduced-motion` respecté partout
@@ -147,11 +149,12 @@ src/
 ├── main.ts                       # Point d'entrée + SW registration
 ├── app.css                       # Design system complet (tokens, dark mode, reset)
 ├── components/
-│   ├── AppHeader.svelte          # Header avec titre
+│   ├── AppHeader.svelte          # Avatar → Mon compte (position absolute : part au défilement)
 │   ├── AppBackdrop.svelte        # Fond de TOUTES les pages : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile (variant home/page)
 │   ├── Icon.svelte               # Icônes au trait (remplacent les émojis décoratifs)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
 │   ├── ConfirmDialog.svelte      # Fenêtre de confirmation centrée commune
+│   ├── CookMode.svelte           # Mode « En cuisine » : une étape à la fois, balayage, écran maintenu allumé (Wake Lock)
 │   ├── PlanRecipeDialog.svelte   # Fenêtre centrée 2 étapes : créneau (4 semaines, créneaux pris visibles) → ingrédients aux courses (mode 'plan' ou 'cart')
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
@@ -166,6 +169,7 @@ src/
 │   ├── floatLayout.ts            # Placement « en vrac » des cartes (fonction pure, tirage seedé, sans chevauchement)
 │   ├── quantities.ts             # Quantités : addition, conversion g→kg / ml→cl→l, format français
 │   ├── offline.ts                # Liste gardée sur le téléphone + cochages en attente
+│   ├── haptics.ts                # tap() : vibration courte (Android)
 │   ├── images.ts                 # sizedImage() : redimensionne les URL Unsplash pour le mobile
 │   └── api/
 │       ├── recipes.ts            # CRUD recettes + recherche (index léger) + photos
@@ -176,8 +180,8 @@ src/
 │   ├── Login.svelte              # Connexion / inscription
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
 │   ├── Recettes.svelte           # Recherche (toute la base, sans accents) + puces catégories + grille
-│   ├── RecetteDetail.svelte      # Détail recette ; « Ajouter à ma semaine » (puis courses) / « Juste les ingrédients »
-│   ├── RecetteForm.svelte        # Formulaire création/édition + photo depuis la galerie
+│   ├── RecetteDetail.svelte      # Fiche : grande photo, portions ajustables, ingrédients/étapes cochables, mode En cuisine, barre d'actions collée en bas
+│   ├── RecetteForm.svelte        # Formulaire création/édition + photo ; Entrée = ingrédient suivant, monter/descendre, validation, confirmation avant de quitter (clics + popstate + beforeunload)
 │   ├── Semaine.svelte            # Planning : cartes jour + tuiles Midi/Soir (téléphone), 2 col (tablette), 7 colonnes (≥ 1100 px)
 │   ├── Courses.svelte            # Liste active : rayons, « Dans le chariot », temps réel, hors connexion, mise à jour sans perte
 │   ├── Historique.svelte         # Listes terminées : cartes dépliables par rayon, suppression confirmée
@@ -221,6 +225,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Bonus : « Ajouter au panier » avec sélection d'ingrédients et portions ajustables
 - Refonte UI V1 ✅ : accueil flottant, fond « mer », icônes, Semaine, Courses, Recettes, Historique, fenêtre « semaine puis courses »
 - V1 fiabilité ✅ : mise à jour de liste sans perte, hors connexion, planning en temps réel, recherche complète, quantités lisibles, photos
+- Peaufinage ✅ : fiche recette + mode En cuisine, formulaire mobile, transitions de pages, Connexion et Mon compte (vider les données locales)
+
+### Pièges connus
+- `signIn()` ne doit PAS toucher `auth.loading` (réservé au chargement initial) : App.svelte remplacerait la page de connexion par le spinner et la saisie serait perdue
 
 ### Règles UI mobile-first (refonte)
 - Animer uniquement `transform` / `opacity` (pas de `filter: blur` animé, trop coûteux sur téléphone)

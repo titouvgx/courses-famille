@@ -52,7 +52,9 @@ export async function signIn(email: string, password: string): Promise<void> {
     return
   }
 
-  auth.loading = true
+  // Pas de auth.loading ici : il sert au chargement initial de la session, et
+  // App.svelte remplacerait la page de connexion par le spinner (saisie perdue).
+  // La page Login affiche elle-même l'état « Connexion… ».
   auth.error = null
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -62,8 +64,6 @@ export async function signIn(email: string, password: string): Promise<void> {
       ? 'Email ou mot de passe incorrect.'
       : error.message
   }
-
-  auth.loading = false
 }
 
 /** Déconnexion. */

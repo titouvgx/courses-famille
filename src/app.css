@@ -167,6 +167,55 @@ p { margin: 0; }
   animation: page-in 0.25s ease-out;
 }
 
+/* ── Transitions entre pages (navigateurs avec View Transitions) ──
+   Le routeur pose data-nav="forward | back | fade" pendant la transition. */
+html.vt .page {
+  animation: none; /* la transition de page remplace l'apparition simple */
+}
+
+/* Seul le contenu de la page glisse : il reçoit un nom de transition le temps
+   de la navigation (pas en permanence, sinon il créerait un contexte
+   d'empilement qui ferait passer la barre d'onglets au-dessus des fenêtres).
+   Le reste (fond photo) ne bouge pas. */
+html[data-nav] .app-shell { view-transition-name: page; }
+
+html[data-nav='forward']::view-transition-old(root),
+html[data-nav='forward']::view-transition-new(root),
+html[data-nav='back']::view-transition-old(root),
+html[data-nav='back']::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(page),
+::view-transition-new(page) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* Le cadre du groupe ne doit pas s'animer (hauteurs de pages différentes) */
+::view-transition-group(page) { animation: none; }
+
+html[data-nav='forward']::view-transition-old(page) { animation-name: vt-out-left; }
+html[data-nav='forward']::view-transition-new(page) { animation-name: vt-in-right; }
+html[data-nav='back']::view-transition-old(page)    { animation-name: vt-out-right; }
+html[data-nav='back']::view-transition-new(page)    { animation-name: vt-in-left; }
+
+/* Barre d'onglets et avatar : immobiles, au-dessus de la page qui glisse */
+::view-transition-group(tab-bar),
+::view-transition-group(app-header),
+::view-transition-new(tab-bar),
+::view-transition-new(app-header) {
+  animation: none;
+}
+::view-transition-old(tab-bar),
+::view-transition-old(app-header) {
+  display: none;
+}
+
+@keyframes vt-out-left  { to   { opacity: 0; transform: translateX(-12%); } }
+@keyframes vt-in-right  { from { opacity: 0; transform: translateX(16%); } }
+@keyframes vt-out-right { to   { opacity: 0; transform: translateX(12%); } }
+@keyframes vt-in-left   { from { opacity: 0; transform: translateX(-16%); } }
+
 /* Entrée échelonnée pour les listes */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(10px); }

@@ -9,6 +9,9 @@
     { route: 'historique',  label: 'Historique',   icon: 'clock' },
   ]
 
+  /** Index de l'onglet actif (-1 sur Mon compte, la connexion…) : place la pastille */
+  const activeIndex = $derived(tabs.findIndex((t) => isActive(t.route)))
+
   function isActive(route: TabRoute): boolean {
     if (route === 'recettes') {
       return ['recettes', 'recette', 'nouvelle-recette', 'editer-recette'].includes(router.current)
@@ -17,7 +20,14 @@
   }
 </script>
 
-<nav class="tab-bar" aria-label="Navigation principale">
+<nav class="tab-bar" aria-label="Navigation principale" style:--count={tabs.length}>
+  <!-- Pastille qui glisse sous l'onglet actif (une seule, déplacée par transform) -->
+  <span
+    class="indicator"
+    class:hidden={activeIndex < 0}
+    style:--i={Math.max(activeIndex, 0)}
+    aria-hidden="true"
+  ></span>
   {#each tabs as tab (tab.route)}
     <a
       href={href(tab.route)}
@@ -50,6 +60,7 @@
 
 <style>
   .tab-bar {
+    view-transition-name: tab-bar; /* reste immobile pendant les transitions de page */
     position: fixed;
     inset: auto 0 0 0;
     display: flex;
@@ -61,7 +72,35 @@
     z-index: 100;
   }
 
+  /* Pastille : une « case » de la largeur d'un onglet, déplacée de i cases.
+     Le rond visible est dessiné au centre de la case (::before). */
+  .indicator {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    width: calc((100% - 16px) / var(--count));
+    height: 30px;
+    transform: translateX(calc(var(--i) * 100%));
+    transition: transform 0.38s cubic-bezier(0.3, 1.35, 0.5, 1), opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .indicator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 56px;
+    height: 100%;
+    margin-left: -28px;
+    border-radius: 999px;
+    background: var(--primary-light);
+  }
+
+  .indicator.hidden { opacity: 0; }
+
   .tab {
+    position: relative; /* au-dessus de la pastille */
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -75,6 +114,23 @@
 
   .tab.active {
     color: var(--primary);
+  }
+
+  /* Petit rebond de l'icône quand l'onglet devient actif */
+  .tab.active .tab-icon {
+    animation: tab-pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  @keyframes tab-pop {
+    0% { transform: scale(0.8); }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  .tab:active .tab-icon { transform: scale(0.88); }
+
+  .tab {
+    touch-action: manipulation;
   }
 
   .tab-label {

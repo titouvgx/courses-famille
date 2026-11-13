@@ -23,6 +23,14 @@
   import type { ShoppingList, ShoppingListItemWithCategory, ShoppingCategory } from '../lib/types'
   import type { RealtimeChannel } from '@supabase/supabase-js'
   import { toast } from '../lib/toast.svelte'
+  import { tap } from '../lib/haptics'
+  import { fly } from 'svelte/transition'
+  import { flip } from 'svelte/animate'
+
+  // Animations de liste (transform/opacity uniquement) ; coupées si
+  // « réduire les animations » est activé sur le téléphone.
+  const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const d = (ms: number) => (reduceMotion ? 0 : ms)
 
   // ── État ──
   let list: ShoppingList | null = $state(null)
@@ -146,6 +154,7 @@
   $effect(() => {
     if (allDone && !celebrated) {
       celebrated = true
+      tap('success')
       toast.success('Tout est dans le chariot !')
     }
     if (!allDone) celebrated = false
@@ -204,6 +213,7 @@
     const userId = auth.user?.id
     if (!userId) return
     const checked = !item.checked
+    tap()
     items = items.map((i) => (i.id === item.id ? { ...i, checked } : i))
     persist()
     try {
@@ -383,7 +393,7 @@
         </h2>
         <ul class="rows">
           {#each group.items as item (item.id)}
-            <li class="row">
+            <li class="row" animate:flip={{ duration: d(220) }} out:fly={{ x: 60, duration: d(180) }}>
               <button class="row-main" onclick={() => toggle(item)} aria-label="Mettre {item.name} dans le chariot">
                 <span class="box" aria-hidden="true"></span>
                 <span class="row-name">{item.name}</span>
@@ -446,7 +456,7 @@
         {#if cartOpen}
           <ul class="rows">
             {#each inCart as item (item.id)}
-              <li class="row is-done">
+              <li class="row is-done" animate:flip={{ duration: d(220) }} in:fly={{ x: -40, duration: d(200) }}>
                 <button class="row-main" onclick={() => toggle(item)} aria-label="Remettre {item.name} dans la liste">
                   <span class="box checked" aria-hidden="true"><Icon name="check" size={14} strokeWidth={3} /></span>
                   <span class="row-name">{item.name}</span>

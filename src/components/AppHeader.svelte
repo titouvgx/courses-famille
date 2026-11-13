@@ -25,7 +25,10 @@
 
 <style>
   .app-header {
-    position: fixed;
+    view-transition-name: app-header; /* reste immobile pendant les transitions de page */
+    /* absolute (et non fixed) : l'avatar part avec le défilement au lieu de
+       recouvrir les boutons qui passent dessous (ex. + des portions). */
+    position: absolute;
     top: 0;
     right: 0;
     z-index: 50;
@@ -50,9 +53,17 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   }
 
-  .avatar-btn:hover,
   .avatar-btn.active {
     transform: scale(1.08);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
   }
+
+  @media (hover: hover) and (pointer: fine) {
+    .avatar-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  .avatar-btn:active { transform: scale(0.92); }
 </style>

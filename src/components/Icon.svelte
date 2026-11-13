@@ -6,6 +6,8 @@
     | 'clock' | 'users' | 'sun' | 'moon' | 'calendar' | 'cart' | 'pencil' | 'trash'
     | 'refresh' | 'check' | 'check-circle' | 'list' | 'lock' | 'logout' | 'user'
     | 'book' | 'archive' | 'star' | 'plate' | 'camera' | 'image'
+    | 'plus' | 'minus' | 'x' | 'arrow-left' | 'arrow-right' | 'chevron-right' | 'chevron-down'
+    | 'grip' | 'chef' | 'mail' | 'eye' | 'eye-off' | 'flame' | 'share' | 'settings' | 'home'
 
   interface Props {
     name: IconName
@@ -79,6 +81,38 @@
   {:else if name === 'image'}
     <rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9.5" r="1.5" />
     <path d="M21 16l-5-5-9 9" />
+  {:else if name === 'plus'}
+    <path d="M12 5v14M5 12h14" />
+  {:else if name === 'minus'}
+    <path d="M5 12h14" />
+  {:else if name === 'x'}
+    <path d="M18 6 6 18M6 6l12 12" />
+  {:else if name === 'arrow-left'}
+    <path d="M19 12H5M11 18l-6-6 6-6" />
+  {:else if name === 'arrow-right'}
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  {:else if name === 'chevron-right'}
+    <path d="m9 18 6-6-6-6" />
+  {:else if name === 'chevron-down'}
+    <path d="m6 9 6 6 6-6" />
+  {:else if name === 'grip'}
+    <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3" />
+  {:else if name === 'chef'}
+    <path d="M6 13.5V20h12v-6.5" /><path d="M6 13.5a4 4 0 1 1 2.2-7.4A4.5 4.5 0 0 1 16 5.6a4 4 0 1 1 2 7.9" /><path d="M6 17h12" />
+  {:else if name === 'mail'}
+    <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />
+  {:else if name === 'eye'}
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" />
+  {:else if name === 'eye-off'}
+    <path d="M3 3l18 18M10.6 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.1 3.9M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+  {:else if name === 'flame'}
+    <path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 1.5.8 2.5 2 2.5-1-3 0-5.5 1-8z" />
+  {:else if name === 'share'}
+    <circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="m8.2 10.8 7.6-4.6M8.2 13.2l7.6 4.6" />
+  {:else if name === 'settings'}
+    <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+  {:else if name === 'home'}
+    <path d="M3 10.5 12 3l9 7.5" /><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9" />
   {/if}
 </svg>
 
