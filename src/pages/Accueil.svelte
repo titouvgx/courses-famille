@@ -182,12 +182,13 @@
     padding-right: 48px; /* place pour l'avatar en haut à droite */
   }
 
+  /* Le fond est une photo sombre (clair comme sombre) : textes de l'en-tête en blanc */
   .date-chip {
     display: inline-block;
     padding: 3px 11px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
-    color: var(--primary);
+    background: rgba(255, 255, 255, 0.16);
+    color: #FFFFFF;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 8px;
@@ -200,6 +201,8 @@
   .hero h1 {
     font-size: clamp(28px, 8vw, 44px);
     font-weight: 800;
+    color: #FFFFFF;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 
   .wave {
@@ -218,7 +221,7 @@
 
   .subtitle {
     margin-top: 4px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.82);
     font-size: 15px;
   }
 

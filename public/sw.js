@@ -1,7 +1,8 @@
 // Service Worker — Courses en famille
 // Stratégie : cache-first pour les assets statiques, network-first pour les API.
 
-const CACHE_NAME = 'courses-v1'
+// Changer ce nom vide l'ancien cache chez tout le monde au prochain chargement
+const CACHE_NAME = 'courses-v2'
 
 // Assets à pré-cacher lors de l'installation
 const PRECACHE_URLS = [
@@ -90,7 +91,10 @@ self.addEventListener('fetch', (event) => {
   // Navigation (HTML) : network-first, fallback sur cache
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      // cache: 'no-cache' → on redemande toujours au serveur si la page a changé.
+      // Sans ça, le cache HTTP du navigateur (10 min sur GitHub Pages) renvoyait
+      // l'ancienne page, qui chargeait l'ancien code après un déploiement.
+      fetch(request, { cache: 'no-cache' })
         .then((response) => {
           if (response.ok) {
             const clone = response.clone()
