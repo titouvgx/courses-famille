@@ -33,6 +33,8 @@
 
   // ── Suppression ──
   let deleteTarget = $state<ShoppingList | null>(null)
+  /** Comme la base : seul un admin du foyer supprime une liste */
+  const isAdmin = $derived(profileState.profile?.role === 'admin')
   let deleting = $state(false)
 
   // ── Chargement initial ──
@@ -313,9 +315,11 @@
               {/if}
 
               <div class="detail-actions">
+                {#if isAdmin}
                 <button class="btn btn-delete" onclick={() => (deleteTarget = list)}>
                   <Icon name="trash" size={16} /> Supprimer cette liste
                 </button>
+                {/if}
               </div>
             </div>
           {/if}

@@ -69,6 +69,7 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 9. `recipe_images.sql` — images Unsplash
 10. `realtime_publication.sql` — temps réel sur `shopping_list_items` ET `meal_slots` (idempotent)
 11. `recipe_photos_storage.sql` — bucket public `recipe-photos` + politiques RLS Storage (idempotent)
+12. `security_fixes.sql` — audit du 13/11/2026 : rôle et foyer verrouillés dans `profiles` (trigger `guard_profile_update`), admin limité à son foyer, `recipe_exists` fermé aux anonymes, `image_url` limitée au stockage Supabase / Unsplash (idempotent)
 
 ### Realtime
 
@@ -199,6 +200,13 @@ public/
 - **Ne pas lancer** `npm audit fix --force`
 - **E-mail utilisateur** : donnée privée, ne pas partager en externe sans accord explicite
 - Le fichier `src/lib/supabase.ts` contient un garde-fou qui refuse de démarrer si une clé secrète est détectée
+
+### Sécurité — ce qui est en place
+- **Contrôle automatique** `.github/workflows/security-check.yml` : après chaque déploiement, chaque lundi et à la demande, vérifie avec la clé publique seule qu'un inconnu ne lit aucune table ni la liste des photos, et affiche les réglages Auth (inscriptions fermées, etc.). Lecture seule
+- **Garde-fou clé secrète au build** (`vite.config.ts`) : refuse de construire si la clé est `sb_secret_…` ou un JWT `service_role` (celui de `supabase.ts` n'est qu'un filet : à l'exécution, la clé serait déjà publiée)
+- **Droits côté appli = droits de la base** : Modifier = membre du foyer qui a créé la recette ; Supprimer recette / liste = admin de ce foyer. Une suppression filtrée par RLS (0 ligne, pas d'erreur) est signalée, jamais affichée comme réussie
+- RLS : les règles portent sur des **lignes**, pas des colonnes → pour limiter des colonnes (ex. `role`, `family_id`), un trigger. Sur Supabase, `REVOKE … FROM PUBLIC` ne retire pas `anon` : viser `anon` explicitement
+- Banc d'attaque local (hors dépôt pour l'instant) : migrations rejouées dans PGlite + 35 tentatives d'accès entre foyers
 
 ## Variables d'environnement
 

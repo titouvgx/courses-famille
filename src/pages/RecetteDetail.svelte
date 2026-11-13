@@ -65,6 +65,13 @@
   })
 
   const isAdmin = $derived(profileState.profile?.role === 'admin')
+  // Les recettes sont partagées entre foyers, mais seul le foyer qui l'a créée
+  // peut la modifier (tout membre) ou la supprimer (son admin) — comme la base.
+  const ownRecipe = $derived(
+    Boolean(recipe && profileState.profile && recipe.family_id === profileState.profile.family_id)
+  )
+  const canEdit = $derived(ownRecipe)
+  const canDelete = $derived(ownRecipe && isAdmin)
 
   const defaultPortions = $derived(recipe?.default_portions || 4)
   const scale = $derived(portions / defaultPortions)
@@ -259,14 +266,16 @@
         {/if}
       </div>
 
-      {#if isAdmin}
+      {#if canEdit}
         <div class="admin">
           <a href={href('editer-recette', recipe.id)} class="admin-btn">
             <Icon name="pencil" size={18} /> Modifier
           </a>
-          <button class="admin-btn danger" onclick={() => (showDeleteConfirm = true)}>
-            <Icon name="trash" size={18} /> Supprimer
-          </button>
+          {#if canDelete}
+            <button class="admin-btn danger" onclick={() => (showDeleteConfirm = true)}>
+              <Icon name="trash" size={18} /> Supprimer
+            </button>
+          {/if}
         </div>
       {/if}
     </div>

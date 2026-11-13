@@ -146,6 +146,9 @@
 
         if (editId && results[2]) {
           const r = results[2]
+          if (familyId && r.family_id !== familyId) {
+            throw new Error('Cette recette appartient à un autre foyer : seul ce foyer peut la modifier.')
+          }
           title = r.title
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min

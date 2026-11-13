@@ -11,7 +11,20 @@ export const supabaseConfigured = Boolean(url && publishableKey)
 
 // Garde-fou : si quelqu'un colle par erreur la clé secrète, on refuse de démarrer
 // plutôt que de l'envoyer à tous les navigateurs.
-if (publishableKey?.startsWith('sb_secret_')) {
+// (Le vrai barrage est au build, dans vite.config.ts : ici c'est un filet.)
+function looksSecret(key: string | undefined): boolean {
+  if (!key) return false
+  if (key.startsWith('sb_secret_')) return true
+  const parts = key.split('.')
+  if (parts.length !== 3) return false
+  try {
+    const json = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json)?.role === 'service_role'
+  } catch {
+    return false
+  }
+}
+if (looksSecret(publishableKey)) {
   throw new Error('Clé secrète détectée dans le frontend : utilise la clé publishable.')
 }
 

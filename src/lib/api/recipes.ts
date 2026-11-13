@@ -440,20 +440,22 @@ export async function deleteRecipe(recipeId: string): Promise<void> {
     .select('id')
   if (error) throw error
 
-  // Le fichier n'est supprimé que si la ligne l'a bien été (RLS peut filtrer
-  // silencieusement un DELETE non autorisé : 0 ligne, pas d'erreur).
-  if (deleted && deleted.length > 0) {
-    await deleteRecipeImage(current?.image_url)
-    // Vider aussi tout le dossier de la recette : récupère les photos restées
-    // orphelines après un échec précédent. Jamais bloquant.
-    try {
-      const bucket = supabase.storage.from(RECIPE_PHOTOS_BUCKET)
-      const { data: files } = await bucket.list(recipeId, { limit: 100 })
-      const paths = (files ?? []).filter((f) => f.id).map((f) => `${recipeId}/${f.name}`)
-      if (paths.length > 0) await bucket.remove(paths)
-    } catch (e) {
-      console.warn('Nettoyage des photos de la recette impossible :', e)
-    }
+  // RLS filtre silencieusement un DELETE non autorisé : 0 ligne, pas d'erreur.
+  // On le dit plutôt que d'afficher « supprimée » à tort.
+  if (!deleted || deleted.length === 0) {
+    throw new Error("Suppression refusée : seul un administrateur du foyer qui a créé la recette peut la supprimer.")
+  }
+
+  await deleteRecipeImage(current?.image_url)
+  // Vider aussi tout le dossier de la recette : récupère les photos restées
+  // orphelines après un échec précédent. Jamais bloquant.
+  try {
+    const bucket = supabase.storage.from(RECIPE_PHOTOS_BUCKET)
+    const { data: files } = await bucket.list(recipeId, { limit: 100 })
+    const paths = (files ?? []).filter((f) => f.id).map((f) => `${recipeId}/${f.name}`)
+    if (paths.length > 0) await bucket.remove(paths)
+  } catch (e) {
+    console.warn('Nettoyage des photos de la recette impossible :', e)
   }
 }
 

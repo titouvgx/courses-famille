@@ -12,11 +12,12 @@ CREATE TABLE known_ingredients (
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
+-- Activer l'extension trigram AVANT l'index qui en a besoin
+-- (dans l'ordre inverse, le script échoue sur un projet neuf, ex. courses-prod)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Index pour la recherche ILIKE
 CREATE INDEX idx_known_ingredients_name ON known_ingredients USING gin (name gin_trgm_ops);
-
--- Activer l'extension trigram si pas déjà fait
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- RLS : lecture pour tout utilisateur authentifié, pas de modification côté client
 ALTER TABLE known_ingredients ENABLE ROW LEVEL SECURITY;

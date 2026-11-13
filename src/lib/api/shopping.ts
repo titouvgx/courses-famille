@@ -450,10 +450,15 @@ export async function completeList(listId: string): Promise<void> {
 export async function deleteList(listId: string): Promise<void> {
   if (!supabase) throw new Error('Supabase non configuré')
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('shopping_lists')
     .delete()
     .eq('id', listId)
+    .select('id')
 
   if (error) throw error
+  // RLS : seul un admin du foyer peut supprimer (sinon 0 ligne, sans erreur)
+  if (!data || data.length === 0) {
+    throw new Error('Suppression refusée : seul un administrateur du foyer peut supprimer une liste.')
+  }
 }
