@@ -94,6 +94,41 @@ export async function fetchSlots(planId: string): Promise<MealSlotWithRecipe[]> 
 }
 
 /**
+ * Lecture seule : créneaux déjà remplis sur plusieurs semaines (sans créer de plan).
+ * Sert à afficher « déjà prévu » dans la fenêtre d'ajout à la semaine.
+ * @returns un objet { 'AAAA-MM-JJ' (lundi) : créneaux de cette semaine }
+ */
+export async function fetchSlotsForWeeks(
+  familyId: string,
+  weekStarts: string[],
+): Promise<Record<string, MealSlotWithRecipe[]>> {
+  const result: Record<string, MealSlotWithRecipe[]> = {}
+  for (const w of weekStarts) result[w] = []
+  if (!supabase || weekStarts.length === 0) return result
+
+  const { data: plans, error: plansErr } = await supabase
+    .from('meal_plans')
+    .select('id, week_start')
+    .eq('family_id', familyId)
+    .in('week_start', weekStarts)
+  if (plansErr) throw plansErr
+  if (!plans || plans.length === 0) return result
+
+  const weekByPlan = new Map(plans.map((p: { id: string; week_start: string }) => [p.id, p.week_start]))
+  const { data: slots, error: slotsErr } = await supabase
+    .from('meal_slots')
+    .select('*, recipes (id, title, image_url, default_portions, prep_time_min)')
+    .in('meal_plan_id', [...weekByPlan.keys()])
+  if (slotsErr) throw slotsErr
+
+  for (const slot of (slots ?? []) as MealSlotWithRecipe[]) {
+    const week = weekByPlan.get(slot.meal_plan_id)
+    if (week) result[week].push(slot)
+  }
+  return result
+}
+
+/**
  * Ajoute ou remplace un créneau (upsert via DELETE + INSERT
  * car Supabase JS ne gère pas l'upsert sur contrainte composite facilement).
  */

@@ -132,6 +132,7 @@ src/
 │   ├── AppBackdrop.svelte        # Fond de TOUTES les pages : photo de mer floutée (public/bg/, WebP 640/1280) + zoom lent + voile (variant home/page)
 │   ├── Icon.svelte               # Icônes au trait (remplacent les émojis décoratifs)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
+│   ├── PlanRecipeDialog.svelte   # Fenêtre centrée 2 étapes : créneau (4 semaines, créneaux pris visibles) → ingrédients aux courses (mode 'plan' ou 'cart')
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
 ├── lib/
@@ -146,13 +147,13 @@ src/
 │   ├── images.ts                 # sizedImage() : redimensionne les URL Unsplash pour le mobile
 │   └── api/
 │       ├── recipes.ts            # CRUD recettes
-│       ├── meals.ts              # CRUD planning (plans + slots)
+│       ├── meals.ts              # CRUD planning (plans + slots) + fetchSlotsForWeeks (lecture seule, sans créer de plan)
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
 │   ├── Login.svelte              # Connexion / inscription
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
 │   ├── Recettes.svelte           # Liste des recettes (paginée)
-│   ├── RecetteDetail.svelte      # Détail recette + ajout semaine/panier
+│   ├── RecetteDetail.svelte      # Détail recette ; « Ajouter à ma semaine » (puis courses) / « Juste les ingrédients »
 │   ├── RecetteForm.svelte        # Formulaire création/édition
 │   ├── Semaine.svelte            # Planning : cartes jour + tuiles Midi/Soir (téléphone), 2 col (tablette), 7 colonnes (≥ 1100 px)
 │   ├── Courses.svelte            # Liste de courses active (realtime)

@@ -3,9 +3,7 @@
   import { router, href, navigate } from '../lib/router.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { fetchRecipe, deleteRecipe } from '../lib/api/recipes'
-  import { getMonday, toISODate, fetchOrCreatePlan, setSlot } from '../lib/api/meals'
-  import { addIngredientsToList } from '../lib/api/shopping'
-  import type { IngredientToAdd } from '../lib/api/shopping'
+  import PlanRecipeDialog from '../components/PlanRecipeDialog.svelte'
   import { toast } from '../lib/toast.svelte'
   import type { RecipeDetail } from '../lib/types'
 
@@ -15,128 +13,9 @@
   let deleting = $state(false)
   let showDeleteConfirm = $state(false)
 
-  // ── Ajouter au panier ──
-  let showCartPicker = $state(false)
-  let cartPortions = $state(4)
-  let cartChecked = $state<Record<string, boolean>>({})
-  let addingToCart = $state(false)
-
-  function openCartPicker() {
-    if (!recipe) return
-    cartPortions = recipe.default_portions
-    // Tout coché par défaut
-    cartChecked = {}
-    for (const ing of recipe.recipe_ingredients) {
-      cartChecked[ing.id] = true
-    }
-    showCartPicker = true
-  }
-
-  const cartSelectedCount = $derived(
-    Object.values(cartChecked).filter(Boolean).length
-  )
-
-  function toggleAllCart() {
-    if (!recipe) return
-    const allChecked = cartSelectedCount === recipe.recipe_ingredients.length
-    for (const ing of recipe.recipe_ingredients) {
-      cartChecked[ing.id] = !allChecked
-    }
-  }
-
-  function scaledQty(qty: number | null): string {
-    if (!qty || !recipe) return ''
-    const scale = cartPortions / (recipe.default_portions || 4)
-    const scaled = Math.round(qty * scale * 100) / 100
-    // Afficher proprement : pas de .00
-    return scaled % 1 === 0 ? String(scaled) : scaled.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
-  }
-
-  async function confirmAddToCart() {
-    if (!recipe || addingToCart) return
-    const familyId = profileState.profile?.family_id
-    if (!familyId) {
-      toast.error('Profil introuvable.')
-      return
-    }
-
-    const selected: IngredientToAdd[] = recipe.recipe_ingredients
-      .filter((ing) => cartChecked[ing.id])
-      .map((ing) => ({
-        name: ing.name,
-        quantity: ing.quantity,
-        unit: ing.unit,
-        shopping_category_id: ing.shopping_category_id,
-      }))
-
-    if (selected.length === 0) {
-      toast.error('Sélectionne au moins un ingrédient.')
-      return
-    }
-
-    addingToCart = true
-    try {
-      const count = await addIngredientsToList(
-        familyId,
-        selected,
-        cartPortions,
-        recipe.default_portions,
-        recipe.id,
-      )
-      showCartPicker = false
-      toast.success(`${count} ingrédient${count > 1 ? 's' : ''} ajouté${count > 1 ? 's' : ''} au panier !`)
-    } catch (e: any) {
-      toast.error(e.message)
-    } finally {
-      addingToCart = false
-    }
-  }
-
-  // ── Ajouter à la semaine ──
-  let showWeekPicker = $state(false)
-  let addingToWeek = $state(false)
-
-  const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-
-  function weekDayDate(dayIdx: number): string {
-    const monday = getMonday(new Date())
-    const d = new Date(monday)
-    d.setDate(d.getDate() + dayIdx)
-    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-  }
-
-  function isDayToday(dayIdx: number): boolean {
-    const monday = getMonday(new Date())
-    const d = new Date(monday)
-    d.setDate(d.getDate() + dayIdx)
-    const now = new Date()
-    return d.getFullYear() === now.getFullYear()
-      && d.getMonth() === now.getMonth()
-      && d.getDate() === now.getDate()
-  }
-
-  async function addToWeek(dayIdx: number, meal: 'midi' | 'soir') {
-    if (!recipe || addingToWeek) return
-    const familyId = profileState.profile?.family_id
-    if (!familyId) {
-      toast.error('Profil introuvable.')
-      return
-    }
-
-    addingToWeek = true
-    try {
-      const monday = getMonday(new Date())
-      const plan = await fetchOrCreatePlan(familyId, toISODate(monday))
-      await setSlot(plan.id, dayIdx, meal, recipe.id, recipe.default_portions)
-      showWeekPicker = false
-      const mealLabel = meal === 'midi' ? 'midi' : 'soir'
-      toast.success(`${recipe.title} ajoutée ${DAY_NAMES[dayIdx]} ${mealLabel} !`)
-    } catch (e: any) {
-      toast.error(e.message)
-    } finally {
-      addingToWeek = false
-    }
-  }
+  // ── Planifier / ajouter aux courses (fenêtre en 2 étapes) ──
+  // 'plan' : choisir un créneau puis proposer les ingrédients ; 'cart' : seulement les ingrédients
+  let dialogMode = $state<'plan' | 'cart' | null>(null)
 
   $effect(() => {
     const id = router.recipeId
@@ -251,11 +130,11 @@
 
     <!-- Actions rapides -->
     <div class="quick-actions">
-      <button class="btn btn-add-cart" onclick={openCartPicker}>
-        <Icon name="cart" /> Ajouter au panier
-      </button>
-      <button class="btn btn-add-week" onclick={() => (showWeekPicker = true)}>
+      <button class="btn btn-add-week" onclick={() => (dialogMode = 'plan')}>
         <Icon name="calendar" /> Ajouter à ma semaine
+      </button>
+      <button class="btn btn-add-cart" onclick={() => (dialogMode = 'cart')}>
+        <Icon name="cart" /> Juste les ingrédients
       </button>
     </div>
 
@@ -291,119 +170,8 @@
       </div>
     {/if}
 
-    <!-- Picker « Ajouter à la semaine » -->
-    <!-- Picker « Ajouter au panier » -->
-    {#if showCartPicker}
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <div class="overlay overlay-bottom" onclick={() => (showCartPicker = false)}>
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="cart-picker" onclick={(e) => e.stopPropagation()}>
-          <div class="cp-header">
-            <h2>Ajouter au panier</h2>
-            <button class="picker-close" onclick={() => (showCartPicker = false)} aria-label="Fermer">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
-          </div>
-
-          <!-- Portions -->
-          <div class="cp-portions">
-            <span class="cp-portions-label">Portions :</span>
-            <div class="cp-portions-ctrl">
-              <button class="cp-pm-btn" onclick={() => { if (cartPortions > 1) cartPortions-- }}>−</button>
-              <span class="cp-pm-val">{cartPortions}</span>
-              <button class="cp-pm-btn" onclick={() => cartPortions++}>+</button>
-            </div>
-          </div>
-
-          <!-- Toggle tout / rien -->
-          <div class="cp-toggle-row">
-            <button class="cp-toggle-btn" onclick={toggleAllCart}>
-              {#if recipe && cartSelectedCount === recipe.recipe_ingredients.length}
-                Tout désélectionner
-              {:else}
-                Tout sélectionner
-              {/if}
-            </button>
-            <span class="cp-count">{cartSelectedCount} sélectionné{cartSelectedCount > 1 ? 's' : ''}</span>
-          </div>
-
-          <!-- Liste des ingrédients -->
-          <div class="cp-list">
-            {#if recipe}
-              {#each recipe.recipe_ingredients as ing (ing.id)}
-                <label class="cp-item" class:cp-unchecked={!cartChecked[ing.id]}>
-                  <input
-                    type="checkbox"
-                    class="cp-checkbox"
-                    checked={cartChecked[ing.id]}
-                    onchange={() => (cartChecked[ing.id] = !cartChecked[ing.id])}
-                  />
-                  <span class="cp-item-qty">
-                    {scaledQty(ing.quantity)}{#if ing.unit} {ing.unit}{/if}
-                  </span>
-                  <span class="cp-item-name">{ing.name}</span>
-                </label>
-              {/each}
-            {/if}
-          </div>
-
-          <!-- Bouton confirmer -->
-          <button
-            class="btn btn-primary cp-confirm"
-            disabled={addingToCart || cartSelectedCount === 0}
-            onclick={confirmAddToCart}
-          >
-            {#if addingToCart}
-              Ajout en cours…
-            {:else}
-              Ajouter {cartSelectedCount} ingrédient{cartSelectedCount > 1 ? 's' : ''}
-            {/if}
-          </button>
-        </div>
-      </div>
-    {/if}
-
-    {#if showWeekPicker}
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <div class="overlay overlay-bottom" onclick={() => (showWeekPicker = false)}>
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div class="week-picker" onclick={(e) => e.stopPropagation()}>
-          <div class="wp-header">
-            <h2>Ajouter à la semaine</h2>
-            <button class="picker-close" onclick={() => (showWeekPicker = false)} aria-label="Fermer">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <p class="wp-sub">Choisis le créneau pour « {recipe.title} »</p>
-          <div class="wp-grid">
-            {#each Array(7) as _, dayIdx}
-              {@const today = isDayToday(dayIdx)}
-              <div class="wp-day" class:wp-today={today}>
-                <div class="wp-day-label">
-                  <span class="wp-day-name">{DAY_NAMES[dayIdx]}</span>
-                  <span class="wp-day-date">{weekDayDate(dayIdx)}</span>
-                </div>
-                <div class="wp-meals">
-                  <button
-                    class="wp-meal-btn"
-                    disabled={addingToWeek}
-                    onclick={() => addToWeek(dayIdx, 'midi')}
-                  ><Icon name="sun" size={15} /> Midi</button>
-                  <button
-                    class="wp-meal-btn"
-                    disabled={addingToWeek}
-                    onclick={() => addToWeek(dayIdx, 'soir')}
-                  ><Icon name="moon" size={15} /> Soir</button>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-      </div>
+    {#if dialogMode}
+      <PlanRecipeDialog {recipe} mode={dialogMode} onclose={() => (dialogMode = null)} />
     {/if}
   {/if}
 </div>
@@ -586,11 +354,6 @@
     padding: var(--gutter);
   }
 
-  .overlay-bottom {
-    align-items: flex-end;
-    padding: 0;
-  }
-
   .confirm-dialog {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -639,6 +402,7 @@
     font-family: var(--font-body);
     border: none;
     cursor: pointer;
+    touch-action: manipulation;
     transition: opacity 0.15s, transform 0.1s;
   }
 
@@ -647,304 +411,20 @@
     transform: scale(0.97);
   }
 
-  .btn-add-cart {
+  /* Action principale : planifier (les courses sont proposées juste après) */
+  .btn-add-week {
+    flex-basis: 100%;
+    padding: 15px 12px;
+    font-size: 15px;
     background: var(--accent);
     color: white;
   }
 
-  .btn-add-week {
-    background: var(--primary);
-    color: var(--on-primary);
-  }
-
-  /* ── Cart picker modal ── */
-  .cart-picker {
-    background: var(--bg);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    padding: 16px;
-    animation: picker-in 0.25s ease-out;
-  }
-
-  .cp-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .cp-header h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .cp-portions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    background: var(--surface);
-    border-radius: var(--radius-md);
-    margin-bottom: 10px;
-  }
-
-  .cp-portions-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .cp-portions-ctrl {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .cp-pm-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1.5px solid var(--border-strong);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    font-family: var(--font-body);
-    line-height: 1;
-    transition: all 0.15s;
-  }
-
-  .cp-pm-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .cp-pm-val {
-    font-size: 16px;
-    font-weight: 700;
-    min-width: 24px;
-    text-align: center;
-    color: var(--text);
-  }
-
-  .cp-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .cp-toggle-btn {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--primary);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-body);
-    padding: 0;
-  }
-
-  .cp-toggle-btn:hover {
-    text-decoration: underline;
-  }
-
-  .cp-count {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .cp-list {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 12px;
-    max-height: 40dvh;
-  }
-
-  .cp-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .cp-unchecked {
-    opacity: 0.45;
-  }
-
-  .cp-checkbox {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    accent-color: var(--primary);
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-
-  .cp-item-qty {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--primary);
-    min-width: 50px;
-    flex-shrink: 0;
-  }
-
-  .cp-item-name {
-    font-size: 14px;
-    color: var(--text);
-    flex: 1;
-    min-width: 0;
-  }
-
-  .cp-confirm {
-    flex-shrink: 0;
-  }
-
-  /* ── Week picker modal ── */
-  .week-picker {
-    background: var(--bg);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px;
-    animation: picker-in 0.25s ease-out;
-  }
-
-  @keyframes picker-in {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-
-  .wp-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-  }
-
-  .wp-header h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .picker-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: none;
-    background: var(--surface);
-    color: var(--text-secondary);
-    cursor: pointer;
-  }
-
-  .wp-sub {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .wp-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .wp-day {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    gap: 8px;
-  }
-
-  .wp-today {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-  }
-
-  .wp-day-label {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .wp-day-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .wp-today .wp-day-name {
-    color: var(--primary);
-  }
-
-  .wp-day-date {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .wp-meals {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .wp-meal-btn {
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border);
+  /* Action secondaire : acheter sans planifier */
+  .btn-add-cart {
     background: transparent;
     color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: var(--font-body);
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .wp-meal-btn:hover {
-    border-color: var(--primary);
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-    color: var(--primary);
-  }
-
-  .wp-meal-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    border: 1px solid var(--border-strong);
   }
 
   .center-msg {
