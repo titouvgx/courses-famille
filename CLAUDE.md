@@ -266,7 +266,13 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Étape 10 : Déploiement prod (brancher `courses-prod`, variables d'env, Realtime)
 
 ### V2 (décidé, PAS maintenant)
-- Inviter un membre par lien à usage unique (fonction serveur Supabase, clé secrète côté Supabase uniquement)
+- **Familles multiples + invitations en chaîne** (décisions du 13/11/2026) :
+  - Le super-admin envoie un lien → l'invité crée son compte puis est **obligé de créer au moins une famille (max 3, limite imposée par la base)** ; il en est admin
+  - Cet admin invite des gens dans ses familles par lien (usage unique, expiration 7 j, jeton stocké chiffré, création de compte par fonction serveur Supabase — clé secrète côté Supabase uniquement)
+  - **Ses invités ne peuvent PAS créer de famille** (pas de chaîne au-delà d'un niveau dans cette version)
+  - Modèle : table d'adhésions (personne, famille, rôle par famille) à la place de `profiles.family_id` ; `is_family()` / `is_admin()` réécrites ; sélecteur de famille active dans l'en-tête ; tout le banc d'attaque à rejouer
+  - **Recettes partagées seulement dans la famille et la « super-famille »** (à confirmer : l'ensemble des familles créées par un même admin) — plus de partage entre tous les utilisateurs
+- **Mot de passe oublié** : `resetPasswordForEmail` de Supabase + page « nouveau mot de passe » (`updateUser`). Piège routeur `#` : faire pointer le lien de l'e-mail vers `?token_hash=…&type=recovery` (paramètre avant le `#`) traité par `verifyOtp`, ajouter l'URL aux redirections autorisées. E-mails intégrés limités (≈ 2/heure pour tout le projet) : suffisant en famille, Resend sinon
 - Importer une recette depuis un lien (fonction serveur, sites autorisés seulement, sans la photo)
 
 ### Idées futures (PAS à implémenter maintenant)
