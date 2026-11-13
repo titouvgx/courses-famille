@@ -7,6 +7,7 @@ import { tick } from 'svelte'
 export type Route =
   | 'login'
   | 'accueil'          // page d'accueil : 5 recettes du jour
+  | 'frigo'            // « Qu'est-ce qu'on mange ? » : recettes selon le frigo
   | 'recettes'
   | 'recette'          // détail : #/recette/<id>
   | 'nouvelle-recette' // création : #/nouvelle-recette
@@ -21,7 +22,7 @@ export type Route =
 export const TAB_ROUTES = ['accueil', 'recettes', 'semaine', 'courses', 'historique'] as const
 export type TabRoute = (typeof TAB_ROUTES)[number]
 
-const STATIC_ROUTES: string[] = ['login', 'accueil', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
+const STATIC_ROUTES: string[] = ['login', 'accueil', 'frigo', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
 const DEFAULT_ROUTE: Route = 'accueil'
 
 interface RouterState {
@@ -65,7 +66,7 @@ export const router: RouterState = $state(readHash())
 /** Position de chaque écran : onglets de gauche à droite, sous-pages juste après leur onglet. */
 const ORDER: Record<Route, number> = {
   login: -10,
-  accueil: 0,
+  accueil: 0, frigo: 1,
   recettes: 10, recette: 11, 'nouvelle-recette': 11, 'editer-recette': 12,
   semaine: 20,
   courses: 30,

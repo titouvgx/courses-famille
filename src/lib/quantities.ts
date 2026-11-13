@@ -117,3 +117,31 @@ export function normalizeText(text: string): string {
 export function ingredientKey(name: string): string {
   return normalizeText(name)
 }
+
+/**
+ * Clé de correspondance plus tolérante (placard, frigo) : comme ingredientKey,
+ * mais au singulier mot par mot (« Courgettes » = « courgette », « Œufs » = « oeuf »,
+ * « Poireaux » = « poireau »). Ne sert qu'à comparer, jamais à afficher.
+ */
+export function matchKey(name: string): string {
+  return ingredientKey(name)
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
+    .split(' ')
+    .map((w) => (w.length > 3 && /[sx]$/.test(w) && !/ss$/.test(w) ? w.slice(0, -1) : w))
+    .join(' ')
+}
+
+/** Vrai si deux noms désignent le même produit (« sel » ≈ « sel fin », « huile d'olive » ≈ « huile »). */
+export function sameProduct(a: string, b: string): boolean {
+  const ka = matchKey(a)
+  const kb = matchKey(b)
+  if (!ka || !kb) return false
+  if (ka === kb) return true
+  // L'un est le début de l'autre, sur un mot entier : « huile » ↔ « huile d'olive ».
+  // Ici on garde le pluriel : « pâtes » ne doit pas avaler « pâte à crêpes ».
+  const ra = ingredientKey(a).replace(/[’‘]/g, "'")
+  const rb = ingredientKey(b).replace(/[’‘]/g, "'")
+  const [short, long] = ra.length <= rb.length ? [ra, rb] : [rb, ra]
+  return long.startsWith(short + ' ') || long.startsWith(short + "'")
+}

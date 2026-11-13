@@ -17,7 +17,10 @@
   } from '../lib/api/meals'
   import { fetchRecipes } from '../lib/api/recipes'
   import { sizedImage } from '../lib/images'
-  import type { MealSlotWithRecipe, RecipeWithCategory } from '../lib/types'
+  import { fetchFamilyMembers, setSlotCook } from '../lib/api/household'
+  import { toast } from '../lib/toast.svelte'
+  import CookPicker from '../components/CookPicker.svelte'
+  import type { FamilyMember, MealSlotWithRecipe, RecipeWithCategory } from '../lib/types'
 
   // ── État principal ──
   let weekMonday: Date = $state(getMonday(new Date()))
@@ -261,6 +264,101 @@
     d.setDate(d.getDate() + dayIndex)
     return d.getDate()
   }
+
+  // ── Qui cuisine ? ──
+
+  let members: FamilyMember[] = $state([])
+  let membersLoading = $state(false)
+  let membersFamily: string | null = null // foyer déjà chargé (non réactif : évite de recharger)
+
+  // Membres du foyer : chargés une fois (et de nouveau seulement si le foyer change)
+  $effect(() => {
+    const familyId = profileState.profile?.family_id
+    if (!familyId || familyId === membersFamily) return
+    membersFamily = familyId
+    membersLoading = true
+    fetchFamilyMembers(familyId)
+      .then((list) => {
+        if (membersFamily === familyId) members = list
+      })
+      .catch((e) => {
+        console.error('Erreur chargement membres:', e?.message ?? e)
+        membersFamily = null // on réessaiera à la prochaine ouverture du sélecteur
+      })
+      .finally(() => {
+        membersLoading = false
+      })
+  })
+
+  const myId = $derived(profileState.profile?.id ?? null)
+
+  /** Nom du cuisinier d'un créneau (null = personne ou colonne absente). */
+  function cookName(slot: MealSlotWithRecipe): string | null {
+    const id = slot.cook_id
+    if (!id) return null
+    if (id === myId && profileState.profile?.display_name) return profileState.profile.display_name
+    return members.find((m) => m.id === id)?.display_name ?? null
+  }
+
+  function initialOf(name: string | null): string {
+    return name?.trim().charAt(0).toUpperCase() || '?'
+  }
+
+  let cookSlotId = $state<string | null>(null)
+  const cookSlot = $derived(cookSlotId ? slots.find((s) => s.id === cookSlotId) : undefined)
+
+  function openCookPicker(slot: MealSlotWithRecipe) {
+    cookSlotId = slot.id
+    // Les membres n'ont pas pu être chargés au départ : nouvel essai
+    const familyId = profileState.profile?.family_id
+    if (familyId && membersFamily === null && !membersLoading) {
+      membersFamily = familyId
+      membersLoading = true
+      fetchFamilyMembers(familyId)
+        .then((list) => (members = list))
+        .catch(() => {
+          membersFamily = null
+          toast.error('Impossible de charger les membres du foyer.')
+        })
+        .finally(() => (membersLoading = false))
+    }
+  }
+
+  function closeCookPicker() {
+    cookSlotId = null
+  }
+
+  function patchCook(slotId: string, cookId: string | null) {
+    slots = slots.map((s) => (s.id === slotId ? { ...s, cook_id: cookId } : s))
+  }
+
+  async function chooseCook(cookId: string | null) {
+    const slot = cookSlot
+    closeCookPicker()
+    if (!slot) return
+    const previous = slot.cook_id ?? null
+    if (previous === cookId) return
+
+    patchCook(slot.id, cookId) // optimiste
+    try {
+      await setSlotCook(slot.id, cookId)
+    } catch (e: any) {
+      // Retour arrière, sauf si quelqu'un a changé le créneau entre-temps
+      const now = slots.find((s) => s.id === slot.id)
+      if (now && (now.cook_id ?? null) === cookId) patchCook(slot.id, previous)
+      const msg = `${e?.message ?? ''} ${e?.code ?? ''}`
+      if (/cook_id|PGRST204|42703/.test(msg)) {
+        toast.error("« Qui cuisine ? » n'est pas encore activé sur la base.")
+      } else {
+        toast.error("Le cuisinier n'a pas pu être enregistré. Réessaie.")
+      }
+      console.error('Erreur choix du cuisinier:', e?.message ?? e)
+    }
+  }
+
+  // ── Filtre « Mes repas » ──
+  let onlyMine = $state(false)
+  const myMealsCount = $derived(myId ? slots.filter((s) => s.cook_id === myId).length : 0)
 </script>
 
 <div class="page">
@@ -291,6 +389,21 @@
     <div class="summary-bar" aria-hidden="true">
       <div class="summary-fill" style:width="{(plannedCount / 14) * 100}%"></div>
     </div>
+
+    {#if !loading && !error && myId}
+      <div class="filter-row">
+        <button class="filter-chip" class:active={onlyMine} aria-pressed={onlyMine} onclick={() => (onlyMine = !onlyMine)}>
+          <Icon name="chef" size={16} />
+          Mes repas
+          <span class="filter-count">{myMealsCount}</span>
+        </button>
+        {#if onlyMine}
+          <span class="filter-hint" role="status">
+            {myMealsCount === 0 ? 'Tu ne cuisines aucun repas cette semaine' : myMealsCount === 1 ? 'Tu cuisines 1 repas' : `Tu cuisines ${myMealsCount} repas`}
+          </span>
+        {/if}
+      </div>
+    {/if}
   </header>
 
   {#if loading}
@@ -327,7 +440,22 @@
 <!-- Une tuile repas (remplie ou vide) -->
 {#snippet slotTile(dayIdx: number, meal: (typeof MEALS)[number], slot: MealSlotWithRecipe | undefined)}
   {#if slot}
-    <div class="slot filled">
+    {@const cook = cookName(slot)}
+    {@const mine = !!myId && slot.cook_id === myId}
+    <div class="slot filled" class:dimmed={onlyMine && !mine} class:mine={onlyMine && mine}>
+      <button
+        class="cook-btn"
+        onclick={() => openCookPicker(slot)}
+        aria-label={cook ? `Qui cuisine ? ${cook}` : 'Choisir qui cuisine'}
+        aria-haspopup="dialog"
+        title={cook ? `${cook} cuisine` : 'Choisir qui cuisine'}
+      >
+        {#if cook}
+          <span class="cook-dot" aria-hidden="true">{initialOf(cook)}</span>
+        {:else}
+          <span class="cook-dot cook-dot-empty" aria-hidden="true"><Icon name="chef" size={15} /></span>
+        {/if}
+      </button>
       <a href={href('recette', slot.recipes.id)} class="slot-visual" aria-label={slot.recipes.title}>
         {#if slot.recipes.image_url}
           <img src={sizedImage(slot.recipes.image_url, 260, 110)} alt="" loading="lazy" />
@@ -358,7 +486,7 @@
       </div>
     </div>
   {:else}
-    <button class="slot empty" onclick={() => openPicker(dayIdx, meal.key)} aria-label="Ajouter un repas : {DAY_NAMES_FULL[dayIdx]} {meal.label}">
+    <button class="slot empty" class:dimmed={onlyMine} onclick={() => openPicker(dayIdx, meal.key)} aria-label="Ajouter un repas : {DAY_NAMES_FULL[dayIdx]} {meal.label}">
       <span class="empty-meal"><Icon name={meal.icon} size={14} /> {meal.label}</span>
       <span class="empty-plus">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -429,6 +557,19 @@
       </div>
     </div>
   </div>
+{/if}
+
+<!-- Fenêtre « Qui cuisine ? » -->
+{#if cookSlot}
+  <CookPicker
+    members={members}
+    currentId={cookSlot.cook_id ?? null}
+    meId={myId}
+    loading={membersLoading}
+    subtitle="{DAY_NAMES_FULL[cookSlot.day_of_week]} {cookSlot.meal_type === 'midi' ? 'midi' : 'soir'} · {cookSlot.recipes.title}"
+    onselect={chooseCook}
+    onclose={closeCookPicker}
+  />
 {/if}
 
 <style>
@@ -675,6 +816,7 @@
 
   /* ── Tuile remplie ── */
   .slot.filled {
+    position: relative;
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.1);
@@ -842,7 +984,7 @@
     font-family: var(--font-body);
     cursor: pointer;
     touch-action: manipulation;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.2s;
   }
 
   .slot.empty:active {
@@ -870,7 +1012,134 @@
     color: var(--text);
   }
 
+  /* ── Qui cuisine ? : pastille en haut à droite de la photo ──
+     Zone tactile 44 px, visuel 28 px (même style que l'avatar de Mon compte) */
+  .cook-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cook-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 70%, var(--accent)));
+    color: var(--on-primary);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 2px rgba(6, 20, 45, 0.7), 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+  }
+
+  /* Personne : icône toque en contour sur fond sombre (lisible sur la photo) */
+  .cook-dot-empty {
+    background: rgba(6, 20, 45, 0.78);
+    color: #FFFFFF;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+  }
+
+  .cook-btn:active .cook-dot {
+    transform: scale(0.88);
+  }
+
+  .cook-btn:focus-visible {
+    outline: none;
+  }
+
+  .cook-btn:focus-visible .cook-dot {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* ── Filtre « Mes repas » ── */
+  .filter-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 12px;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 8px 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .filter-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
+  }
+
+  .filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 13px;
+  }
+
+  .filter-chip.active .filter-count {
+    background: rgba(6, 34, 58, 0.16);
+  }
+
+  .filter-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Filtre actif : mes repas mis en avant, les autres atténués (rien n'est caché) */
+  .slot {
+    transition: opacity 0.2s ease;
+  }
+
+  .slot.dimmed {
+    opacity: 0.38;
+  }
+
+  .slot.filled.mine {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+
   @media (hover: hover) and (pointer: fine) {
+    .cook-btn:hover .cook-dot { transform: scale(1.1); }
+    .filter-chip:not(.active):hover { border-color: var(--primary); color: var(--primary); }
+    .slot.dimmed:hover { opacity: 0.75; }
     .nav-btn:hover { background: var(--surface-hover); }
     .slot.empty:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
     .slot.filled:hover { border-color: var(--border-strong); }

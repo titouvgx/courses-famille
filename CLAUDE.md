@@ -30,7 +30,7 @@ Ce projet utilise exclusivement les **runes Svelte 5** :
 
 Le routeur (`src/lib/router.svelte.ts`) utilise le hash (`#/recettes`, `#/recette/<id>`) pour la compatibilité GitHub Pages. Les routes :
 - `login`, `accueil` (route par défaut), `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`
-- `semaine`, `courses`, `historique`, `compte`
+- `semaine`, `courses`, `historique`, `compte`, `frigo` (« Qu'est-ce qu'on mange ? », onglet Accueil actif)
 
 Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 
@@ -70,6 +70,7 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 10. `realtime_publication.sql` — temps réel sur `shopping_list_items` ET `meal_slots` (idempotent)
 11. `recipe_photos_storage.sql` — bucket public `recipe-photos` + politiques RLS Storage (idempotent)
 12. `security_fixes.sql` — audit du 13/11/2026 : rôle et foyer verrouillés dans `profiles` (trigger `guard_profile_update`), admin limité à son foyer, `recipe_exists` fermé aux anonymes, `image_url` limitée au stockage Supabase / Unsplash (idempotent)
+13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
 
 ### Realtime
 
@@ -89,6 +90,14 @@ Piège Svelte 5 : la variable qui garde le canal Realtime ne doit **pas** être 
 - La dernière liste de courses et le profil sont gardés dans `localStorage` (clés `courses:*`)
 - Les cochages faits sans réseau sont mis en file et renvoyés au retour du réseau (`flushPending`)
 - Tout est effacé à la déconnexion (`clearProfile(true)`)
+
+### Vie du foyer (`src/lib/api/household.ts`)
+- **Qui cuisine ?** : pastille sur chaque repas de Semaine (`CookPicker`), filtre « Mes repas » ; `setSlot` garde le cuisinier quand on change la recette ; Accueil : « Ce soir : … · X cuisine »
+- **Habituels** : bouton dans Courses (`StaplesDialog`) → articles `is_extra` (survivent à la mise à jour), sans doublon d'un article non coché
+- **Placard** (`PantryDialog`) : les articles du planning qui y sont vont dans « Sûrement déjà à la maison » (non comptés) ; « Il en manque » → `needed = true` (gardé par `regenerateList`)
+- **Qu'est-ce qu'on mange ?** (`Frigo.svelte`) : calcul dans le téléphone (`rankByFridge`) sur tous les ingrédients des recettes (lus par pages de 1000), placard compté comme disponible
+- Correspondance des noms : `matchKey` / `sameProduct` (quantities.ts) — pluriel toléré, « sel » ≈ « sel fin », mais « pâtes » ≠ « pâte à crêpes »
+- **Sans la migration 13**, l'appli fonctionne comme avant (colonnes nouvelles envoyées seulement si utiles, erreurs de chargement ignorées)
 
 ### Liste de courses
 - `regenerateList` : recalcule depuis le planning en **gardant** les articles cochés et ceux ajoutés à la main (`is_extra`)
@@ -155,6 +164,9 @@ src/
 │   ├── Icon.svelte               # Icônes au trait (remplacent les émojis décoratifs)
 │   ├── FloatingRecipeCard.svelte # Carte flottante de l'accueil (couches : position/parallaxe, drift x, drift y, rotation, carte)
 │   ├── ConfirmDialog.svelte      # Fenêtre de confirmation centrée commune
+│   ├── CookPicker.svelte         # « Qui cuisine ? » : membres du foyer + Personne
+│   ├── StaplesDialog.svelte      # Achats habituels : ajouter à la liste / modifier
+│   ├── PantryDialog.svelte       # Mon placard : ajout (autocomplétion), retrait, suggestions
 │   ├── CookMode.svelte           # Mode « En cuisine » : une étape à la fois, balayage, écran maintenu allumé (Wake Lock)
 │   ├── PlanRecipeDialog.svelte   # Fenêtre centrée 2 étapes : créneau (4 semaines, créneaux pris visibles) → ingrédients aux courses (mode 'plan' ou 'cart')
 │   ├── TabBar.svelte             # Navigation bottom bar
@@ -176,10 +188,12 @@ src/
 │       ├── recipes.ts            # CRUD recettes + recherche (index léger) + photos
 │       ├── recipeImages.ts       # Photos : compression, envoi Storage, suppression
 │       ├── meals.ts              # CRUD planning (plans + slots) + fetchSlotsForWeeks (lecture seule, sans créer de plan)
+│       ├── household.ts          # Membres, cuisinier, habituels, placard, index des ingrédients, rankByFridge
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
 │   ├── Login.svelte              # Connexion / inscription
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
+│   ├── Frigo.svelte              # « Qu'est-ce qu'on mange ? » : puces du frigo → recettes triées par ingrédients manquants
 │   ├── Recettes.svelte           # Recherche (toute la base, sans accents) + puces catégories + grille
 │   ├── RecetteDetail.svelte      # Fiche : grande photo, portions ajustables, ingrédients/étapes cochables, mode En cuisine, barre d'actions collée en bas
 │   ├── RecetteForm.svelte        # Formulaire création/édition + photo ; Entrée = ingrédient suivant, monter/descendre, validation, confirmation avant de quitter (clics + popstate + beforeunload)
@@ -206,7 +220,7 @@ public/
 - **Garde-fou clé secrète au build** (`vite.config.ts`) : refuse de construire si la clé est `sb_secret_…` ou un JWT `service_role` (celui de `supabase.ts` n'est qu'un filet : à l'exécution, la clé serait déjà publiée)
 - **Droits côté appli = droits de la base** : Modifier = membre du foyer qui a créé la recette ; Supprimer recette / liste = admin de ce foyer. Une suppression filtrée par RLS (0 ligne, pas d'erreur) est signalée, jamais affichée comme réussie
 - RLS : les règles portent sur des **lignes**, pas des colonnes → pour limiter des colonnes (ex. `role`, `family_id`), un trigger. Sur Supabase, `REVOKE … FROM PUBLIC` ne retire pas `anon` : viser `anon` explicitement
-- Banc d'attaque local (hors dépôt pour l'instant) : migrations rejouées dans PGlite + 35 tentatives d'accès entre foyers
+- Banc d'attaque local (hors dépôt pour l'instant) : migrations rejouées dans PGlite + 48 tentatives d'accès entre foyers
 
 ## Variables d'environnement
 
@@ -233,6 +247,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Bonus : « Ajouter au panier » avec sélection d'ingrédients et portions ajustables
 - Refonte UI V1 ✅ : accueil flottant, fond « mer », icônes, Semaine, Courses, Recettes, Historique, fenêtre « semaine puis courses »
 - V1 fiabilité ✅ : mise à jour de liste sans perte, hors connexion, planning en temps réel, recherche complète, quantités lisibles, photos
+- Vie du foyer ✅ : qui cuisine, habituels, placard, « Qu'est-ce qu'on mange ? »
 - Peaufinage ✅ : fiche recette + mode En cuisine, formulaire mobile, transitions de pages, Connexion et Mon compte (vider les données locales)
 
 ### Pièges connus
@@ -249,6 +264,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 
 ### Restant ⬜
 - Étape 10 : Déploiement prod (brancher `courses-prod`, variables d'env, Realtime)
+
+### V2 (décidé, PAS maintenant)
+- Inviter un membre par lien à usage unique (fonction serveur Supabase, clé secrète côté Supabase uniquement)
+- Importer une recette depuis un lien (fonction serveur, sites autorisés seulement, sans la photo)
 
 ### Idées futures (PAS à implémenter maintenant)
 - Nutri-Score (A à E) par recette

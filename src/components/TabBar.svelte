@@ -13,6 +13,9 @@
   const activeIndex = $derived(tabs.findIndex((t) => isActive(t.route)))
 
   function isActive(route: TabRoute): boolean {
+    if (route === 'accueil') {
+      return router.current === 'accueil' || router.current === 'frigo' // sous-page de l'accueil
+    }
     if (route === 'recettes') {
       return ['recettes', 'recette', 'nouvelle-recette', 'editer-recette'].includes(router.current)
     }

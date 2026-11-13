@@ -10,6 +10,7 @@
   import AppBackdrop from './components/AppBackdrop.svelte'
   import Login from './pages/Login.svelte'
   import Accueil from './pages/Accueil.svelte'
+  import Frigo from './pages/Frigo.svelte'
   import Recettes from './pages/Recettes.svelte'
   import RecetteDetail from './pages/RecetteDetail.svelte'
   import RecetteForm from './pages/RecetteForm.svelte'
@@ -68,6 +69,8 @@
   <div class="app-shell">
     {#if router.current === 'accueil'}
       <Accueil />
+    {:else if router.current === 'frigo'}
+      <Frigo />
     {:else if router.current === 'recettes'}
       <Recettes />
     {:else if router.current === 'recette'}

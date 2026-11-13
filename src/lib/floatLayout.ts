@@ -45,7 +45,7 @@ export interface FloatLayout {
 }
 
 /** Hauteur minimale de la zone (en dessous, la page défile). */
-export const MIN_ZONE_HEIGHT = 420
+export const MIN_ZONE_HEIGHT = 380
 
 const PAD = 10          // marge intérieure de la zone
 const RATIO = 1.1       // hauteur = largeur × RATIO

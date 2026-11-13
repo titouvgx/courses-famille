@@ -234,6 +234,9 @@ export async function regenerateList(listId: string, planId: string): Promise<nu
   const checkedBefore = new Map(
     current.filter((i) => !i.is_extra && i.checked).map((i) => [ingredientKey(i.name), i]),
   )
+  const neededBefore = new Set(
+    current.filter((i) => !i.is_extra && i.needed).map((i) => ingredientKey(i.name)),
+  )
   let position = extras.reduce((m, i) => Math.max(m, i.position), -1) + 1
 
   const fresh = [...aggregated.entries()].map(([key, ing]) => {
@@ -246,6 +249,9 @@ export async function regenerateList(listId: string, planId: string): Promise<nu
       source_recipe_id: ing.source_recipe_id,
       is_extra: false,
       checked: !!was,
+      // Colonne envoyée seulement si utile : l'appli marche encore si la
+      // migration « household » n'a pas été exécutée
+      ...(neededBefore.size > 0 ? { needed: neededBefore.has(key) } : {}),
       checked_by: was?.checked_by ?? null,
       checked_at: was?.checked_at ?? null,
       position: position++,

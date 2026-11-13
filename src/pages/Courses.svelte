@@ -4,9 +4,13 @@
   //   - temps réel entre membres (cochage, ajout, suppression)
   //   - hors connexion : dernière liste gardée sur le téléphone, cochages en attente
   //   - « Mettre à jour depuis le planning » ne perd ni les cochages ni les ajouts à la main
+  //   - achats habituels (fenêtre « Habituels ») et placard (« Sûrement déjà à la maison »),
+  //     masqués sans erreur si les tables n'existent pas encore côté base
   import { onMount, onDestroy } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import ConfirmDialog from '../components/ConfirmDialog.svelte'
+  import StaplesDialog from '../components/StaplesDialog.svelte'
+  import PantryDialog from '../components/PantryDialog.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { auth } from '../lib/auth.svelte'
   import { supabase } from '../lib/supabase'
@@ -19,8 +23,12 @@
   import {
     loadCachedList, saveCachedList, queueToggle, applyPending, flushPending,
     pendingToggles, isNetworkError,
+    loadCachedHousehold, saveCachedHousehold, queueNeeded, applyPendingNeeded, flushPendingNeeded,
   } from '../lib/offline'
-  import type { ShoppingList, ShoppingListItemWithCategory, ShoppingCategory } from '../lib/types'
+  import { fetchStaples, fetchPantry, isProbablyAtHome, setItemNeeded } from '../lib/api/household'
+  import type {
+    ShoppingList, ShoppingListItemWithCategory, ShoppingCategory, Staple, PantryItem,
+  } from '../lib/types'
   import type { RealtimeChannel } from '@supabase/supabase-js'
   import { toast } from '../lib/toast.svelte'
   import { tap } from '../lib/haptics'
@@ -57,6 +65,14 @@
   // « Dans le chariot » replié par défaut
   let cartOpen = $state(false)
 
+  // Habituels et placard du foyer. null = indisponible (migration pas encore
+  // passée, ou jamais chargé hors connexion) : les nouveautés restent masquées.
+  let staples = $state<Staple[] | null>(null)
+  let pantry = $state<PantryItem[] | null>(null)
+  let dialog = $state<'staples' | 'pantry' | null>(null)
+  // « Sûrement déjà à la maison » replié par défaut
+  let homeOpen = $state(false)
+
   const familyId = $derived(profileState.profile?.family_id ?? null)
 
   // ── Chargement (cache d'abord, réseau ensuite) ──
@@ -65,15 +81,43 @@
     if (familyId) saveCachedList(familyId, { list, items, categories })
   }
 
+  /** Cochages et « il en manque » faits sans réseau, réappliqués à l'affichage */
+  function withPending(list: ShoppingListItemWithCategory[]): ShoppingListItemWithCategory[] {
+    return applyPendingNeeded(applyPending(list))
+  }
+
+  function persistHousehold() {
+    if (familyId) saveCachedHousehold(familyId, { staples, pantry })
+  }
+
+  /**
+   * Habituels + placard, à part : une erreur (table absente, réseau) ne doit
+   * jamais gêner la liste. On garde la version du téléphone si le réseau manque.
+   */
+  async function loadHousehold(fid: string) {
+    const [st, pa] = await Promise.allSettled([fetchStaples(fid), fetchPantry(fid)])
+    const netDown = [st, pa].some((r) => r.status === 'rejected' && isNetworkError(r.reason))
+    if (netDown) return // on reste sur le cache
+    staples = st.status === 'fulfilled' ? st.value : null
+    pantry = pa.status === 'fulfilled' ? pa.value : null
+    persistHousehold()
+  }
+
   async function load() {
     const fid = familyId
     if (!fid) return
     error = null
 
+    const home = loadCachedHousehold(fid)
+    if (home) {
+      staples = home.staples
+      pantry = home.pantry
+    }
+
     const cache = loadCachedList(fid)
     if (cache) {
       list = cache.list
-      items = applyPending(cache.items)
+      items = withPending(cache.items)
       categories = cache.categories
       cachedAt = cache.savedAt
       loading = false // on affiche tout de suite la dernière version connue
@@ -81,11 +125,16 @@
 
     try {
       await flushPending()
+      await flushPendingNeeded().catch(() => 0)
       pendingCount = pendingToggles().length
-      const [activeList, cats] = await Promise.all([fetchActiveList(fid), fetchShoppingCategories()])
+      const [activeList, cats] = await Promise.all([
+        fetchActiveList(fid),
+        fetchShoppingCategories(),
+        loadHousehold(fid).catch(() => {}),
+      ])
       categories = cats
       list = activeList
-      items = activeList ? applyPending(await fetchListItems(activeList.id)) : []
+      items = activeList ? withPending(await fetchListItems(activeList.id)) : []
       offline = false
       cachedAt = null
       persist()
@@ -132,7 +181,14 @@
 
   // ── Dérivés ──
 
-  const toBuy = $derived(items.filter((i) => !i.checked))
+  /** Articles du planning qui sont au placard : mis à part, hors des rayons et du compteur */
+  const atHome = $derived(
+    pantry && pantry.length > 0
+      ? items.filter((i) => isProbablyAtHome(i, pantry!)).sort((a, b) => a.position - b.position)
+      : [],
+  )
+  const atHomeIds = $derived(new Set(atHome.map((i) => i.id)))
+  const toBuy = $derived(items.filter((i) => !i.checked && !atHomeIds.has(i.id)))
   const inCart = $derived(items.filter((i) => i.checked).sort((a, b) => a.position - b.position))
 
   /** Articles à prendre, groupés par rayon (ordre des rayons du magasin) */
@@ -146,7 +202,8 @@
     return [...map.values()].sort((a, b) => (a.category?.position ?? 999) - (b.category?.position ?? 999))
   })
 
-  const total = $derived(items.length)
+  // « Sûrement déjà à la maison » ne compte pas : ni dans « N à prendre », ni dans la barre
+  const total = $derived(items.length - atHome.length)
   const done = $derived(inCart.length)
   const allDone = $derived(total > 0 && done === total)
 
@@ -181,7 +238,8 @@
         (payload) => {
           const u = payload.new as any
           items = items.map((i) => (i.id === u.id
-            ? { ...i, checked: u.checked, checked_by: u.checked_by, checked_at: u.checked_at, quantity: u.quantity }
+            ? { ...i, checked: u.checked, checked_by: u.checked_by, checked_at: u.checked_at, quantity: u.quantity,
+                needed: u.needed ?? i.needed }
             : i))
           persist()
         })
@@ -189,7 +247,7 @@
         { event: 'INSERT', schema: 'public', table: 'shopping_list_items', filter: `shopping_list_id=eq.${listId}` },
         async () => {
           // l'insertion ne renvoie pas le rayon joint : on recharge
-          if (list) { items = applyPending(await fetchListItems(list.id)); persist() }
+          if (list) { items = withPending(await fetchListItems(list.id)); persist() }
         })
       .on('postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'shopping_list_items' },
@@ -231,6 +289,39 @@
     }
   }
 
+  // ── « Il en manque » : l'article du placard repasse dans son rayon (pour tout le foyer) ──
+
+  async function markNeeded(item: ShoppingListItemWithCategory) {
+    tap()
+    items = items.map((i) => (i.id === item.id ? { ...i, needed: true } : i))
+    persist()
+    try {
+      await setItemNeeded(item.id, true)
+    } catch (e) {
+      if (isNetworkError(e)) {
+        queueNeeded({ itemId: item.id, needed: true })
+        offline = true
+      } else {
+        items = items.map((i) => (i.id === item.id ? { ...i, needed: false } : i))
+        persist()
+        toast.error((e as any)?.message ?? 'Erreur')
+      }
+    }
+  }
+
+  // ── Habituels / placard ──
+
+  async function reloadItems() {
+    if (!list) return
+    items = withPending(await fetchListItems(list.id))
+    persist()
+  }
+
+  function openDialog(which: 'staples' | 'pantry') {
+    if (needNetwork()) return
+    dialog = which
+  }
+
   function needNetwork(): boolean {
     if (offline) toast.error('Pas de réseau : cette action attendra le retour de la connexion.')
     return offline
@@ -254,7 +345,7 @@
     busy = true
     try {
       await addExtraItem(list.id, newItemName, newItemQty || null, newItemCat || null)
-      items = applyPending(await fetchListItems(list.id))
+      items = withPending(await fetchListItems(list.id))
       persist()
       newItemName = ''
       newItemQty = ''
@@ -305,7 +396,7 @@
         return
       }
       await regenerateList(list.id, plan.id)
-      items = applyPending(await fetchListItems(list.id))
+      items = withPending(await fetchListItems(list.id))
       persist()
       toast.success('Liste mise à jour (cochés et ajouts conservés)')
     } catch (e: any) {
@@ -379,7 +470,7 @@
       </button>
     </div>
   {:else}
-    {#if groups.length === 0 && inCart.length === 0}
+    {#if groups.length === 0 && inCart.length === 0 && atHome.length === 0}
       <div class="card empty"><p>La liste est vide.</p></div>
     {/if}
 
@@ -438,10 +529,58 @@
         </div>
       </section>
     {:else}
-      <button class="add-btn" onclick={() => (showAddForm = true)}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        Ajouter un article
-      </button>
+      <div class="tools" class:single={!staples && !pantry}>
+        <button class="add-btn" onclick={() => (showAddForm = true)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Ajouter un article
+        </button>
+        {#if staples}
+          <button class="tool-btn" onclick={() => openDialog('staples')} disabled={offline}>
+            <Icon name="star" size={18} />
+            Habituels
+            {#if staples.length > 0}<span class="tool-count">{staples.length}</span>{/if}
+          </button>
+        {/if}
+        {#if pantry}
+          <button class="tool-btn" onclick={() => openDialog('pantry')} disabled={offline}>
+            <Icon name="archive" size={18} />
+            Mon placard
+            {#if pantry.length > 0}<span class="tool-count">{pantry.length}</span>{/if}
+          </button>
+        {/if}
+      </div>
+    {/if}
+
+    <!-- Sûrement déjà à la maison (produits du placard) -->
+    {#if atHome.length > 0}
+      <section class="card cart home">
+        <button class="cart-head" onclick={() => (homeOpen = !homeOpen)} aria-expanded={homeOpen}>
+          <Icon name="home" />
+          <span>Sûrement déjà à la maison</span>
+          <span class="rayon-count">{atHome.length}</span>
+          <svg class="chevron" class:open={homeOpen} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        {#if homeOpen}
+          <p class="home-hint">
+            Ils sont dans ton placard.
+            <button class="inline-link" onclick={() => openDialog('pantry')} disabled={offline}>Gérer mon placard</button>
+          </p>
+          <ul class="rows">
+            {#each atHome as item (item.id)}
+              <li class="row is-home" animate:flip={{ duration: d(220) }} out:fly={{ y: -16, duration: d(180) }}>
+                <button class="row-main" onclick={() => toggle(item)} aria-label="Mettre {item.name} dans le chariot">
+                  <span class="box" aria-hidden="true"></span>
+                  <span class="row-name">{item.name}</span>
+                  {#if item.quantity}<span class="row-qty">{item.quantity}</span>{/if}
+                </button>
+                <button class="need-btn" onclick={() => markNeeded(item)} aria-label="Il manque {item.name} : le remettre dans la liste">
+                  Il en manque
+                </button>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </section>
     {/if}
 
     <!-- Dans le chariot -->
@@ -480,6 +619,30 @@
     </div>
   {/if}
 </div>
+
+{#if dialog === 'staples' && staples && list && familyId}
+  <StaplesDialog
+    {familyId}
+    listId={list.id}
+    {staples}
+    {categories}
+    listItems={items}
+    onchange={(next) => { staples = next; persistHousehold() }}
+    onadded={reloadItems}
+    onclose={() => (dialog = null)}
+  />
+{/if}
+
+{#if dialog === 'pantry' && pantry && familyId}
+  <PantryDialog
+    {familyId}
+    {pantry}
+    {categories}
+    listItems={items}
+    onchange={(next) => { pantry = next; persistHousehold() }}
+    onclose={() => (dialog = null)}
+  />
+{/if}
 
 {#if confirm === 'complete'}
   <ConfirmDialog title="Terminer les courses ?" confirmLabel="Terminer" {busy}
@@ -777,6 +940,98 @@
 
   .add-btn:active { background: var(--primary-light); border-color: var(--primary); }
 
+  /* Ajouter / Habituels / Mon placard */
+  .tools {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .tools .add-btn { grid-column: 1 / -1; }
+  /* Un seul bouton secondaire disponible : il prend toute la largeur */
+  .tools .tool-btn:last-child:nth-child(2) { grid-column: 1 / -1; }
+
+  .tool-btn {
+    min-height: 48px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border-strong);
+    background: rgba(9, 24, 50, 0.6);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .tool-btn :global(svg) { color: var(--primary); flex-shrink: 0; }
+  .tool-btn:active { background: var(--primary-light); border-color: var(--primary); }
+  .tool-btn:disabled { opacity: 0.45; cursor: default; }
+
+  .tool-count {
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  /* ── Sûrement déjà à la maison ── */
+  .home-hint {
+    padding: 0 8px 6px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .inline-link {
+    min-height: 44px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    color: var(--primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .inline-link:disabled { opacity: 0.5; }
+
+  .is-home .row-name, .is-home .row-qty { color: var(--text-secondary); }
+  .is-home .box { border-style: dashed; }
+
+  .need-btn {
+    flex-shrink: 0;
+    min-height: 40px;
+    margin-left: 2px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: #FFB596;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    position: relative;
+  }
+
+  /* Zone de tap portée à 48 px sans grossir le bouton */
+  .need-btn::before { content: ''; position: absolute; inset: -4px -2px; }
+  .need-btn:active { transform: scale(0.96); background: color-mix(in srgb, var(--accent) 26%, transparent); }
+
   .add-form {
     display: flex;
     flex-direction: column;
@@ -829,5 +1084,8 @@
     .row-main:hover { background: rgba(255, 255, 255, 0.06); }
     .row-remove:hover { background: var(--error-bg); color: var(--error); }
     .add-btn:hover { border-color: var(--primary); }
+    .tool-btn:not(:disabled):hover { border-color: var(--primary); }
+    .need-btn:hover { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+    .inline-link:hover { text-decoration: underline; }
   }
 </style>

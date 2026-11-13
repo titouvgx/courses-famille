@@ -7,8 +7,9 @@
 // Stockage : localStorage (quelques Ko). Tout est protégé par try/catch :
 // navigation privée ou stockage plein → l'appli marche simplement sans cache.
 
-import type { ShoppingList, ShoppingListItemWithCategory, ShoppingCategory } from './types'
+import type { ShoppingList, ShoppingListItemWithCategory, ShoppingCategory, Staple, PantryItem } from './types'
 import { toggleItem } from './api/shopping'
+import { setItemNeeded } from './api/household'
 
 const LIST_KEY = (familyId: string) => `courses:liste:${familyId}`
 const QUEUE_KEY = 'courses:cochages-en-attente'
@@ -106,4 +107,67 @@ export function isNetworkError(e: unknown): boolean {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
   const msg = String((e as any)?.message ?? e).toLowerCase()
   return msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('network request failed') || msg.includes('load failed')
+}
+
+// ── Habituels et placard (gardés pour l'affichage sans réseau) ──
+// null = indisponible (migration pas encore passée, ou jamais chargé).
+
+const HOUSEHOLD_KEY = (familyId: string) => `courses:foyer:${familyId}`
+
+export interface CachedHousehold {
+  staples: Staple[] | null
+  pantry: PantryItem[] | null
+}
+
+export function loadCachedHousehold(familyId: string): CachedHousehold | null {
+  return read<CachedHousehold>(HOUSEHOLD_KEY(familyId))
+}
+
+export function saveCachedHousehold(familyId: string, data: CachedHousehold): void {
+  write(HOUSEHOLD_KEY(familyId), data)
+}
+
+// ── « Il en manque » en attente (fait sans réseau) ──
+
+const NEEDED_KEY = 'courses:il-en-manque-en-attente'
+
+export interface PendingNeeded {
+  itemId: string
+  needed: boolean
+}
+
+export function pendingNeeded(): PendingNeeded[] {
+  return read<PendingNeeded[]>(NEEDED_KEY) ?? []
+}
+
+export function queueNeeded(p: PendingNeeded): void {
+  const queue = pendingNeeded().filter((q) => q.itemId !== p.itemId)
+  queue.push(p)
+  write(NEEDED_KEY, queue)
+}
+
+/** Réapplique les « il en manque » en attente sur une liste. */
+export function applyPendingNeeded(items: ShoppingListItemWithCategory[]): ShoppingListItemWithCategory[] {
+  const queue = pendingNeeded()
+  if (queue.length === 0) return items
+  const byId = new Map(queue.map((p) => [p.itemId, p.needed]))
+  return items.map((i) => (byId.has(i.id) ? { ...i, needed: byId.get(i.id) } : i))
+}
+
+/** Renvoie les « il en manque » en attente (ceux qui échouent faute de réseau restent). */
+export async function flushPendingNeeded(): Promise<number> {
+  const queue = pendingNeeded()
+  if (queue.length === 0) return 0
+  const stillPending: PendingNeeded[] = []
+  let sent = 0
+  for (const p of queue) {
+    try {
+      await setItemNeeded(p.itemId, p.needed)
+      sent++
+    } catch (e) {
+      if (isNetworkError(e)) stillPending.push(p)
+    }
+  }
+  write(NEEDED_KEY, stillPending)
+  return sent
 }

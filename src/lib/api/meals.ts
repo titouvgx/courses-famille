@@ -141,6 +141,15 @@ export async function setSlot(
 ): Promise<void> {
   if (!supabase) throw new Error('Supabase non configuré')
 
+  // Garder le cuisinier déjà choisi pour ce créneau
+  const { data: previous } = await supabase
+    .from('meal_slots')
+    .select('cook_id')
+    .eq('meal_plan_id', planId)
+    .eq('day_of_week', dayOfWeek)
+    .eq('meal_type', mealType)
+    .maybeSingle()
+
   // Supprimer l'ancien slot s'il existe
   await supabase
     .from('meal_slots')
@@ -158,6 +167,7 @@ export async function setSlot(
       meal_type: mealType,
       recipe_id: recipeId,
       portions,
+      ...(previous?.cook_id ? { cook_id: previous.cook_id } : {}),
     })
 
   if (error) throw error

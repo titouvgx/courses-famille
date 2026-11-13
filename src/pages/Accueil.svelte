@@ -11,6 +11,7 @@
   import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
   import PlanRecipeDialog from '../components/PlanRecipeDialog.svelte'
   import { fetchRecipe } from '../lib/api/recipes'
+  import { fetchTodayMeals, type TodayMeal } from '../lib/api/household'
   import { toast } from '../lib/toast.svelte'
   import type { RecipeDetail } from '../lib/types'
   import type { RecipeWithCategory } from '../lib/types'
@@ -37,6 +38,21 @@
       .catch((e) => { if (!cancelled) error = e?.message ?? 'Erreur de chargement' })
       .finally(() => { if (!cancelled) loading = false })
 
+    return () => { cancelled = true }
+  })
+
+  // Repas prévus aujourd'hui (« Ce soir : … »). En cas d'échec : on n'affiche rien.
+  let todayMeals = $state<TodayMeal[]>([])
+
+  $effect(() => {
+    if (profileState.loading) return
+    const familyId = profileState.profile?.family_id
+    void dateKey // recharger à minuit
+    if (!familyId) { todayMeals = []; return }
+    let cancelled = false
+    fetchTodayMeals(familyId)
+      .then((m) => { if (!cancelled) todayMeals = m })
+      .catch(() => { if (!cancelled) todayMeals = [] })
     return () => { cancelled = true }
   })
 
@@ -68,6 +84,13 @@
     const h = Math.floor(mins / 60)
     const m = mins % 60
     return h > 0 ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`
+  })
+
+  /** Le repas à venir : le midi jusqu'à 14 h (sinon le soir), puis le soir. */
+  const nextMeal = $derived.by(() => {
+    const midi = todayMeals.find((m) => m.mealType === 'midi')
+    const soir = todayMeals.find((m) => m.mealType === 'soir')
+    return now.getHours() < 14 ? (midi ?? soir ?? null) : (soir ?? null)
   })
 
   // ────────── Placement ──────────
@@ -138,6 +161,16 @@
     <p class="subtitle">
       Tes <strong>{DAILY_RECIPES_COUNT} idées</strong> du jour
     </p>
+    {#if nextMeal}
+      <a href={href('recette', nextMeal.recipeId)} class="today-meal">
+        <Icon name={nextMeal.mealType === 'midi' ? 'sun' : 'moon'} size={15} />
+        <span class="today-text">
+          <span class="today-when">{nextMeal.mealType === 'midi' ? 'Ce midi' : 'Ce soir'}&nbsp;:</span>
+          <strong>{nextMeal.title}</strong>{#if nextMeal.cookName}{' · '}<span class="today-cook">{nextMeal.cookName} cuisine</span>{/if}
+        </span>
+        <Icon name="chevron-right" size={15} />
+      </a>
+    {/if}
   </header>
 
   {#if error}
@@ -174,6 +207,17 @@
         />
       {/each}
     </section>
+
+    <!-- Hors de la zone flottante : la zone (flex: 1) rétrécit d'autant et
+         computeFloatLayout reçoit la hauteur restante → aucune carte dessous. -->
+    <a href={href('frigo')} class="fridge-cta">
+      <span class="fridge-icon"><Icon name="chef" size={20} /></span>
+      <span class="fridge-text">
+        <strong>Qu'est-ce qu'on mange&nbsp;?</strong>
+        <span>Selon ce qu'il y a dans le frigo</span>
+      </span>
+      <Icon name="chevron-right" size={18} />
+    </a>
 
     <footer class="accueil-footer">
       <p class="countdown">
@@ -241,12 +285,123 @@
     color: var(--accent);
   }
 
+  /* Repas du jour : pastille discrète, cliquable vers la fiche */
+  .today-meal {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: calc(100% + 48px); /* l'avatar est plus haut : on récupère sa marge */
+    min-height: 34px;
+    margin-top: 8px;
+    margin-right: -48px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-raised) 80%, transparent);
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.25;
+    text-decoration: none;
+    touch-action: manipulation;
+  }
+
+  .today-meal > :global(svg:first-child) { flex-shrink: 0; color: var(--accent); }
+  .today-meal > :global(svg:last-child) { flex-shrink: 0; opacity: 0.7; }
+
+  /* Titre long ou petit écran : on passe à la ligne (2 lignes max) plutôt que de couper le cuisinier */
+  .today-text {
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .today-cook { white-space: nowrap; }
+
+  .today-when { color: var(--text-secondary); }
+  .today-meal strong { color: var(--text); font-weight: 700; }
+
+  .today-meal:active { transform: scale(0.97); }
+
   /* ── Zone flottante ─────────────────────────── */
   .float-zone {
     position: relative;
     flex: 1;
     /* bord à bord : on récupère les marges latérales pour des cartes plus grandes */
     margin: 4px calc(var(--gutter) * -1) 0;
+  }
+
+  /* ── « Qu'est-ce qu'on mange ? » ────────────── */
+  .fridge-cta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    margin-top: 6px;
+    padding: 8px 14px 8px 8px;
+    border-radius: var(--radius-xl);
+    background: var(--bg-raised);
+    border: 1.5px solid var(--border-strong);
+    color: var(--text);
+    text-decoration: none;
+    touch-action: manipulation;
+    transition: transform 0.1s;
+  }
+
+  .fridge-cta:active { transform: scale(0.98); }
+
+  .fridge-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    color: var(--accent);
+  }
+
+  .fridge-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .fridge-text strong {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .fridge-text span {
+    margin-top: 2px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+  }
+
+  .fridge-cta > :global(svg) { flex-shrink: 0; color: var(--text-secondary); }
+
+  /* Grand écran : bouton centré, pas en bandeau sur toute la largeur */
+  @media (min-width: 700px) {
+    .fridge-cta { align-self: center; width: min(100%, 460px); }
+  }
+
+  /* Téléphones courts (360 × 740…) : bouton sur une ligne, pour laisser
+     la hauteur aux cartes (la zone flottante ne descend pas sous MIN_ZONE_HEIGHT) */
+  @media (max-height: 780px) {
+    .fridge-cta { min-height: 48px; margin-top: 4px; padding: 4px 12px 4px 6px; }
+    .fridge-icon { width: 36px; height: 36px; border-radius: 10px; }
+    .fridge-text span { display: none; }
+    .today-meal { min-height: 30px; margin-top: 6px; padding: 4px 10px; }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .fridge-cta:hover { border-color: var(--primary); }
+    .today-meal:hover strong { color: var(--primary); }
   }
 
   /* ── Pied de page ───────────────────────────── */
@@ -347,4 +502,14 @@
     .countdown { font-size: 12px; }
     .see-all { padding: 0 10px; font-size: 13px; }
   }
+
+  /* Très petits téléphones (iPhone SE, 375 × 667) : on retire le superflu
+     (date, compte à rebours) pour que tout tienne sans défiler. */
+  @media (max-height: 700px) {
+    .date-chip { display: none; }
+    .countdown { display: none; }
+    .see-all { margin-inline: auto; }
+    .accueil-footer { justify-content: center; padding-top: 2px; }
+  }
+
 </style>

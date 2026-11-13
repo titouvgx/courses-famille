@@ -87,6 +87,8 @@ export interface MealSlot {
   meal_type: 'midi' | 'soir'
   recipe_id: string
   portions: number
+  /** Qui cuisine (profil du foyer), null = personne */
+  cook_id?: string | null
 }
 
 /** Slot enrichi avec les infos de la recette (jointure) */
@@ -123,6 +125,8 @@ export interface ShoppingListItem {
   checked_by: string | null
   checked_at: string | null
   position: number
+  /** Produit du placard qu'il faut quand même acheter cette fois */
+  needed?: boolean
 }
 
 /** Item enrichi avec son rayon (jointure) */
@@ -152,4 +156,30 @@ export interface RecipeFormData {
   default_portions: number
   ingredients: RecipeIngredientInput[]
   steps: RecipeStepInput[]
+}
+
+// ---------- Vie du foyer ----------
+
+/** Membre du foyer (sous-ensemble de Profile) */
+export interface FamilyMember {
+  id: string
+  display_name: string
+  role: 'admin' | 'member'
+}
+
+/** Achat habituel (lait, pain…) */
+export interface Staple {
+  id: string
+  family_id: string
+  name: string
+  quantity: string | null
+  shopping_category_id: string | null
+  position: number
+}
+
+/** Produit toujours à la maison */
+export interface PantryItem {
+  id: string
+  family_id: string
+  name: string
 }
