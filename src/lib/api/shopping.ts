@@ -258,6 +258,132 @@ export async function addExtraItem(
   if (error) throw error
 }
 
+// ────────── Ajout depuis une recette ──────────
+
+export interface IngredientToAdd {
+  name: string
+  quantity: number | null
+  unit: string | null
+  shopping_category_id: string | null
+}
+
+/**
+ * Ajoute des ingrédients sélectionnés à la liste de courses active.
+ * Si aucune liste active n'existe, en crée une.
+ * Si un ingrédient identique (même nom) existe déjà, additionne les quantités.
+ * @returns le nombre d'ingrédients ajoutés/mis à jour
+ */
+export async function addIngredientsToList(
+  familyId: string,
+  ingredients: IngredientToAdd[],
+  portions: number,
+  defaultPortions: number,
+  recipeId: string,
+): Promise<number> {
+  if (!supabase) throw new Error('Supabase non configuré')
+  if (ingredients.length === 0) return 0
+
+  // 1. Récupérer ou créer la liste active
+  let list = await fetchActiveList(familyId)
+
+  if (!list) {
+    const { data: created, error: createErr } = await supabase
+      .from('shopping_lists')
+      .insert({
+        family_id: familyId,
+        meal_plan_id: null,
+        status: 'active',
+      })
+      .select('*')
+      .single()
+
+    if (createErr) throw createErr
+    list = created as ShoppingList
+  }
+
+  // 2. Récupérer les articles existants pour détecter les doublons
+  const existingItems = await fetchListItems(list.id)
+  const existingByName = new Map(
+    existingItems.map((it) => [it.name.toLowerCase().trim(), it])
+  )
+
+  // 3. Calculer le ratio de portions
+  const scale = portions / (defaultPortions || 4)
+
+  // 4. Trouver la position max actuelle
+  const maxPos = existingItems.length > 0
+    ? Math.max(...existingItems.map((it) => it.position))
+    : -1
+  let nextPos = maxPos + 1
+
+  const toInsert: any[] = []
+  const toUpdate: { id: string; quantity: string }[] = []
+
+  for (const ing of ingredients) {
+    const scaledQty = ing.quantity ? Math.round(ing.quantity * scale * 100) / 100 : null
+    const unit = ing.unit || ''
+    const qtyStr = scaledQty ? `${scaledQty}${unit ? ' ' + unit : ''}` : unit || null
+
+    const key = ing.name.toLowerCase().trim()
+    const existing = existingByName.get(key)
+
+    if (existing) {
+      // Additionner les quantités si possible
+      if (scaledQty && existing.quantity) {
+        const match = existing.quantity.match(/^([\d.]+)\s*(.*)$/)
+        if (match) {
+          const existQty = parseFloat(match[1])
+          const existUnit = match[2].trim()
+          if (existUnit === unit) {
+            const total = Math.round((existQty + scaledQty) * 100) / 100
+            toUpdate.push({
+              id: existing.id,
+              quantity: `${total}${unit ? ' ' + unit : ''}`,
+            })
+            continue
+          }
+        }
+        // Unités différentes : concaténer
+        toUpdate.push({
+          id: existing.id,
+          quantity: `${existing.quantity} + ${qtyStr}`,
+        })
+      }
+      // Sinon on ne touche pas à l'existant
+    } else {
+      toInsert.push({
+        shopping_list_id: list.id,
+        name: ing.name.trim(),
+        quantity: qtyStr,
+        shopping_category_id: ing.shopping_category_id,
+        source_recipe_id: recipeId,
+        is_extra: false,
+        checked: false,
+        position: nextPos++,
+      })
+    }
+  }
+
+  // 5. Exécuter les updates
+  for (const upd of toUpdate) {
+    const { error } = await supabase
+      .from('shopping_list_items')
+      .update({ quantity: upd.quantity })
+      .eq('id', upd.id)
+    if (error) throw error
+  }
+
+  // 6. Exécuter les inserts
+  if (toInsert.length > 0) {
+    const { error } = await supabase
+      .from('shopping_list_items')
+      .insert(toInsert)
+    if (error) throw error
+  }
+
+  return toInsert.length + toUpdate.length
+}
+
 /**
  * Supprime un article de la liste.
  */

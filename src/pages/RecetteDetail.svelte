@@ -3,6 +3,8 @@
   import { profileState } from '../lib/profile.svelte'
   import { fetchRecipe, deleteRecipe } from '../lib/api/recipes'
   import { getMonday, toISODate, fetchOrCreatePlan, setSlot } from '../lib/api/meals'
+  import { addIngredientsToList } from '../lib/api/shopping'
+  import type { IngredientToAdd } from '../lib/api/shopping'
   import { toast } from '../lib/toast.svelte'
   import type { RecipeDetail } from '../lib/types'
 
@@ -11,6 +13,83 @@
   let error = $state<string | null>(null)
   let deleting = $state(false)
   let showDeleteConfirm = $state(false)
+
+  // ── Ajouter au panier ──
+  let showCartPicker = $state(false)
+  let cartPortions = $state(4)
+  let cartChecked = $state<Record<string, boolean>>({})
+  let addingToCart = $state(false)
+
+  function openCartPicker() {
+    if (!recipe) return
+    cartPortions = recipe.default_portions
+    // Tout coché par défaut
+    cartChecked = {}
+    for (const ing of recipe.recipe_ingredients) {
+      cartChecked[ing.id] = true
+    }
+    showCartPicker = true
+  }
+
+  const cartSelectedCount = $derived(
+    Object.values(cartChecked).filter(Boolean).length
+  )
+
+  function toggleAllCart() {
+    if (!recipe) return
+    const allChecked = cartSelectedCount === recipe.recipe_ingredients.length
+    for (const ing of recipe.recipe_ingredients) {
+      cartChecked[ing.id] = !allChecked
+    }
+  }
+
+  function scaledQty(qty: number | null): string {
+    if (!qty || !recipe) return ''
+    const scale = cartPortions / (recipe.default_portions || 4)
+    const scaled = Math.round(qty * scale * 100) / 100
+    // Afficher proprement : pas de .00
+    return scaled % 1 === 0 ? String(scaled) : scaled.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+  }
+
+  async function confirmAddToCart() {
+    if (!recipe || addingToCart) return
+    const familyId = profileState.profile?.family_id
+    if (!familyId) {
+      toast.error('Profil introuvable.')
+      return
+    }
+
+    const selected: IngredientToAdd[] = recipe.recipe_ingredients
+      .filter((ing) => cartChecked[ing.id])
+      .map((ing) => ({
+        name: ing.name,
+        quantity: ing.quantity,
+        unit: ing.unit,
+        shopping_category_id: ing.shopping_category_id,
+      }))
+
+    if (selected.length === 0) {
+      toast.error('Sélectionne au moins un ingrédient.')
+      return
+    }
+
+    addingToCart = true
+    try {
+      const count = await addIngredientsToList(
+        familyId,
+        selected,
+        cartPortions,
+        recipe.default_portions,
+        recipe.id,
+      )
+      showCartPicker = false
+      toast.success(`${count} ingrédient${count > 1 ? 's' : ''} ajouté${count > 1 ? 's' : ''} au panier !`)
+    } catch (e: any) {
+      toast.error(e.message)
+    } finally {
+      addingToCart = false
+    }
+  }
 
   // ── Ajouter à la semaine ──
   let showWeekPicker = $state(false)
@@ -169,8 +248,11 @@
       </section>
     {/if}
 
-    <!-- Ajouter à la semaine -->
-    <div class="add-week-section">
+    <!-- Actions rapides -->
+    <div class="quick-actions">
+      <button class="btn btn-add-cart" onclick={openCartPicker}>
+        🛒 Ajouter au panier
+      </button>
       <button class="btn btn-add-week" onclick={() => (showWeekPicker = true)}>
         📅 Ajouter à ma semaine
       </button>
@@ -209,6 +291,79 @@
     {/if}
 
     <!-- Picker « Ajouter à la semaine » -->
+    <!-- Picker « Ajouter au panier » -->
+    {#if showCartPicker}
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div class="overlay overlay-bottom" onclick={() => (showCartPicker = false)}>
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="cart-picker" onclick={(e) => e.stopPropagation()}>
+          <div class="cp-header">
+            <h2>🛒 Ajouter au panier</h2>
+            <button class="picker-close" onclick={() => (showCartPicker = false)} aria-label="Fermer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <!-- Portions -->
+          <div class="cp-portions">
+            <span class="cp-portions-label">Portions :</span>
+            <div class="cp-portions-ctrl">
+              <button class="cp-pm-btn" onclick={() => { if (cartPortions > 1) cartPortions-- }}>−</button>
+              <span class="cp-pm-val">{cartPortions}</span>
+              <button class="cp-pm-btn" onclick={() => cartPortions++}>+</button>
+            </div>
+          </div>
+
+          <!-- Toggle tout / rien -->
+          <div class="cp-toggle-row">
+            <button class="cp-toggle-btn" onclick={toggleAllCart}>
+              {#if recipe && cartSelectedCount === recipe.recipe_ingredients.length}
+                Tout désélectionner
+              {:else}
+                Tout sélectionner
+              {/if}
+            </button>
+            <span class="cp-count">{cartSelectedCount} sélectionné{cartSelectedCount > 1 ? 's' : ''}</span>
+          </div>
+
+          <!-- Liste des ingrédients -->
+          <div class="cp-list">
+            {#if recipe}
+              {#each recipe.recipe_ingredients as ing (ing.id)}
+                <label class="cp-item" class:cp-unchecked={!cartChecked[ing.id]}>
+                  <input
+                    type="checkbox"
+                    class="cp-checkbox"
+                    checked={cartChecked[ing.id]}
+                    onchange={() => (cartChecked[ing.id] = !cartChecked[ing.id])}
+                  />
+                  <span class="cp-item-qty">
+                    {scaledQty(ing.quantity)}{#if ing.unit} {ing.unit}{/if}
+                  </span>
+                  <span class="cp-item-name">{ing.name}</span>
+                </label>
+              {/each}
+            {/if}
+          </div>
+
+          <!-- Bouton confirmer -->
+          <button
+            class="btn btn-primary cp-confirm"
+            disabled={addingToCart || cartSelectedCount === 0}
+            onclick={confirmAddToCart}
+          >
+            {#if addingToCart}
+              Ajout en cours…
+            {:else}
+              Ajouter {cartSelectedCount} ingrédient{cartSelectedCount > 1 ? 's' : ''}
+            {/if}
+          </button>
+        </div>
+      </div>
+    {/if}
+
     {#if showWeekPicker}
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -463,19 +618,20 @@
     justify-content: flex-end;
   }
 
-  /* ── Ajouter à la semaine ── */
-  .add-week-section {
+  /* ── Actions rapides ── */
+  .quick-actions {
+    display: flex;
+    gap: 8px;
     margin-top: 24px;
     margin-bottom: 8px;
   }
 
+  .btn-add-cart,
   .btn-add-week {
-    width: 100%;
-    padding: 14px;
+    flex: 1;
+    padding: 12px 8px;
     border-radius: var(--radius-lg);
-    background: var(--primary);
-    color: white;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     font-family: var(--font-body);
     border: none;
@@ -483,8 +639,181 @@
     transition: opacity 0.15s, transform 0.1s;
   }
 
+  .btn-add-cart:active,
   .btn-add-week:active {
     transform: scale(0.97);
+  }
+
+  .btn-add-cart {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-add-week {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* ── Cart picker modal ── */
+  .cart-picker {
+    background: var(--bg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 16px;
+    animation: picker-in 0.25s ease-out;
+  }
+
+  .cp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .cp-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .cp-portions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+  }
+
+  .cp-portions-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .cp-portions-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cp-pm-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: var(--font-body);
+    line-height: 1;
+    transition: all 0.15s;
+  }
+
+  .cp-pm-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .cp-pm-val {
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .cp-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .cp-toggle-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    padding: 0;
+  }
+
+  .cp-toggle-btn:hover {
+    text-decoration: underline;
+  }
+
+  .cp-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .cp-list {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+    max-height: 40dvh;
+  }
+
+  .cp-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .cp-unchecked {
+    opacity: 0.45;
+  }
+
+  .cp-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    accent-color: var(--primary);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .cp-item-qty {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    min-width: 50px;
+    flex-shrink: 0;
+  }
+
+  .cp-item-name {
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cp-confirm {
+    flex-shrink: 0;
   }
 
   /* ── Week picker modal ── */
