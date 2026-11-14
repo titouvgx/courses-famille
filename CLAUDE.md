@@ -96,7 +96,7 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 18. `recettes_photos.sql` — **GÉNÉRÉ** par `npm run recettes` depuis `supabase/recettes/photos.json` : une photo Unsplash vérifiée à l'œil par recette du **catalogue** (jamais les recettes des familles, jamais une photo envoyée dans l'appli). Nécessite la 17. Idempotente
 
 **État des bases** (à tenir à jour) :
-- `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes) ; **15 à exécuter juste après le déploiement de la v0.9.0**, puis 16 (n'importe quand)
+- `courses-test` : migrations 1 à 18 appliquées et vérifiées le 14/11/2026 (requête de contrôle : 513 ingrédients, 50 recettes catalogue dont 49 avec photo, 0 famille sans super-famille, 0 table sans RLS) ; code v0.9.0 · 6225216 en ligne le même jour
 - `courses-prod` : pas encore créée
 
 **Règle** : une migration est exécutée dans la base **avant** de pousser le code qui en dépend, puis vérifiée par une requête de contrôle (tables, colonnes, triggers, RLS actif). Toute nouvelle table : RLS par foyer + attaques ajoutées dans `tests/rls` avant de pousser.
