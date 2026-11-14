@@ -112,7 +112,7 @@ export async function traiter(req: Request, acces: Acces, origines: string[] = O
   }
 
   const res = await acces.consommer(token, compte.id, nom, info.kind === 'fondateur' ? famille : null)
-  if (!res.ok) {
+  if (res.ok === false) {
     // Pas de compte orphelin : on annule la création
     console.error('accepter-invitation : rattachement refusé', res.message)
     await acces.supprimerCompte(compte.id)
