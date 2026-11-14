@@ -26,7 +26,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 /** Accès à Supabase dont la fonction a besoin (remplacé par un faux dans les tests). */
 export interface Acces {
   invitationInfo(token: string): Promise<{ status: string; kind: string | null } | null>
-  creerCompte(email: string, motDePasse: string, nom: string): Promise<{ id: string } | { erreur: 'existe' | 'autre'; message?: string }>
+  creerCompte(email: string, motDePasse: string, nom: string): Promise<{ id: string } | { erreur: 'existe' | 'autre'; message?: string; code?: string }>
   supprimerCompte(id: string): Promise<void>
   consommer(token: string, userId: string, nom: string, famille: string | null): Promise<{ ok: true; kind: string } | { ok: false; message: string }>
 }
@@ -105,12 +105,16 @@ export async function traiter(req: Request, acces: Acces, origines: string[] = O
   const compte = await acces.creerCompte(email, motDePasse, nom)
   if ('erreur' in compte) {
     if (compte.erreur === 'existe') return json(409, { erreur: 'Un compte existe déjà avec cette adresse. Connecte-toi plutôt.' }, cors)
-    return json(502, { erreur: 'Le compte n’a pas pu être créé. Réessaie dans un instant.' }, cors)
+    // Raison complète dans les Logs ; à l'écran, seulement un code court (pas de détail interne)
+    console.error('accepter-invitation : création du compte refusée', compte.code ?? '', compte.message ?? '')
+    const code = (compte.code ?? '').replace(/[^a-z0-9_]/gi, '').slice(0, 40)
+    return json(502, { erreur: `Le compte n’a pas pu être créé${code ? ` (${code})` : ''}. Réessaie dans un instant.` }, cors)
   }
 
   const res = await acces.consommer(token, compte.id, nom, info.kind === 'fondateur' ? famille : null)
   if (!res.ok) {
     // Pas de compte orphelin : on annule la création
+    console.error('accepter-invitation : rattachement refusé', res.message)
     await acces.supprimerCompte(compte.id)
     return json(410, { erreur: res.message || 'Ce lien d’invitation n’est plus valable.' }, cors)
   }
@@ -132,7 +136,8 @@ if (typeof Deno !== 'undefined') {
   } catch {
     cle = ''
   }
-  if (!cle) cle = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  if (typeof cle !== 'string' || !cle) cle = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  if (!cle) console.error('accepter-invitation : aucune clé secrète disponible (SUPABASE_SECRET_KEYS / SUPABASE_SERVICE_ROLE_KEY)')
   const origines = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
     .split(',')
     .map((o) => o.trim())
@@ -143,7 +148,10 @@ if (typeof Deno !== 'undefined') {
   const acces: Acces = {
     async invitationInfo(token) {
       const { data, error } = await admin.rpc('invitation_info', { p_token: token })
-      if (error) return null
+      if (error) {
+        console.error('accepter-invitation : invitation_info', error.code ?? '', error.message)
+        return null
+      }
       const ligne = Array.isArray(data) ? data[0] : data
       return ligne ? { status: ligne.status, kind: ligne.kind } : null
     },
@@ -157,7 +165,8 @@ if (typeof Deno !== 'undefined') {
       if (error || !data?.user) {
         const m = (error?.message ?? '').toLowerCase()
         const existe = (error as { status?: number } | null)?.status === 422 || m.includes('already') || m.includes('exists')
-        return { erreur: existe ? 'existe' : 'autre', message: error?.message }
+        const code = (error as { code?: string } | null)?.code ?? String((error as { status?: number } | null)?.status ?? 'sans_reponse')
+        return { erreur: existe ? 'existe' : 'autre', message: error?.message, code }
       }
       return { id: data.user.id }
     },
