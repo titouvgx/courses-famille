@@ -41,7 +41,7 @@ select
 
 ## 5. La fonction serveur
 **Edge Functions → Deploy a new function → Via Editor**, nom `accepter-invitation`, coller
-`supabase/functions/accepter-invitation/index.ts`, **Deploy**, puis désactiver **Verify JWT**
+`supabase/functions/accepter-invitation/index.ts`, **Deploy**, puis désactiver **Verify JWT**. ⚠️ Vérifier la colonne **URL** : elle doit finir par `/accepter-invitation` (pas une adresse au hasard comme `dynamic-api`, voir `supabase/functions/README.md`)
 (voir `supabase/functions/README.md`).
 
 ## 6. Brancher le site sur la prod

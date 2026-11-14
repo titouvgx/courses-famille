@@ -36,6 +36,14 @@ Dans l'appli : Mon compte → Ma famille → « Inviter quelqu'un » → ouvrir 
 dans une fenêtre privée → créer un compte de test → il apparaît dans la famille.
 Logs : Edge Functions → accepter-invitation → **Logs**.
 
+### Piège : le nom affiché n'est pas l'adresse
+Dans le tableau de bord, une fonction a un **nom affiché** et une **adresse** (colonne URL,
+`…/functions/v1/<adresse>`). Le site appelle `…/functions/v1/accepter-invitation` : c'est
+l'**adresse** qui doit valoir `accepter-invitation`. L'éditeur propose une adresse au hasard
+(ex. `dynamic-api`) et on ne peut pas la changer ensuite → créer une nouvelle fonction en tapant
+`accepter-invitation` dès la création. Vérification : ouvrir l'URL dans un navigateur doit
+afficher `{"erreur":"Méthode non autorisée"}` (404 `NOT_FOUND` = mauvaise adresse).
+
 ### Si la création de compte échoue
 L'écran « Rejoindre » affiche le code renvoyé :
 - **401** : « Verify JWT » est encore activé → le désactiver ;
