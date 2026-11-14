@@ -60,7 +60,9 @@ jobs:
           fi
 
           sum "### Fonctions (sans connexion)"
-          for f in recipe_exists:'{"rid":"x"}' is_member:'{}' user_family_id:'{}'; do
+          for f in recipe_exists:'{"rid":"x"}' is_member:'{}' user_family_id:'{}' \
+                   remove_member:'{"p_member":"00000000-0000-0000-0000-000000000000"}' \
+                   delete_family:'{"p_family":"00000000-0000-0000-0000-000000000000"}'; do
             name=${f%%:*}; args=${f#*:}
             code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/rest/v1/rpc/$name" \
               -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
