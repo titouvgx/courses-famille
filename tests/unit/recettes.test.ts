@@ -23,6 +23,15 @@ describe('recettes livrées avec l\'appli', () => {
     }
   })
 
+  it('la migration 17 range toutes les recettes livrées dans le catalogue commun', () => {
+    const m17 = readFileSync(join(DOSSIER_MIGRATIONS, '20261114100000_familles_invitations.sql'), 'utf8')
+    for (const r of [...corrections, ...nouvelles]) {
+      for (const t of new Set([r.title, r.original_title ?? r.title])) {
+        expect(m17.includes(`'${t.replace(/'/g, "''")}'`), t).toBe(true)
+      }
+    }
+  })
+
   it('la migration générée est à jour (sinon : npm run recettes)', async () => {
     const attendu = await genererSQL()
     const actuel = readFileSync(join(DOSSIER_MIGRATIONS, FICHIER_MIGRATION), 'utf8')

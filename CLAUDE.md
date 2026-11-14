@@ -33,6 +33,8 @@ Ce projet utilise exclusivement les **runes Svelte 5** :
 Le routeur (`src/lib/router.svelte.ts`) utilise le hash (`#/recettes`, `#/recette/<id>`) pour la compatibilité GitHub Pages. Les routes :
 - `login`, `accueil` (route par défaut), `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`
 - `semaine`, `courses`, `historique`, `compte`, `frigo` (« Qu'est-ce qu'on mange ? », onglet Accueil actif)
+- `famille` (Ma famille : membres, rôles, invitations ; fondateur : ses familles), `admin` (super-admin)
+- **Pages publiques** (`PUBLIC_ROUTES`, plein écran, hors coque connectée) : `rejoindre/<jeton>`, `mot-de-passe-oublie`, `nouveau-mot-de-passe` (arrivée depuis l'e-mail avec `?token_hash=…&type=recovery` AVANT le `#`, retiré de l'adresse aussitôt)
 
 Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 
@@ -43,7 +45,7 @@ Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 - **courses-test** : développement actif
 - **courses-prod** : production (pas encore branché, étape 10)
 
-### Modèle de données (15 tables)
+### Modèle de données (17 tables)
 
 ```
 families, profiles, super_admins,
@@ -52,8 +54,20 @@ recipes, recipe_ingredients, recipe_steps,
 meal_plans, meal_slots,
 shopping_lists, shopping_list_items,
 known_ingredients (autocomplétion, migration 6),
-staples (habituels) et pantry_items (placard) — migration 13
+staples (habituels) et pantry_items (placard) — migration 13,
+super_families et invitations — migration 17
 ```
+
+### Familles, super-familles, invitations (migration 17)
+- **Une personne = une famille** (`profiles.family_id`) ; **une famille = une super-famille** (`families.super_family_id`)
+- **Fondateur** (`super_families.founder_id`) : crée jusqu'à **3 familles** (sans limite si super-admin), invite dans toutes ses familles, voit et gère leurs membres ; il n'est membre que de sa propre famille
+- **Admin d'une famille** : invite dans SA famille (rôle membre ou admin), change les rôles (jamais le sien), renomme la famille
+- **Super-admin** : crée les liens « fondateur » (page `#/admin`) ; voit tout
+- **Lien d'invitation** : usage unique, 7 jours, annulable ; seul `sha256(jeton)` est stocké, le jeton n'est montré qu'à la création ; 20 liens en attente max par personne ; le jeton est dans le `#` de l'adresse (jamais envoyé au serveur web)
+- **Création du compte** : fonction serveur `supabase/functions/accepter-invitation` (clé secrète côté Supabase seulement) → `auth.admin.createUser` puis `consume_invitation()` (atomique, réservé à `service_role`) ; si le rattachement échoue, le compte est supprimé. Lien fondateur : compte + super-famille + famille + profil admin en une fois (pas d'état « compte sans famille »)
+- **Recettes** : `visibility` = `famille` (défaut) | `super_famille` | `catalogue` (les 50 recettes livrées, lecture seule sauf super-admin). Une recette partagée ne peut plus repasser en « famille » si une autre famille l'a au planning
+- Fonctions : `create_invitation`, `revoke_invitation`, `invitation_info` (accessible sans compte), `consume_invitation` (service_role), `create_family` ; aides `can_read_recipe`, `can_edit_recipe`, `can_invite`, `is_founder…`
+- Les recettes livrées par une future migration doivent être créées avec `visibility = 'catalogue'`
 
 ### Concept clé : "familles" = foyers
 
@@ -77,6 +91,7 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
 14. `more_ingredients.sql` — 251 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
 15. `photo_paths.sql` — **`recipes.image_url` = chemin `<id recette>/<uuid>.webp|jpg` de NOTRE bucket** (plus d'URL complète : l'appli reconstruit l'adresse avec `VITE_SUPABASE_URL`) ou photo Unsplash `https://images.unsplash.com/photo-…` ; trigger `trg_recipe_image_exists` : le fichier doit exister dans `recipe-photos`. Convertit les anciennes URL de nos photos, vide le reste (idempotent). ⚠️ **Ordre** : déployer d'abord le code ≥ v0.9.0, puis exécuter cette migration aussitôt (entre les deux, l'envoi de photo est refusé)
+17. `familles_invitations.sql` — super-familles, invitations, visibilité des recettes, règles RLS réécrites (recettes, ingrédients, étapes, planning, listes, photos), gardes (auteur, « coché par », planning d'un autre foyer). Rattache les familles existantes à une super-famille (fondateur : premier super-admin). Idempotente
 16. `recettes_v1.sql` — **GÉNÉRÉ** par `npm run recettes` depuis `supabase/recettes/*.json` (ne jamais l'éditer à la main) : corrige les 20 recettes de démo **seulement si elles sont encore dans leur état d'origine** (empreinte md5 ; une recette modifiée dans l'appli n'est pas touchée) et ajoute 30 recettes si le titre n'existe pas. Idempotente, indépendante du code
 
 **État des bases** (à tenir à jour) :
@@ -182,6 +197,7 @@ src/
 │   ├── StaplesDialog.svelte      # Achats habituels : ajouter à la liste / modifier
 │   ├── PantryDialog.svelte       # Mon placard : ajout (autocomplétion), retrait, suggestions
 │   ├── CookMode.svelte           # Mode « En cuisine » : une étape à la fois, balayage, écran maintenu allumé (Wake Lock)
+│   ├── InviteDialog.svelte       # Créer un lien (rôle, « pour qui ») puis Copier / Partager ; jeton affiché une seule fois
 │   ├── PlanRecipeDialog.svelte   # Fenêtre centrée 2 étapes : créneau (4 semaines, créneaux pris visibles) → ingrédients aux courses (mode 'plan' ou 'cart')
 │   ├── TabBar.svelte             # Navigation bottom bar
 │   └── ToastContainer.svelte     # Notifications toast
@@ -204,9 +220,15 @@ src/
 │       ├── recipeImages.ts       # Photos : compression, envoi Storage, suppression
 │       ├── meals.ts              # CRUD planning (plans + slots) + fetchSlotsForWeeks (lecture seule, sans créer de plan)
 │       ├── household.ts          # Membres, cuisinier, habituels, placard, index des ingrédients, rankByFridge
+│       ├── famille.ts            # Familles, invitations, admin, rejoindre, mot de passe oublié
 │       └── shopping.ts           # Liste de courses (génération, toggle, panier)
 ├── pages/
-│   ├── Login.svelte              # Connexion seule (pas d'inscription publique) + version
+│   ├── Login.svelte              # Connexion seule (pas d'inscription publique) + « Mot de passe oublié ? » + version
+│   ├── Rejoindre.svelte          # Public : création de compte par lien (membre ; fondateur en 2 étapes : compte puis famille)
+│   ├── MotDePasseOublie.svelte   # Public : e-mail de réinitialisation (même réponse que le compte existe ou non)
+│   ├── NouveauMotDePasse.svelte  # Public : arrivée depuis l'e-mail (verifyOtp recovery) → nouveau mot de passe
+│   ├── Famille.svelte            # Ma famille : membres, rôles, invitations ; fondateur : « Mes familles » (3 max)
+│   ├── Admin.svelte              # Super-admin : liens fondateur, vue d'ensemble
 │   ├── Accueil.svelte            # 5 recettes du jour qui flottent (tirage par date, change à minuit)
 │   ├── Frigo.svelte              # « Qu'est-ce qu'on mange ? » : puces du frigo → recettes triées par ingrédients manquants
 │   ├── Recettes.svelte           # Recherche (toute la base, sans accents) + puces catégories + grille
@@ -252,7 +274,7 @@ CHANGELOG.md                      # Journal des versions (règle SemVer)
 - **Vérifications CI** (`verifications.yml`) : aucun `.env` suivi, aucun secret dans le dépôt, `npm audit` (bloquant : moyenne+ en production, haute+ en outils), types, tests, build. Le déploiement en dépend
 - **Droits côté appli = droits de la base** : Modifier = membre du foyer qui a créé la recette ; Supprimer recette / liste = admin de ce foyer. Une suppression filtrée par RLS (0 ligne, pas d'erreur) est signalée, jamais affichée comme réussie
 - RLS : les règles portent sur des **lignes**, pas des colonnes → pour limiter des colonnes (ex. `role`, `family_id`), un trigger. Sur Supabase, `REVOKE … FROM PUBLIC` ne retire pas `anon` : viser `anon` explicitement
-- **Banc d'attaque RLS dans le dépôt** (`tests/rls`, `npm run test:rls`) : stubs Supabase (rôles, `auth.uid()`, storage) + toutes les migrations rejouées dans PGlite + tentatives entre foyers et contrôles positifs. Lancé par la CI à chaque push. Au 13/11/2026 : **379 tentatives d'attaque (toutes bloquées), 91 contrôles positifs, 9 contrôles de structure** ; un test de mutation (RLS retiré, règle ouverte) est bien détecté. Limites (SQL direct, pas PostgREST/Auth/Realtime) : voir `tests/rls/README.md`
+- **Banc d'attaque RLS dans le dépôt** (`tests/rls`, `npm run test:rls`) : stubs Supabase (rôles, `auth.uid()`, storage) + toutes les migrations rejouées dans PGlite + tentatives entre foyers et contrôles positifs. Lancé par la CI à chaque push. Au 14/11/2026 : **825 tentatives d'attaque (toutes bloquées), 182 contrôles positifs, 13 contrôles de structure** (foyers A, A2 dans la super-famille SA, B dans SB) ; un test de mutation (RLS retiré, règle ouverte) est bien détecté. Limites (SQL direct, pas PostgREST/Auth/Realtime) : voir `tests/rls/README.md`
 
 ## Variables d'environnement
 
@@ -297,6 +319,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - `shopping_lists.meal_plan_id` : une liste peut être rattachée au planning d'un autre foyer (pas de lecture possible, mais incohérent)
 - `created_by` / `checked_by` : un membre peut y mettre l'id de quelqu'un d'autre (usurpation de signature)
 - Supprimer une recette efface les créneaux qui l'utilisent **dans tous les foyers** (`ON DELETE CASCADE`). Piste choisie par l'utilisateur : ne plus supprimer (modifier, archiver ou « demande de suppression ») — à décider
+- Restent connues (banc du 14/11) : supprimer une recette **partagée** efface le créneau d'une autre famille (cascade, cf. archivage) ; `recipe_exists()` dit à un membre connecté si un id de recette existe (UUID impossible à deviner) ; photos orphelines listables/supprimables par tout membre ; ✅ corrigés dans la migration 17 : oracle anonyme `family_super_family`, `source_recipe_id` d'une recette illisible, limites (3 familles, 20 liens) protégées par verrou
 - `sameProduct` : « Beurre de cacahuète » ≈ « Beurre », « Pain d'épices » ≈ « Pain » (placard / frigo)
 
 ### Recettes livrées avec l'appli
@@ -349,8 +372,16 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Fusion sur `main` : vérifications puis déploiement ; rien n'est mis en ligne si une étape échoue
 - Réglages GitHub recommandés : protection de `main` (vérifications obligatoires), secret scanning + push protection, e-mail privé (Settings → Emails)
 
+### Supabase : réglages pour les invitations et le mot de passe oublié (par base)
+1. Migration 17 exécutée
+2. Fonction serveur `accepter-invitation` déployée, **Verify JWT désactivé** (voir `supabase/functions/README.md`)
+3. Authentication → URL Configuration : **Site URL** = adresse de l'appli (`https://titouvgx.github.io/courses-famille/`), et la même dans les **Redirect URLs**
+4. Authentication → Email Templates → **Reset Password** : lien `{{ .SiteURL }}?token_hash={{ .TokenHash }}&type=recovery#/nouveau-mot-de-passe` (le routeur lit `type=recovery` avant le `#`)
+5. E-mails intégrés de Supabase limités (≈ 2/heure pour tout le projet) : suffisant en famille, sinon SMTP (Resend…)
+
 ### V2 (décidé, PAS maintenant)
-- **Familles multiples + invitations en chaîne** (décisions du 13/11/2026) :
+- ✅ **Fait le 14/11/2026 (migration 17)** — familles, super-familles, invitations, mot de passe oublié, visibilité des recettes (voir « Familles, super-familles, invitations »). Décision finale de l'utilisateur : une personne n'appartient qu'à UNE famille (pas de sélecteur) ; « partagée » = la super-famille ; seul l'admin d'une famille (ou le fondateur) invite
+- ~~**Familles multiples + invitations en chaîne** (décisions du 13/11/2026)~~ (ancienne réflexion, gardée pour l'historique) :
   - Le super-admin envoie un lien → l'invité crée son compte puis est **obligé de créer au moins une famille (max 3, limite imposée par la base)** ; il en est admin
   - Cet admin invite des gens dans ses familles par lien (usage unique, expiration 7 j, jeton stocké chiffré, création de compte par fonction serveur Supabase — clé secrète côté Supabase uniquement)
   - **Ses invités ne peuvent PAS créer de famille** (pas de chaîne au-delà d'un niveau dans cette version)
@@ -360,6 +391,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Importer une recette depuis un lien (fonction serveur, sites autorisés seulement, sans la photo)
 
 ### Idées en attente (PAS sans feu vert explicite de l'utilisateur)
+- **Booster des recettes du jour** (validé par l'utilisateur le 14/11, à faire après les invitations) : sur l'accueil, un booster à toucher qui se déchire, les 5 cartes en sortent une à une jusqu'à leur place actuelle (`floatLayout`) ; une seule ouverture par jour (localStorage), bouton « Passer », `prefers-reduced-motion` → cartes directement ; animer transform/opacity seulement
 - Envoyer la liste de courses par message (WhatsApp, SMS) en un clic
 - Recopier la semaine passée ou une semaine type dans le planning
 - Favoris et notes par recette (étoiles + commentaire du foyer)

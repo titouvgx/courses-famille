@@ -70,8 +70,16 @@
   const ownRecipe = $derived(
     Boolean(recipe && profileState.profile && recipe.family_id === profileState.profile.family_id)
   )
-  const canEdit = $derived(ownRecipe)
-  const canDelete = $derived(ownRecipe && isAdmin)
+  // Recettes du catalogue commun (livrées avec l'appli) : lecture seule, sauf super-admin
+  const isSuperAdmin = $derived(!!profileState.context?.isSuperAdmin)
+  const isCatalogue = $derived(recipe?.visibility === 'catalogue')
+  const canEdit = $derived(isSuperAdmin || (ownRecipe && !isCatalogue))
+  const canDelete = $derived(isSuperAdmin || (ownRecipe && isAdmin && !isCatalogue))
+  const visibilityLabel = $derived(
+    recipe?.visibility === 'catalogue' ? 'Catalogue commun'
+      : recipe?.visibility === 'super_famille' ? 'Toutes nos familles'
+      : 'Ma famille',
+  )
 
   const defaultPortions = $derived(recipe?.default_portions || 4)
   const scale = $derived(portions / defaultPortions)
@@ -162,6 +170,11 @@
             <li class="chip"><Icon name="clock" size={16} /> {formatTime(recipe.prep_time_min)}</li>
           {/if}
           <li class="chip"><Icon name="users" size={16} /> {portions} portion{portions > 1 ? 's' : ''}</li>
+          {#if recipe.visibility}
+            <li class="chip" title="Qui voit cette recette">
+              <Icon name={recipe.visibility === 'famille' ? 'lock' : 'users'} size={16} /> {visibilityLabel}
+            </li>
+          {/if}
         </ul>
         {#if recipe.recipe_steps.length > 0}
           <button class="cook-btn" onclick={() => (cookOpen = true)}>

@@ -8,6 +8,8 @@
     | 'book' | 'archive' | 'star' | 'plate' | 'camera' | 'image'
     | 'plus' | 'minus' | 'x' | 'arrow-left' | 'arrow-right' | 'chevron-right' | 'chevron-down'
     | 'grip' | 'chef' | 'mail' | 'eye' | 'eye-off' | 'flame' | 'share' | 'settings' | 'home'
+    | 'alert-circle' | 'key'
+    | 'link' | 'copy' | 'shield' | 'user-plus'
 
   interface Props {
     name: IconName
@@ -113,6 +115,19 @@
     <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
   {:else if name === 'home'}
     <path d="M3 10.5 12 3l9 7.5" /><path d="M5 9v11a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9" />
+  {:else if name === 'link'}
+    <path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2" />
+    <path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2" />
+  {:else if name === 'copy'}
+    <rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+  {:else if name === 'shield'}
+    <path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z" /><path d="m9 12 2 2 4-4" />
+  {:else if name === 'user-plus'}
+    <circle cx="10" cy="8" r="4" /><path d="M3 21c0-4.4 3.1-7 7-7 1.4 0 2.7.3 3.8.9" /><path d="M19 15v6M16 18h6" />
+  {:else if name === 'alert-circle'}
+    <circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5h.01" />
+  {:else if name === 'key'}
+    <circle cx="7.5" cy="15.5" r="3.5" /><path d="m10 13 9.5-9.5M16 7l2.5 2.5M13.5 9.5l2 2" />
   {/if}
 </svg>
 

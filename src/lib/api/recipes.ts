@@ -265,6 +265,7 @@ export async function createRecipe(
     .insert({
       family_id: familyId,
       title: form.title.trim(),
+      visibility: form.visibility ?? 'famille',
       category_id: form.category_id || null,
       prep_time_min: form.prep_time_min,
       default_portions: form.default_portions,
@@ -361,6 +362,7 @@ export async function updateRecipe(
     prep_time_min: form.prep_time_min,
     default_portions: form.default_portions,
   }
+  if (form.visibility) patch.visibility = form.visibility
   if (photo.kind !== 'keep') patch.image_url = newUrl
 
   const { error: recipeErr } = await supabase

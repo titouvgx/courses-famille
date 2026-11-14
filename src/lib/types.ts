@@ -3,7 +3,39 @@
 export interface Family {
   id: string
   name: string
+  super_family_id: string
   created_at: string
+}
+
+/** Groupe de familles créé par un fondateur (lien du super-admin). */
+export interface SuperFamily {
+  id: string
+  name: string
+  founder_id: string | null
+  created_at: string
+}
+
+/**
+ * Qui voit une recette :
+ * - 'famille' : seulement la famille qui l'a créée (défaut) ;
+ * - 'super_famille' : toutes les familles de la même super-famille ;
+ * - 'catalogue' : recettes livrées avec l'appli, lecture seule pour tous.
+ */
+export type RecipeVisibility = 'famille' | 'super_famille' | 'catalogue'
+
+/** Lien d'invitation (le jeton en clair n'est jamais relu : seulement à la création). */
+export interface Invitation {
+  id: string
+  kind: 'fondateur' | 'membre'
+  family_id: string | null
+  role: 'admin' | 'member' | null
+  label: string | null
+  created_by: string
+  created_at: string
+  expires_at: string
+  used_at: string | null
+  used_by: string | null
+  revoked_at: string | null
 }
 
 export interface Profile {
@@ -37,6 +69,7 @@ export interface Recipe {
   prep_time_min: number | null
   default_portions: number
   image_url: string | null
+  visibility: RecipeVisibility
   created_by: string | null
   created_at: string
   updated_at: string
@@ -154,6 +187,8 @@ export interface RecipeFormData {
   category_id: string
   prep_time_min: number | null
   default_portions: number
+  /** Qui voit la recette (absent = 'famille') */
+  visibility?: Exclude<RecipeVisibility, 'catalogue'>
   ingredients: RecipeIngredientInput[]
   steps: RecipeStepInput[]
 }

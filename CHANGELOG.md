@@ -21,6 +21,24 @@ numérotation [SemVer](https://semver.org/lang/fr/) : **MAJEUR.MINEUR.CORRECTIF*
 
 ## [Non publié]
 
+Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`) + fonction serveur
+`accepter-invitation` déployée + réglages Auth (voir `CLAUDE.md`, « Supabase : réglages… »).
+
+### Ajouté
+- **Invitations par lien** : le super-admin invite des fondateurs ; un fondateur crée son compte
+  puis sa famille, peut créer jusqu'à 3 familles et y inviter ; l'admin d'une famille invite
+  (rôle membre ou admin). Lien à usage unique, valable 7 jours, annulable, partageable en un geste.
+- Pages **Ma famille** (membres, rôles, invitations, familles du fondateur) et **Administration**.
+- **Mot de passe oublié** depuis la connexion (lien par e-mail, nouveau mot de passe).
+- **Qui voit la recette** : « Ma famille seulement » (par défaut) ou « Toutes nos familles » ;
+  les 50 recettes livrées forment un **catalogue commun** en lecture seule.
+
+### Sécurité
+- Règles d'accès réécrites et banc d'attaque étendu (familles, super-familles, invitations,
+  visibilité). Comptes créés uniquement par la fonction serveur (clé secrète jamais dans le site).
+- Corrigé : une liste ne peut plus être rattachée au planning d'un autre foyer ; l'auteur d'une
+  recette et « coché par » ne peuvent plus désigner quelqu'un d'une autre famille.
+
 ## [0.9.0] — 2026-11-13 — Candidate V1 (base `courses-test`)
 
 Migrations nécessaires : **1 à 16** (`supabase/migrations/`, dans l'ordre).

@@ -76,7 +76,7 @@ export async function empreintesOrigine(titres: string[]): Promise<Map<string, s
   }
   process.env.RLS_MIGRATIONS_DIR = dir
   const { createBench } = await import('../../tests/rls/harness.ts')
-  const bench = await createBench()
+  const bench = await createBench({ fixtures: false })
   const res = new Map<string, string>()
   for (const t of titres) {
     const rows = await bench.db.query<{ id: string }>(`SELECT id FROM public.recipes WHERE title = $1`, [t])

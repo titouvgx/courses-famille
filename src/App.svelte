@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { router, navigate } from './lib/router.svelte'
+  import { router, navigate, PUBLIC_ROUTES } from './lib/router.svelte'
   import { auth, initAuth, signOut } from './lib/auth.svelte'
   import { profileState, loadProfile, clearProfile } from './lib/profile.svelte'
   import { supabaseConfigured } from './lib/supabase'
@@ -18,6 +18,16 @@
   import Courses from './pages/Courses.svelte'
   import Historique from './pages/Historique.svelte'
   import MonCompte from './pages/MonCompte.svelte'
+  import Famille from './pages/Famille.svelte'
+  import Admin from './pages/Admin.svelte'
+  import Rejoindre from './pages/Rejoindre.svelte'
+  import MotDePasseOublie from './pages/MotDePasseOublie.svelte'
+  import NouveauMotDePasse from './pages/NouveauMotDePasse.svelte'
+
+  // Pages plein écran, accessibles sans être connecté (invitation, mot de passe).
+  // Elles restent affichées même quand une session s'ouvre pendant qu'on y est
+  // (création du compte, lien de réinitialisation) : c'est la page qui navigue ensuite.
+  const isPublicPage = $derived(PUBLIC_ROUTES.includes(router.current))
 
   // Initialiser l'auth au montage
   initAuth()
@@ -39,6 +49,7 @@
   $effect(() => {
     if (auth.loading) return
 
+    if (isPublicPage) return
     if (!auth.user && router.current !== 'login') {
       navigate('login')
     } else if (auth.user && router.current === 'login') {
@@ -56,7 +67,15 @@
 <AppBackdrop variant={auth.user && router.current === 'accueil' ? 'home' : 'page'} />
 <ToastContainer />
 
-{#if auth.loading}
+{#if isPublicPage}
+  {#if router.current === 'rejoindre'}
+    <Rejoindre />
+  {:else if router.current === 'mot-de-passe-oublie'}
+    <MotDePasseOublie />
+  {:else}
+    <NouveauMotDePasse />
+  {/if}
+{:else if auth.loading}
   <div class="loading">
     <div class="spinner"></div>
   </div>
@@ -87,6 +106,10 @@
       <Historique />
     {:else if router.current === 'compte'}
       <MonCompte />
+    {:else if router.current === 'famille'}
+      <Famille />
+    {:else if router.current === 'admin'}
+      <Admin />
     {:else}
       <div class="page-404">
         <h1>Page introuvable</h1>

@@ -2,6 +2,7 @@
   import { onMount, tick } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import { auth, signIn } from '../lib/auth.svelte'
+  import { href } from '../lib/router.svelte'
   import { VERSION_LABEL } from '../lib/version'
 
   let email = $state('')
@@ -187,6 +188,10 @@
           {/if}
         </button>
       </form>
+
+      <div class="forgot">
+        <a class="forgot-link" href={href('mot-de-passe-oublie')}>Mot de passe oublié ?</a>
+      </div>
 
       <p class="hint">
         Pas encore de compte ? Demande à l'administrateur de la famille de t'en créer un.
@@ -396,8 +401,39 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Lien discret sous le bouton (zone de tap 44 px) */
+  .forgot {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .forgot-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    touch-action: manipulation;
+  }
+
+  .forgot-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .forgot-link:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+  }
+
   .hint {
-    margin-top: 18px;
+    margin-top: 8px;
     font-size: 13px;
     line-height: 1.45;
     color: var(--text-secondary);

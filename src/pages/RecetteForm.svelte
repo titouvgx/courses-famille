@@ -68,6 +68,9 @@
   let categoryId = $state('')
   let prepTimeMin = $state<number | null>(null)
   let defaultPortions = $state<number | null>(4)
+  // Qui voit la recette : sa famille (défaut, le plus prudent) ou toute la super-famille
+  let visibility = $state<'famille' | 'super_famille'>('famille')
+  const superFamilyName = $derived(profileState.context?.superFamily?.name ?? null)
   let ingredients = $state<IngRow[]>([newIng()])
   let steps = $state<StepRow[]>([newStep()])
 
@@ -147,9 +150,13 @@
 
         if (editId && results[2]) {
           const r = results[2]
-          if (familyId && r.family_id !== familyId) {
+          if (familyId && r.family_id !== familyId && !profileState.context?.isSuperAdmin) {
             throw new Error('Cette recette appartient à un autre foyer : seul ce foyer peut la modifier.')
           }
+          if (r.visibility === 'catalogue' && !profileState.context?.isSuperAdmin) {
+            throw new Error('Recette du catalogue commun : elle ne se modifie pas.')
+          }
+          visibility = r.visibility === 'super_famille' ? 'super_famille' : 'famille'
           title = r.title
           categoryId = r.category_id ?? ''
           prepTimeMin = r.prep_time_min
@@ -216,6 +223,7 @@
       c: categoryId,
       p: prepTimeMin ?? null,
       d: defaultPortions ?? null,
+      v: visibility,
       i: ingredients
         .filter((i) => i.name.trim() || i.qty.trim() || i.unit.trim())
         .map((i) => [i.qty.trim(), i.unit.trim(), i.name.trim(), i.shopping_category_id]),
@@ -545,6 +553,7 @@
       category_id: categoryId,
       prep_time_min: prepTimeMin,
       default_portions: Number(defaultPortions),
+      visibility,
       ingredients: validIngredients,
       steps: validSteps,
     }
@@ -883,6 +892,29 @@
             />
             {#if errors.prep}<p class="field-err" id="rf-prep-err">{errors.prep}</p>{/if}
           </div>
+        </div>
+      </section>
+
+      <!-- ── Qui peut voir la recette ── -->
+      <section class="card" aria-labelledby="rf-vis-title">
+        <h2 class="section-title" id="rf-vis-title"><Icon name="users" size={18} /> Qui peut la voir ?</h2>
+        <div class="vis-options" role="radiogroup" aria-labelledby="rf-vis-title">
+          <label class="vis-option" class:selected={visibility === 'famille'}>
+            <input type="radio" name="rf-visibility" value="famille" bind:group={visibility} />
+            <span class="vis-text">
+              <span class="vis-name">Ma famille seulement</span>
+              <span class="vis-hint">Visible par les membres de ta famille.</span>
+            </span>
+          </label>
+          <label class="vis-option" class:selected={visibility === 'super_famille'}>
+            <input type="radio" name="rf-visibility" value="super_famille" bind:group={visibility} />
+            <span class="vis-text">
+              <span class="vis-name">Toutes nos familles</span>
+              <span class="vis-hint">
+                {superFamilyName ? `Partagée avec toutes les familles de « ${superFamilyName} ».` : 'Partagée avec les autres familles de ton groupe.'}
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
@@ -1237,6 +1269,43 @@
   }
 
   .req { color: var(--accent); }
+
+  /* Qui peut voir la recette */
+  .vis-options {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .vis-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md, 14px);
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .vis-option.selected {
+    border-color: var(--primary);
+    background: rgba(92, 200, 216, 0.12);
+  }
+  .vis-option input {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    flex-shrink: 0;
+  }
+  .vis-option input:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  .vis-text { display: grid; gap: 2px; }
+  .vis-name { font-weight: 600; color: var(--text); }
+  .vis-hint { font-size: 13px; color: var(--text-secondary); }
 
   /* Champs : la mise au point fait défiler en gardant de la place
      au-dessus de la barre d'enregistrement et de la barre d'onglets */

@@ -2,10 +2,10 @@
   import Icon from '../components/Icon.svelte'
   import ConfirmDialog from '../components/ConfirmDialog.svelte'
   import { auth, signOut } from '../lib/auth.svelte'
-  import { profileState, loadProfile, clearProfile } from '../lib/profile.svelte'
+  import { profileState, loadProfile, clearProfile, canInviteInOwnFamily } from '../lib/profile.svelte'
   import { pendingToggles } from '../lib/offline'
   import { supabase } from '../lib/supabase'
-  import { navigate } from '../lib/router.svelte'
+  import { navigate, href } from '../lib/router.svelte'
   import { toast } from '../lib/toast.svelte'
   import { VERSION_LABEL } from '../lib/version'
 
@@ -65,7 +65,7 @@
   const strength = $derived.by(() => {
     const p = newPassword
     if (!p) return null
-    if (p.length < 6) return { level: 0, label: 'Trop court (6 caractères min.)' }
+    if (p.length < 10) return { level: 0, label: 'Trop court (10 caractères min.)' }
     let score = 0
     if (p.length >= 10) score++
     if (p.length >= 14) score++
@@ -82,8 +82,8 @@
   async function handleChangePassword() {
     if (!supabase || savingPw) return
     pwError = null
-    if (newPassword.length < 6) {
-      pwError = 'Le mot de passe doit faire au moins 6 caractères.'
+    if (newPassword.length < 10) {
+      pwError = 'Le mot de passe doit faire au moins 10 caractères.'
       return
     }
     if (newPassword !== confirmPassword) {
@@ -170,6 +170,30 @@
     </div>
   </section>
 
+  <!-- Famille et administration -->
+  <nav class="links" aria-label="Famille">
+    <a class="link-row" href={href('famille')}>
+      <span class="section-icon"><Icon name="users" size={18} /></span>
+      <span class="link-text">
+        <span class="link-title">Ma famille</span>
+        <span class="link-sub">
+          {profileState.context?.family?.name ?? 'Membres'}{canInviteInOwnFamily() ? ' · inviter des personnes' : ''}
+        </span>
+      </span>
+      <Icon name="chevron-right" size={18} />
+    </a>
+    {#if profileState.context?.isSuperAdmin}
+      <a class="link-row" href={href('admin')}>
+        <span class="section-icon"><Icon name="lock" size={18} /></span>
+        <span class="link-text">
+          <span class="link-title">Administration</span>
+          <span class="link-sub">Inviter des fondateurs, vue d'ensemble</span>
+        </span>
+        <Icon name="chevron-right" size={18} />
+      </a>
+    {/if}
+  </nav>
+
   <!-- Nom d'affichage -->
   <section class="card" aria-labelledby="name-title">
     <h2 id="name-title" class="section-title">
@@ -211,8 +235,8 @@
           id="new-password"
           type={showPassword ? 'text' : 'password'}
           class="input input-has-toggle"
-          class:error={pwError != null && newPassword.length < 6}
-          placeholder="6 caractères minimum"
+          class:error={pwError != null && newPassword.length < 10}
+          placeholder="10 caractères minimum"
           autocomplete="new-password"
           autocapitalize="off"
           spellcheck="false"
@@ -357,6 +381,28 @@
   }
 
   /* ── Profil ── */
+  .links {
+    display: grid;
+    gap: 10px;
+  }
+  .link-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    color: var(--text);
+    text-decoration: none;
+    touch-action: manipulation;
+  }
+  .link-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .link-text { flex: 1; display: grid; gap: 2px; min-width: 0; }
+  .link-title { font-weight: 600; }
+  .link-sub { font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   .profile-card {
     display: flex;
     align-items: center;

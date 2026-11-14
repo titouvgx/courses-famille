@@ -12,6 +12,7 @@
   "include": [
     "tests/**/*.ts",
     "scripts/**/*.ts",
+    "supabase/functions/**/*.ts",
     "src/globals.d.ts"
   ]
 }

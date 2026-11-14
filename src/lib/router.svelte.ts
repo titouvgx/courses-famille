@@ -16,41 +16,62 @@ export type Route =
   | 'courses'
   | 'historique'
   | 'compte'           // page profil / mon compte
+  | 'famille'          // ma famille : membres, invitations ; fondateur : ses familles
+  | 'admin'            // super-admin : liens fondateur, vue d'ensemble
+  | 'rejoindre'        // public : #/rejoindre/<jeton> (création de compte par lien)
+  | 'mot-de-passe-oublie'  // public : demande d'e-mail de réinitialisation
+  | 'nouveau-mot-de-passe' // public : arrivée depuis l'e-mail (?token_hash=…&type=recovery)
   | 'introuvable'
 
 /** Les 5 onglets de la tab bar. */
 export const TAB_ROUTES = ['accueil', 'recettes', 'semaine', 'courses', 'historique'] as const
 export type TabRoute = (typeof TAB_ROUTES)[number]
 
-const STATIC_ROUTES: string[] = ['login', 'accueil', 'frigo', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte']
+const STATIC_ROUTES: string[] = [
+  'login', 'accueil', 'frigo', 'recettes', 'nouvelle-recette', 'semaine', 'courses', 'historique', 'compte',
+  'famille', 'admin', 'mot-de-passe-oublie', 'nouveau-mot-de-passe',
+]
+
+/** Pages accessibles sans être connecté (en plus de « login »). */
+export const PUBLIC_ROUTES: Route[] = ['rejoindre', 'mot-de-passe-oublie', 'nouveau-mot-de-passe']
 const DEFAULT_ROUTE: Route = 'accueil'
 
 interface RouterState {
   current: Route
   /** ID de la recette quand current === 'recette'. */
   recipeId: string | null
+  /** Jeton d'invitation quand current === 'rejoindre'. */
+  token: string | null
 }
 
 function readHash(): RouterState {
   const raw = window.location.hash.replace(/^#\/?/, '')
   const parts = raw.split('/')
 
-  if (raw === '') return { current: DEFAULT_ROUTE, recipeId: null }
+  // Arrivée depuis l'e-mail « mot de passe oublié » : ?token_hash=…&type=recovery
+  if (new URLSearchParams(window.location.search).get('type') === 'recovery') {
+    return { current: 'nouveau-mot-de-passe', recipeId: null, token: null }
+  }
+
+  if (raw === '') return { current: DEFAULT_ROUTE, recipeId: null, token: null }
 
   // Routes dynamiques
   if (parts[0] === 'recette' && parts[1]) {
-    return { current: 'recette', recipeId: parts[1] }
+    return { current: 'recette', recipeId: parts[1], token: null }
   }
   if (parts[0] === 'editer-recette' && parts[1]) {
-    return { current: 'editer-recette', recipeId: parts[1] }
+    return { current: 'editer-recette', recipeId: parts[1], token: null }
+  }
+  if (parts[0] === 'rejoindre') {
+    return { current: 'rejoindre', recipeId: null, token: parts[1] ?? null }
   }
 
   // Routes statiques
   if (STATIC_ROUTES.includes(parts[0])) {
-    return { current: parts[0] as Route, recipeId: null }
+    return { current: parts[0] as Route, recipeId: null, token: null }
   }
 
-  return { current: 'introuvable', recipeId: null }
+  return { current: 'introuvable', recipeId: null, token: null }
 }
 
 // $state = valeur réactive de Svelte 5
@@ -71,7 +92,8 @@ const ORDER: Record<Route, number> = {
   semaine: 20,
   courses: 30,
   historique: 40,
-  compte: 50,
+  compte: 50, famille: 51, admin: 52,
+  rejoindre: -10, 'mot-de-passe-oublie': -9, 'nouveau-mot-de-passe': -9,
   introuvable: 60,
 }
 
@@ -83,12 +105,13 @@ if (supportsViewTransitions) document.documentElement.classList.add('vt')
 function applyRoute(next: RouterState) {
   router.current = next.current
   router.recipeId = next.recipeId
+  router.token = next.token
   window.scrollTo(0, 0) // chaque nouvel écran commence en haut
 }
 
 window.addEventListener('hashchange', () => {
   const next = readHash()
-  if (next.current === router.current && next.recipeId === router.recipeId) return
+  if (next.current === router.current && next.recipeId === router.recipeId && next.token === router.token) return
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (!supportsViewTransitions || reduce) {
@@ -98,7 +121,7 @@ window.addEventListener('hashchange', () => {
 
   const root = document.documentElement
   root.dataset.nav =
-    next.current === 'login' || router.current === 'login'
+    next.current === 'login' || router.current === 'login' || PUBLIC_ROUTES.includes(next.current)
       ? 'fade'
       : ORDER[next.current] >= ORDER[router.current] ? 'forward' : 'back'
 
