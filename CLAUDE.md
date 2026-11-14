@@ -1,7 +1,7 @@
-# Courses en famille — Contexte projet
+# Madéo — Contexte projet
 
-PWA familiale : recettes, planning de la semaine, liste de courses partagée en temps réel entre les membres d'une famille.
-- **Site** : https://titouvgx.github.io/courses-famille/ — **Repo** : https://github.com/titouvgx/courses-famille (public)
+**Madéo** (anciennement « Courses en famille », renommée le 14/11/2026 → `docs/renommage-madeo.md`) : PWA familiale : recettes, planning de la semaine, liste de courses partagée en temps réel entre les membres d'une famille.
+- **Site** : https://titouvgx.github.io/madeo/ — **Repo** : https://github.com/titouvgx/madeo (public) — tant que le dépôt n'est pas renommé sur GitHub : `…/courses-famille`
 - **Détails à lire seulement si besoin** : `docs/architecture.md` (modèle, Realtime, photos, hors connexion, vie du foyer, structure des fichiers, recettes livrées), `docs/design.md` (design « Mer », règles UI mobile), `docs/historique.md` (étapes passées, anciennes décisions), `supabase/prod/README.md` (mise en prod), `tests/rls/README.md` (banc d'attaque)
 
 ## Règles de travail (demandées par l'utilisateur)

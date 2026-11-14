@@ -64,7 +64,7 @@
       : '',
   )
 
-  const shareText = $derived(invitation ? `Rejoins-moi sur Courses en famille : ${invitation.url}` : '')
+  const shareText = $derived(invitation ? `Rejoins-moi sur Madéo : ${invitation.url}` : '')
 
   function messageOf(e: unknown, fallback: string): string {
     const m = (e as { message?: unknown } | null)?.message
@@ -143,7 +143,7 @@
       return
     }
     try {
-      await navigator.share({ title: 'Courses en famille', text: shareText })
+      await navigator.share({ title: 'Madéo', text: shareText })
       sent = true
     } catch (e) {
       // Partage annulé par la personne : rien à dire

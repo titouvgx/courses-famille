@@ -1,4 +1,4 @@
-# Courses en famille
+# Madéo
 
 Recettes partagées, planning des repas par foyer, liste de courses fusionnée et synchronisée en direct.
 

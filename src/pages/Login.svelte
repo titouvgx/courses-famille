@@ -110,7 +110,7 @@
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
       </div>
-      <h1>Courses en famille</h1>
+      <h1>Madéo</h1>
       <p class="tagline">Les recettes, la semaine et la liste de courses, partagées à la maison.</p>
     </header>
 
@@ -194,7 +194,7 @@
       </div>
 
       <p class="hint">
-        Pas encore de compte ? Demande à l'administrateur de la famille de t'en créer un.
+        Pas encore de compte ? Demande un lien d’invitation à l’admin de ta famille.
       </p>
     </section>
 

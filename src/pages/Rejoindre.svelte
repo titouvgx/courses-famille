@@ -254,7 +254,7 @@
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
         </svg>
       </div>
-      <h1>Courses en famille</h1>
+      <h1>Madéo</h1>
     </header>
 
     <section class="auth-card" aria-labelledby="join-title">
@@ -317,7 +317,7 @@
           </h2>
           <p class="lead">
             {step === 1
-              ? 'Tu es invité à fonder ta famille sur Courses en famille. D’abord ton compte, puis ta famille.'
+              ? 'Tu es invité à fonder ta famille sur Madéo. D’abord ton compte, puis ta famille.'
               : 'Dernière étape : le nom de ta famille.'}
           </p>
           <ol class="steps" aria-label="Étapes">

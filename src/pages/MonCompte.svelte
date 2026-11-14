@@ -317,7 +317,7 @@
     </button>
   </div>
 
-  <p class="app-version">Courses en famille · {VERSION_LABEL}</p>
+  <p class="app-version">Madéo · {VERSION_LABEL}</p>
 </div>
 
 {#if confirmSignOut}

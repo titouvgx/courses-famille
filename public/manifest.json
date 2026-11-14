@@ -1,7 +1,7 @@
 {
-  "name": "Courses en famille",
-  "short_name": "Courses",
-  "description": "Liste de courses collaborative pour la famille",
+  "name": "Madéo",
+  "short_name": "Madéo",
+  "description": "Recettes, planning de la semaine et liste de courses partagée en famille",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
