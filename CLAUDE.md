@@ -1,7 +1,7 @@
-# Madéo — Contexte projet
+# Lichouz — Contexte projet
 
-**Madéo** (anciennement « Courses en famille », renommée le 14/11/2026 → `docs/renommage-madeo.md`) : PWA familiale : recettes, planning de la semaine, liste de courses partagée en temps réel entre les membres d'une famille.
-- **Site** : https://titouvgx.github.io/madeo/ — **Repo** : https://github.com/titouvgx/madeo (public) — tant que le dépôt n'est pas renommé sur GitHub : `…/courses-famille`
+**Lichouz** (anciennement « Courses en famille », renommée le 14/11/2026 → `docs/renommage-lichouz.md`) : PWA familiale : recettes, planning de la semaine, liste de courses partagée en temps réel entre les membres d'une famille.
+- **Site** : https://titouvgx.github.io/lichouz/ — **Repo** : https://github.com/titouvgx/lichouz (public) — tant que le dépôt n'est pas renommé sur GitHub : `…/courses-famille`
 - **Détails à lire seulement si besoin** : `docs/architecture.md` (modèle, Realtime, photos, hors connexion, vie du foyer, structure des fichiers, recettes livrées), `docs/design.md` (design « Mer », règles UI mobile), `docs/historique.md` (étapes passées, anciennes décisions), `supabase/prod/README.md` (mise en prod), `tests/rls/README.md` (banc d'attaque)
 
 ## Règles de travail (demandées par l'utilisateur)
@@ -17,7 +17,7 @@ Svelte 5 (runes uniquement : `$state`, `$derived`, `$effect`, `$props`) + TypeSc
 **Pièges Svelte** : `{@const}` enfant DIRECT d'un bloc `{#each}`/`{#if}` ; la variable du canal Realtime ne doit PAS être en `$state` (boucle infinie).
 
 ## Routes (`src/lib/router.svelte.ts`)
-`login`, `accueil` (défaut), `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`, `semaine`, `courses`, `historique`, `compte`, `frigo`, `famille` (Ma famille), `admin` (super-admin), `aide` (lien dans Mon compte ; écran de bienvenue `Bienvenue.svelte` une fois par personne et par téléphone, clé `madeo:bienvenue-vue:<id>`). **L'aide décrit l'appli : la mettre à jour quand une fonction change.** Publiques (plein écran) : `rejoindre/<jeton>`, `mot-de-passe-oublie`, `nouveau-mot-de-passe` (`?token_hash=…&type=recovery` AVANT le `#`). Tab bar : Accueil | Recettes | Semaine | Courses | Historique
+`login`, `accueil` (défaut), `recettes`, `nouvelle-recette`, `recette/<id>`, `editer-recette/<id>`, `semaine`, `courses`, `historique`, `compte`, `frigo`, `famille` (Ma famille), `admin` (super-admin), `aide` (lien dans Mon compte ; écran de bienvenue `Bienvenue.svelte` une fois par personne et par téléphone, clé `lichouz:bienvenue-vue:<id>`). **L'aide décrit l'appli : la mettre à jour quand une fonction change.** Publiques (plein écran) : `rejoindre/<jeton>`, `mot-de-passe-oublie`, `nouveau-mot-de-passe` (`?token_hash=…&type=recovery` AVANT le `#`). Tab bar : Accueil | Recettes | Semaine | Courses | Historique
 
 ## Modèle familles (migration 17)
 - **Une personne = une famille** (`profiles.family_id`, rôle `admin`/`member`) ; **une famille = une super-famille** (`families.super_family_id`)

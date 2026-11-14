@@ -1,4 +1,4 @@
-// Service Worker — Madéo
+// Service Worker — Lichouz
 // Stratégie : stale-while-revalidate pour les fichiers du site, réseau d'abord
 // pour les pages, rien pour l'API Supabase (données toujours fraîches).
 //

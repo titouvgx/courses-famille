@@ -1,6 +1,6 @@
 # Journal des versions
 
-Toutes les évolutions notables de Madéo (anciennement « Courses en famille »).
+Toutes les évolutions notables de Lichouz (anciennement « Courses en famille »).
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/),
 numérotation [SemVer](https://semver.org/lang/fr/) : **MAJEUR.MINEUR.CORRECTIF**.
 
@@ -39,14 +39,14 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **
 - **Fondateur** : voit les membres de ses autres familles (« Membres (n) »), change leur rôle,
   les retire, et **supprime une famille vide** (0 membre, 0 lien en attente).
 
-- **Aide** (Mon compte → Aide) : à quoi sert Madéo, chaque onglet expliqué, « Ma famille » selon
+- **Aide** (Mon compte → Aide) : à quoi sert Lichouz, chaque onglet expliqué, « Ma famille » selon
   ton rôle, questions fréquentes. **Écran de bienvenue** au premier lancement (une seule fois).
 
 ### Modifié
-- **L'appli s'appelle désormais Madéo** (onglet, écran d'accueil du téléphone, connexion,
-  invitation, Mon compte). Nouvelle adresse `https://titouvgx.github.io/madeo/` une fois le dépôt
+- **L'appli s'appelle désormais Lichouz** (onglet, écran d'accueil du téléphone, connexion,
+  invitation, Mon compte). Nouvelle adresse `https://titouvgx.github.io/lichouz/` une fois le dépôt
   renommé : réinstaller l'appli, mettre à jour Site URL / Redirect URLs dans Supabase
-  (`docs/renommage-madeo.md`).
+  (`docs/renommage-lichouz.md`).
 
 ### Corrigé
 - **Création de compte par lien** : la fonction serveur `accepter-invitation` chargeait `supabase-js`

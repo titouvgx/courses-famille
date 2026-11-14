@@ -24,7 +24,7 @@
 
 <div class="overlay" role="presentation">
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-    <h2 id="welcome-title">Bienvenue sur Madéo</h2>
+    <h2 id="welcome-title">Bienvenue sur Lichouz</h2>
     <p class="lead">Les repas et les courses de la maison, au même endroit et à jour pour tout le monde.</p>
     <ol class="steps">
       <li><span class="step-icon"><Icon name="book" size={18} /></span><span><strong>Choisis des recettes</strong> : les tiennes ou celles du catalogue.</span></li>

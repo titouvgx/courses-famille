@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Aide : à quoi sert Madéo et comment s'en servir, onglet par onglet,
+  // Aide : à quoi sert Lichouz et comment s'en servir, onglet par onglet,
   // + « Ma famille » expliqué selon le rôle de la personne, + FAQ.
   // Sections dépliables (<details>) : lisibles au clavier et au lecteur d'écran.
   import Icon from '../components/Icon.svelte'
@@ -38,11 +38,11 @@
 <div class="page">
   <header class="head">
     <h1>Aide</h1>
-    <p class="head-sub">Madéo en quelques minutes.</p>
+    <p class="head-sub">Lichouz en quelques minutes.</p>
   </header>
 
   <section class="card intro" aria-labelledby="intro-title">
-    <h2 id="intro-title" class="section-title">Madéo, c’est quoi ?</h2>
+    <h2 id="intro-title" class="section-title">Lichouz, c’est quoi ?</h2>
     <p>
       L’appli des repas et des courses de la famille. Tout ce que tu fais est visible
       tout de suite par les autres membres de ta famille, et seulement par eux.
@@ -93,7 +93,7 @@
             <p>Les listes de courses terminées, pour retrouver ce qu’on a acheté et quand.</p>
           {:else if s.id === 'frigo'}
             <p>
-              Depuis l’accueil : tape ce qu’il te reste (« courgettes, œufs… »), Madéo classe les recettes qui
+              Depuis l’accueil : tape ce qu’il te reste (« courgettes, œufs… »), Lichouz classe les recettes qui
               l’utilisent le mieux (le placard est compté comme disponible). Le calcul se fait dans ton téléphone.
             </p>
           {:else if s.id === 'famille'}

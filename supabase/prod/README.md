@@ -14,7 +14,7 @@ privée / partagée, photo, mot de passe oublié) et toutes les vérifications G
 - **Sign In / Providers → Email** : « Allow new users to sign up » **désactivé** ; « Confirm email » activé.
 - **Mot de passe** : longueur minimale **10** ; exiger lettres et chiffres si l'option est proposée.
 - **Rate limits** : laisser les valeurs par défaut (ou plus strictes).
-- **URL Configuration** : **Site URL** = `https://titouvgx.github.io/madeo/` ; ajouter la même adresse dans **Redirect URLs**.
+- **URL Configuration** : **Site URL** = `https://titouvgx.github.io/lichouz/` ; ajouter la même adresse dans **Redirect URLs**.
 - **Email Templates → Reset Password** : remplacer le lien par
   `{{ .SiteURL }}?token_hash={{ .TokenHash }}&type=recovery#/nouveau-mot-de-passe`
 

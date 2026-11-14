@@ -196,7 +196,7 @@
       <span class="section-icon"><Icon name="book" size={18} /></span>
       <span class="link-text">
         <span class="link-title">Aide</span>
-        <span class="link-sub">À quoi sert Madéo, comment s’en servir</span>
+        <span class="link-sub">À quoi sert Lichouz, comment s’en servir</span>
       </span>
       <Icon name="chevron-right" size={18} />
     </a>
@@ -325,7 +325,7 @@
     </button>
   </div>
 
-  <p class="app-version">Madéo · {VERSION_LABEL}</p>
+  <p class="app-version">Lichouz · {VERSION_LABEL}</p>
 </div>
 
 {#if confirmSignOut}
