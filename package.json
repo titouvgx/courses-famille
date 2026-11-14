@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:rls": "vitest run tests/rls",
-    "recettes": "node --experimental-strip-types --no-warnings scripts/recettes/generer.ts"
+    "recettes": "node --experimental-strip-types --no-warnings scripts/recettes/generer.ts",
+    "prod:sql": "node --experimental-strip-types --no-warnings scripts/prod/assembler.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.16",

@@ -91,8 +91,9 @@ Dans `supabase/migrations/` — à exécuter dans l'ordre dans le SQL Editor de 
 13. `household.sql` — `meal_slots.cook_id` (cuisinier du foyer, trigger), tables `staples` (habituels) et `pantry_items` (placard), `shopping_list_items.needed` (« il en manque »). RLS `is_family`, longueurs bornées (idempotent)
 14. `more_ingredients.sql` — 251 ingrédients de plus dans `known_ingredients` (rayon par nom de rayon, `ON CONFLICT DO NOTHING`, idempotent)
 15. `photo_paths.sql` — **`recipes.image_url` = chemin `<id recette>/<uuid>.webp|jpg` de NOTRE bucket** (plus d'URL complète : l'appli reconstruit l'adresse avec `VITE_SUPABASE_URL`) ou photo Unsplash `https://images.unsplash.com/photo-…` ; trigger `trg_recipe_image_exists` : le fichier doit exister dans `recipe-photos`. Convertit les anciennes URL de nos photos, vide le reste (idempotent). ⚠️ **Ordre** : déployer d'abord le code ≥ v0.9.0, puis exécuter cette migration aussitôt (entre les deux, l'envoi de photo est refusé)
-17. `familles_invitations.sql` — super-familles, invitations, visibilité des recettes, règles RLS réécrites (recettes, ingrédients, étapes, planning, listes, photos), gardes (auteur, « coché par », planning d'un autre foyer). Rattache les familles existantes à une super-famille (fondateur : premier super-admin). Idempotente
 16. `recettes_v1.sql` — **GÉNÉRÉ** par `npm run recettes` depuis `supabase/recettes/*.json` (ne jamais l'éditer à la main) : corrige les 20 recettes de démo **seulement si elles sont encore dans leur état d'origine** (empreinte md5 ; une recette modifiée dans l'appli n'est pas touchée) et ajoute 30 recettes si le titre n'existe pas. Idempotente, indépendante du code
+17. `familles_invitations.sql` — super-familles, invitations, visibilité des recettes, règles RLS réécrites (recettes, ingrédients, étapes, planning, listes, photos), gardes (auteur, « coché par », planning d'un autre foyer). Rattache les familles existantes à une super-famille (fondateur : premier super-admin). Idempotente
+18. `recettes_photos.sql` — **GÉNÉRÉ** par `npm run recettes` depuis `supabase/recettes/photos.json` : une photo Unsplash vérifiée à l'œil par recette du **catalogue** (jamais les recettes des familles, jamais une photo envoyée dans l'appli). Nécessite la 17. Idempotente
 
 **État des bases** (à tenir à jour) :
 - `courses-test` : migrations 1 à 14 appliquées et vérifiées le 13/11/2026 (requête de contrôle ; `known_ingredients` = 513 lignes) ; **15 à exécuter juste après le déploiement de la v0.9.0**, puis 16 (n'importe quand)
@@ -344,10 +345,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
 - Préparation V1 ✅ (v0.9.0) : version affichée, CHANGELOG, CI/CD (vérifications, release, Dependabot), tests unitaires + banc RLS dans le dépôt, CSP, polices hébergées, migration 14 (ingrédients)
 
 ### Restant ⬜
-- Étape 10 : Déploiement prod → **v1.0.0**. Procédure :
+- Étape 10 : Déploiement prod → **v1.0.0**. **Guide à jour : `supabase/prod/README.md`** (SQL d'installation neuve en 3 fichiers : `npm run prod:sql`, testé par `tests/rls/installation.test.ts`). Résumé historique :
   1. Créer le projet Supabase `courses-prod` (même région que test)
   2. Auth : inscriptions fermées, confirmation e-mail, mot de passe ≥ 10 caractères (+ caractères variés), limites de tentatives, URL du site et redirections = adresse GitHub Pages
-  3. Créer le compte super-admin et son foyer, puis exécuter les migrations 1 à 16 dans l'ordre (7 après le compte et le foyer)
+  3. Créer le compte super-admin et son foyer, puis exécuter toutes les migrations dans l'ordre (7 après le compte et le foyer)
   4. Requête de contrôle (tables, colonnes, triggers, RLS, publication Realtime, bucket photos)
   5. Variables GitHub `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` → valeurs de prod (clé publishable seulement)
   6. Passer la version à 1.0.0 + CHANGELOG, pousser sur main, vérifier le site, l'onglet Actions (déploiement + contrôle de sécurité), puis étiquette `v1.0.0`

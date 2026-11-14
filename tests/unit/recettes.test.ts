@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { DOSSIER_MIGRATIONS, FICHIER_MIGRATION, genererSQL, lireRecettes } from '../../scripts/recettes/generer.ts'
+import { DOSSIER_MIGRATIONS, FICHIER_MIGRATION, FICHIER_MIGRATION_PHOTOS, genererPhotosSQL, genererSQL, lirePhotos, lireRecettes } from '../../scripts/recettes/generer.ts'
 
 describe('recettes livrées avec l\'appli', () => {
   const { corrections, nouvelles, erreurs } = lireRecettes()
@@ -37,4 +37,13 @@ describe('recettes livrées avec l\'appli', () => {
     const actuel = readFileSync(join(DOSSIER_MIGRATIONS, FICHIER_MIGRATION), 'utf8')
     expect(actuel === attendu, 'migration différente des fichiers JSON : lancer « npm run recettes »').toBe(true)
   }, 120_000)
+
+  it('photos du catalogue : une entrée vérifiée par recette, format Unsplash, sans doublon', () => {
+    expect(lirePhotos().erreurs).toEqual([])
+  })
+
+  it('la migration des photos est à jour (sinon : npm run recettes)', () => {
+    const actuel = readFileSync(join(DOSSIER_MIGRATIONS, FICHIER_MIGRATION_PHOTOS), 'utf8')
+    expect(actuel === genererPhotosSQL(), 'migration des photos différente de photos.json : lancer « npm run recettes »').toBe(true)
+  })
 })

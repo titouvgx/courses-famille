@@ -20,6 +20,20 @@ const ROOT = fileURLToPath(new URL('../../', import.meta.url))
 export const DOSSIER_RECETTES = process.env.RECETTES_DIR || join(ROOT, 'supabase', 'recettes')
 export const DOSSIER_MIGRATIONS = join(ROOT, 'supabase', 'migrations')
 export const FICHIER_MIGRATION = '20261113170000_recettes_v1.sql'
+export const FICHIER_PHOTOS = 'photos.json'
+export const FICHIER_MIGRATION_PHOTOS = '20261114110000_recettes_photos.sql'
+
+/** Photo Unsplash (même règle que la contrainte recipes_image_url_origin, format figé). */
+export const URL_PHOTO = /^https:\/\/images\.unsplash\.com\/photo-[A-Za-z0-9_-]+\?w=800&h=600&fit=crop&auto=format$/
+
+export interface PhotoRecette {
+  title: string
+  url: string | null
+  photographe?: string
+  verifiee?: boolean
+  note?: string
+  remplace_ancienne?: boolean
+}
 
 /** Empreinte d'une recette en base (même expression ici et dans la migration). */
 const EMPREINTE_SQL = (rid: string) => `md5(concat_ws('§',
@@ -35,7 +49,7 @@ export function lireRecettes(): { corrections: Recette[]; nouvelles: Recette[]; 
   const corrections: Recette[] = []
   const nouvelles: Recette[] = []
   const erreurs: string[] = []
-  const fichiers = readdirSync(DOSSIER_RECETTES).filter((f) => f.endsWith('.json')).sort()
+  const fichiers = readdirSync(DOSSIER_RECETTES).filter((f) => f.endsWith('.json') && f !== FICHIER_PHOTOS).sort()
   for (const f of fichiers) {
     const contenu = JSON.parse(readFileSync(join(DOSSIER_RECETTES, f), 'utf8')) as FichierRecettes
     erreurs.push(...valider(contenu, f))
@@ -179,9 +193,83 @@ END $$;
 `
 }
 
+/** Photos des recettes du catalogue (supabase/recettes/photos.json). */
+export function lirePhotos(): { photos: PhotoRecette[]; erreurs: string[] } {
+  const erreurs: string[] = []
+  let photos: PhotoRecette[] = []
+  try {
+    photos = (JSON.parse(readFileSync(join(DOSSIER_RECETTES, FICHIER_PHOTOS), 'utf8')) as { photos: PhotoRecette[] }).photos
+  } catch {
+    return { photos: [], erreurs: [`${FICHIER_PHOTOS} absent ou illisible`] }
+  }
+  const { corrections, nouvelles } = lireRecettes()
+  const titres = new Set([...corrections, ...nouvelles].map((r) => r.title))
+  const vusT = new Set<string>()
+  const vusU = new Set<string>()
+  for (const p of photos) {
+    if (!titres.has(p.title)) erreurs.push(`photo pour un titre inconnu : « ${p.title} »`)
+    if (vusT.has(p.title)) erreurs.push(`deux photos pour « ${p.title} »`)
+    vusT.add(p.title)
+    if (p.url !== null) {
+      if (!URL_PHOTO.test(p.url)) erreurs.push(`URL au mauvais format pour « ${p.title} »`)
+      if (vusU.has(p.url)) erreurs.push(`même photo utilisée deux fois (« ${p.title} »)`)
+      vusU.add(p.url)
+      if (p.verifiee !== true) erreurs.push(`photo non vérifiée pour « ${p.title} »`)
+    }
+  }
+  for (const t of titres) if (!vusT.has(t)) erreurs.push(`pas d'entrée photo pour « ${t} »`)
+  return { photos, erreurs }
+}
+
+export function genererPhotosSQL(): string {
+  const { photos, erreurs } = lirePhotos()
+  if (erreurs.length) throw new Error('Photos invalides :\n' + erreurs.join('\n'))
+  const avec = photos.filter((p) => p.url)
+  const lignes = avec.map((p) => `    (${q(p.title)}, ${q(p.url!)})`).join(',\n')
+  return `-- ============================================================
+-- Migration : photos des recettes du catalogue commun
+-- ============================================================
+-- FICHIER GÉNÉRÉ par scripts/recettes/generer.ts à partir de
+-- supabase/recettes/photos.json — NE PAS MODIFIER À LA MAIN (npm run recettes).
+--
+-- ${avec.length} photos Unsplash (licence Unsplash : usage gratuit, attribution non
+-- obligatoire), chacune vérifiée à l'œil. Ne touche QUE les recettes du
+-- catalogue (visibility = 'catalogue') sans photo ou avec une photo Unsplash :
+-- une photo envoyée dans l'appli (chemin de notre stockage) n'est jamais remplacée.
+-- Les recettes ajoutées par les familles ne sont pas concernées.
+-- Nécessite la migration 17 (colonne visibility). Idempotente.
+-- ============================================================
+
+DO $$
+DECLARE
+  v_n integer;
+BEGIN
+  WITH photos(title, url) AS (
+    VALUES
+${lignes}
+  ), upd AS (
+    UPDATE public.recipes r
+       SET image_url = p.url
+      FROM photos p
+     WHERE r.title = p.title
+       AND r.visibility = 'catalogue'
+       AND (r.image_url IS NULL OR r.image_url LIKE 'https://images.unsplash.com/%')
+       AND r.image_url IS DISTINCT FROM p.url
+    RETURNING 1
+  )
+  SELECT count(*) INTO v_n FROM upd;
+  RAISE NOTICE 'recettes_photos : % photo(s) mise(s) à jour', v_n;
+END $$;
+`
+}
+
 // Exécution directe : écrit la migration
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const sql = await genererSQL()
   writeFileSync(join(DOSSIER_MIGRATIONS, FICHIER_MIGRATION), sql)
   console.log(`Écrit : supabase/migrations/${FICHIER_MIGRATION}`)
+  if (lirePhotos().photos.length) {
+    writeFileSync(join(DOSSIER_MIGRATIONS, FICHIER_MIGRATION_PHOTOS), genererPhotosSQL())
+    console.log(`Écrit : supabase/migrations/${FICHIER_MIGRATION_PHOTOS}`)
+  }
 }

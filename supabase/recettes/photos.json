@@ -1,0 +1,375 @@
+{
+  "source": "Unsplash (licence Unsplash : usage gratuit, attribution non obligatoire)",
+  "photos": [
+    {
+      "title": "Bœuf bourguignon",
+      "url": "https://images.unsplash.com/photo-1608500218987-0f2b3be34b47?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Nathan Dumlao",
+      "verifiee": true,
+      "note": "Bol de bœuf mijoté en sauce au vin rouge avec carottes, champignons et romarin.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Poulet rôti",
+      "url": "https://images.unsplash.com/photo-1616401616927-3c81de22dfa8?w=800&h=600&fit=crop&auto=format",
+      "photographe": "inconnu (non retrouvé dans les recherches Unsplash)",
+      "verifiee": true,
+      "note": "Poulet entier rôti, peau dorée, servi sur un plat.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Quiche lorraine",
+      "url": "https://images.unsplash.com/photo-1767065584177-9ceb902eec7a?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Diego Arenas de Rodrigo",
+      "verifiee": true,
+      "note": "Part de quiche dorée avec une petite salade sur une ardoise.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Pâte à crêpes",
+      "url": "https://images.unsplash.com/photo-1777891258086-52a41e4477f6?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Husien Bisky",
+      "verifiee": true,
+      "note": "Crêpes pliées en triangle avec trois sauces à tremper et de la menthe.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Gratin dauphinois",
+      "url": "https://images.unsplash.com/photo-1701520181969-2d3e5e00eee5?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Kat von Wood",
+      "verifiee": true,
+      "note": "Gratin de pommes de terre en fines tranches, crémeux et doré, dans son plat.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Hachis parmentier",
+      "url": "https://images.unsplash.com/photo-1696935257293-9ec4f03074a1?w=800&h=600&fit=crop&auto=format",
+      "photographe": "David Todd McCarty",
+      "verifiee": true,
+      "note": "Plat de purée gratinée sur viande hachée, une part servie à côté.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Tartiflette",
+      "url": "https://images.unsplash.com/photo-1760445530213-bd887eec98fa?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Ahmet Koç",
+      "verifiee": true,
+      "note": "Fromage entier fondu au four sur des pommes de terre en cocotte (très proche d'une tartiflette, sans lardons visibles).",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Mousse au chocolat",
+      "url": "https://images.unsplash.com/photo-1673551494277-92204546b504?w=800&h=600&fit=crop&auto=format",
+      "photographe": "American Heritage Chocolate",
+      "verifiee": true,
+      "note": "Ramequins de mousse au chocolat avec chantilly et framboises.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Pâtes à la carbonara",
+      "url": "https://images.unsplash.com/photo-1588013273468-315fd88ea34c?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Zoran Borojevic",
+      "verifiee": true,
+      "note": "Assiette de spaghetti carbonara avec lardons et parmesan.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Soupe à l'oignon gratinée",
+      "url": "https://images.unsplash.com/photo-1549203438-a7696aed4dac?w=800&h=600&fit=crop&auto=format",
+      "photographe": "sheri silver",
+      "verifiee": true,
+      "note": "Bol de soupe à l'oignon gratinée au fromage fondu, brin de thym.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Ratatouille",
+      "url": "https://images.unsplash.com/photo-1572453800999-e8d2d1589b7c?w=800&h=600&fit=crop&auto=format",
+      "photographe": "amirali mirhashemian",
+      "verifiee": true,
+      "note": "Légumes du soleil en tranches (courgette, tomate, aubergine) sur sauce tomate, dressage façon confit byaldi.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Tarte aux pommes",
+      "url": "https://images.unsplash.com/photo-1621743478914-cc8a86d7e7b5?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Kavya P K",
+      "verifiee": true,
+      "note": "Tarte aux pommes à croisillons dorée, deux pommes à côté.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Fondant au chocolat",
+      "url": "https://images.unsplash.com/photo-1673551490812-eaee2e9bf0ef?w=800&h=600&fit=crop&auto=format",
+      "photographe": "American Heritage Chocolate",
+      "verifiee": true,
+      "note": "Fondant au chocolat entamé, cœur coulant, avec une boule de glace vanille.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Saumon en papillote",
+      "url": "https://images.unsplash.com/photo-1617146629059-0814c2d61b41?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Jonathan Cooper",
+      "verifiee": true,
+      "note": "Pavés de saumon avec rondelles de citron sur papier aluminium, prêts à être enfermés.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Velouté de potiron",
+      "url": "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Cala",
+      "verifiee": true,
+      "note": "Bols de velouté orange garnis de graines de courge et de feta.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Lasagnes bolognaise",
+      "url": "https://images.unsplash.com/photo-1759409117421-1a64af35f118?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Clare Andrews",
+      "verifiee": true,
+      "note": "Plat de lasagnes gratinées avec une feuille de basilic.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Salade niçoise",
+      "url": "https://images.unsplash.com/photo-1604909052743-94e838986d24?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Farhad Ibrahimzade",
+      "verifiee": true,
+      "note": "Salade composée au thon, œufs durs, tomates cerises et roquette.",
+      "remplace_ancienne": false
+    },
+    {
+      "title": "Croque-monsieur",
+      "url": "https://images.unsplash.com/photo-1748522133662-1c5f382d0569?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Jon Tyson",
+      "verifiee": true,
+      "note": "Deux croque-monsieur gratinés avec salade verte sur une table de bistrot.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Blanquette de veau",
+      "url": "https://images.unsplash.com/photo-1709786204884-e65fb0598c14?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Rohith Murali",
+      "verifiee": true,
+      "note": "Morceaux de viande en sauce blanche crémeuse avec un dôme de riz persillé.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Omelette aux champignons",
+      "url": "https://images.unsplash.com/photo-1766146431872-a4472ccd3889?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Amin Zabardast",
+      "verifiee": true,
+      "note": "Omelette pliée garnie, salade verte et pain grillé.",
+      "remplace_ancienne": true
+    },
+    {
+      "title": "Pot-au-feu",
+      "url": "https://images.unsplash.com/photo-1689860892307-7db54ab276ba?w=800&h=600&fit=crop&auto=format",
+      "photographe": "nilufar nattaq",
+      "verifiee": true,
+      "note": "Bœuf mijoté dans son bouillon avec pommes de terre, carottes, oignon et petits pois, dans une cocotte noire (photo sombre)."
+    },
+    {
+      "title": "Poulet basquaise",
+      "url": "https://images.unsplash.com/photo-1748864221145-269b4a23a67e?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Rodrigo Rodrigues | WOLF Λ R T",
+      "verifiee": true,
+      "note": "Morceaux de poulet dorés mijotés avec tomates fondantes dans un plat (pas de poivrons visibles : proche, à revoir si mieux)."
+    },
+    {
+      "title": "Chili con carne",
+      "url": "https://images.unsplash.com/photo-1790701909034-6c7b45c7b58a?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Chad Montano",
+      "verifiee": true,
+      "note": "Bol de chili aux haricots rouges, fromage fondu, crème et oignon vert, vu du dessus."
+    },
+    {
+      "title": "Curry de poulet au lait de coco",
+      "url": "https://images.unsplash.com/photo-1764304733301-3a9f335f0c67?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Kalindu Waranga",
+      "verifiee": true,
+      "note": "Morceaux de poulet dans une sauce curry orangée onctueuse, bol blanc."
+    },
+    {
+      "title": "Gratin de pâtes au jambon",
+      "url": "https://images.unsplash.com/photo-1645453014403-4ad5170a386c?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Some Tale",
+      "verifiee": true,
+      "note": "Gratin de petites pâtes crémeux et doré, persil, dans un plat ovale."
+    },
+    {
+      "title": "Endives au jambon",
+      "url": null,
+      "photographe": null,
+      "verifiee": false,
+      "note": "Aucune photo gratuite convenable trouvée (recherches endive, endive gratin, chicory gratin, belgian endive : Unsplash+ uniquement ou gratins sans endives). Garder l'initiale."
+    },
+    {
+      "title": "Boulettes de bœuf à la sauce tomate",
+      "url": "https://images.unsplash.com/photo-1768187067375-4cd5a79fec41?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Kris Tian",
+      "verifiee": true,
+      "note": "Boulettes de viande en sauce tomate avec basilic et focaccia."
+    },
+    {
+      "title": "Couscous au poulet et merguez",
+      "url": "https://images.unsplash.com/photo-1742806418170-f051cb880314?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Marco Palumbo",
+      "verifiee": true,
+      "note": "Grand plat de couscous aux légumes (carottes, courgettes) en terre cuite ; viande non visible, couscous bien reconnaissable."
+    },
+    {
+      "title": "Risotto aux champignons",
+      "url": "https://images.unsplash.com/photo-1680420574628-225def8eea0a?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Corryn Burtenshaw",
+      "verifiee": true,
+      "note": "Assiette creuse de risotto crémeux aux champignons et persil, fond sombre."
+    },
+    {
+      "title": "Petit salé aux lentilles",
+      "url": "https://images.unsplash.com/photo-1648455320791-a667c8aab7e4?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Elena Leya",
+      "verifiee": true,
+      "note": "Bol de lentilles mijotées avec viande, pommes de terre et carottes (boulettes et non petit salé : approchant)."
+    },
+    {
+      "title": "Rôti de porc aux pommes de terre",
+      "url": "https://images.unsplash.com/photo-1741560591088-505db91cd105?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Gennady Zakharin",
+      "verifiee": true,
+      "note": "Morceaux de porc rôti avec pommes de terre dorées et feuilles de laurier, assiette blanche."
+    },
+    {
+      "title": "Galettes de sarrasin complètes",
+      "url": "https://images.unsplash.com/photo-1577953589629-446f28f0d8c1?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Sarah Halliday",
+      "verifiee": true,
+      "note": "Galette de sarrasin pliée en carré (garniture saumon, crème, aneth) : la galette est juste, pas la garniture jambon-œuf-fromage."
+    },
+    {
+      "title": "Pizza maison",
+      "url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Ivan Torres",
+      "verifiee": true,
+      "note": "Pizza au fromage gratinée coupée en parts sur planche, tomates cerises et romarin."
+    },
+    {
+      "title": "Moules marinières",
+      "url": "https://images.unsplash.com/photo-1715249792920-bfe1a3b9d79e?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Cathrine Skovly",
+      "verifiee": true,
+      "note": "Cocotte de moules au persil vue du dessus, avec frites et verre de vin blanc."
+    },
+    {
+      "title": "Dahl de lentilles corail",
+      "url": "https://images.unsplash.com/photo-1626500154744-e4b394ffea16?w=800&h=600&fit=crop&auto=format",
+      "photographe": "VD Photography",
+      "verifiee": true,
+      "note": "Bol de dahl jaune avec piments verts, coriandre, citron et oignon (lentilles jaunes plutôt que corail)."
+    },
+    {
+      "title": "Cabillaud au four et sauce vierge",
+      "url": "https://images.unsplash.com/photo-1689199407130-4694f3f5344e?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Tuggsy Agency",
+      "verifiee": true,
+      "note": "Filet de poisson blanc nacré, garniture de petits dés (tomate, légumes) et romarin, jus persillé : proche d'un cabillaud sauce vierge."
+    },
+    {
+      "title": "Wok de nouilles au poulet et aux légumes",
+      "url": "https://images.unsplash.com/photo-1634864572865-1cf8ff8bd23d?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Focused on You",
+      "verifiee": true,
+      "note": "Assiette de nouilles sautées aux légumes (pak-choï, brocoli, poivron, oignon vert) ; poulet peu visible."
+    },
+    {
+      "title": "Tomates farcies",
+      "url": "https://images.unsplash.com/photo-1618825827072-74b096164e44?w=800&h=600&fit=crop&auto=format",
+      "photographe": "May Lawrence",
+      "verifiee": true,
+      "note": "Tomate farcie cuite au four, chapeau reposé dessus, sur un lit de pesto, pain en arrière-plan."
+    },
+    {
+      "title": "Soupe poireaux-pommes de terre",
+      "url": "https://images.unsplash.com/photo-1616501268826-ee9731c915d4?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Julia Kicova",
+      "verifiee": true,
+      "note": "Bol de velouté blanc crémeux avec croûtons et aneth, vu du dessus sur marbre."
+    },
+    {
+      "title": "Taboulé",
+      "url": "https://images.unsplash.com/photo-1673960802455-ec189a6207e5?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Sandie Clarke",
+      "verifiee": true,
+      "note": "Bol de salade de semoule aux poivrons, feta et basilic : proche du taboulé à la française (semoule), feta en plus."
+    },
+    {
+      "title": "Œufs mimosa",
+      "url": "https://images.unsplash.com/photo-1557965983-5b9fc9ab9014?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Rosalind Chang",
+      "verifiee": true,
+      "note": "Demi-œufs durs farcis saupoudrés de paprika sur une assiette blanche (bras flou à l'arrière-plan, sans visage)."
+    },
+    {
+      "title": "Salade de pâtes",
+      "url": "https://images.unsplash.com/photo-1757625620914-1f686e8d15b5?w=800&h=600&fit=crop&auto=format",
+      "photographe": "sheri silver",
+      "verifiee": true,
+      "note": "Plat de salade de tortellinis aux tomates cerises, jambon, pois chiches, fromage et basilic."
+    },
+    {
+      "title": "Purée de pommes de terre",
+      "url": "https://images.unsplash.com/photo-1707616954324-99c89a78a20d?w=800&h=600&fit=crop&auto=format",
+      "photographe": "You Le",
+      "verifiee": true,
+      "note": "Bol de purée lisse parsemée de ciboulette, fond sombre."
+    },
+    {
+      "title": "Riz pilaf",
+      "url": "https://images.unsplash.com/photo-1666181190996-80ed100c66ef?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Keesha's Kitchen",
+      "verifiee": true,
+      "note": "Riz pilaf doré aux épices avec herbes et quelques morceaux de viande, assiette creuse blanche."
+    },
+    {
+      "title": "Légumes rôtis au four",
+      "url": "https://images.unsplash.com/photo-1606791422814-b32c705e3e2f?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Christina Rumpf",
+      "verifiee": true,
+      "note": "Carottes de couleurs, panais, oignons et courge rôtis et caramélisés dans un plat noir, vus du dessus."
+    },
+    {
+      "title": "Gâteau au yaourt",
+      "url": "https://images.unsplash.com/photo-1605466237764-3d8d802c8a8d?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Iñigo De la Maza",
+      "verifiee": true,
+      "note": "Gâteau moelleux en forme de cake, doré, sur planche avec citrons (sans glaçage)."
+    },
+    {
+      "title": "Clafoutis aux cerises",
+      "url": "https://images.unsplash.com/photo-1719577823946-8a6331d450a3?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Denisa Trif",
+      "verifiee": true,
+      "note": "Clafoutis entamé, flan doré parsemé de cerises, sur plat en étain (bord légèrement relevé façon tarte)."
+    },
+    {
+      "title": "Riz au lait",
+      "url": "https://images.unsplash.com/photo-1665529545347-8eac2abf7f41?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Wil Carranza",
+      "verifiee": true,
+      "note": "Assiette creuse de riz au lait crémeux à la cannelle (bâtons et poudre), vue du dessus ; quelques flocons d'avoine en décor."
+    },
+    {
+      "title": "Crumble aux pommes",
+      "url": "https://images.unsplash.com/photo-1589462286900-15610446ff76?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Diliara Garifullina",
+      "verifiee": true,
+      "note": "Ramequins de crumble aux pommes doré, cuillère, pomme verte et flocons d'avoine en décor."
+    },
+    {
+      "title": "Cookies aux pépites de chocolat",
+      "url": "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&h=600&fit=crop&auto=format",
+      "photographe": "Jennifer Pallian",
+      "verifiee": true,
+      "note": "Cookies aux gros morceaux de chocolat fondant et fleur de sel sur papier cuisson, l'un cassé en deux."
+    }
+  ]
+}
