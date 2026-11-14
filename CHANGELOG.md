@@ -26,6 +26,7 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **
 `accepter-invitation` déployée + réglages Auth (voir `CLAUDE.md`, « Supabase : réglages… »).
 
 ### Ajouté
+- Fichier `LICENSE` : tous droits réservés (Titouan Perivier--Vigouroux) ; éléments de tiers sous leur propre licence.
 - **Invitations par lien** : le super-admin invite des fondateurs ; un fondateur crée son compte
   puis sa famille, peut créer jusqu'à 3 familles et y inviter ; l'admin d'une famille invite
   (rôle membre ou admin). Lien à usage unique, valable 7 jours, annulable, partageable en un geste.

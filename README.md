@@ -58,3 +58,7 @@ src/
   lib/supabase.ts       client Supabase (clé publique uniquement)
 supabase/migrations/    structure de la base, versionnée (étape 2)
 ```
+
+## Licence
+
+© 2026 Titouan Perivier--Vigouroux. Tous droits réservés : voir [`LICENSE`](LICENSE).

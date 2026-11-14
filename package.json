@@ -1,6 +1,8 @@
 {
   "name": "lichouz",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "Titouan Perivier--Vigouroux",
   "version": "0.9.0",
   "type": "module",
   "scripts": {

@@ -1,0 +1,27 @@
+Copyright (c) 2026 Titouan Perivier--Vigouroux. Tous droits réservés.
+
+Ce dépôt (code source, textes, recettes rédigées pour l'appli, design et
+documentation de l'application Lichouz) est la propriété de son auteur.
+
+Aucune licence n'est accordée. Sans autorisation écrite préalable de l'auteur,
+il est interdit de copier, modifier, distribuer, publier, vendre ou réutiliser
+tout ou partie de ce dépôt, sauf dans les limites prévues par la loi (Code de la
+propriété intellectuelle) et par les conditions d'utilisation de GitHub, qui
+permettent seulement de consulter le dépôt et d'en faire une copie (« fork »)
+sur GitHub.
+
+Éléments de tiers (non couverts par ce fichier, ils gardent leur propre licence) :
+- les bibliothèques installées par npm (voir package.json et leurs licences) ;
+- les polices DM Sans et Outfit (SIL Open Font License) ;
+- les photos Unsplash (licence Unsplash) et leurs photographes.
+
+Contact : via le profil GitHub https://github.com/titouvgx
+
+---
+
+Copyright (c) 2026 Titouan Perivier--Vigouroux. All rights reserved.
+
+No license is granted. Copying, modifying, distributing or reusing any part of
+this repository without the author's prior written permission is prohibited,
+except as allowed by law and by GitHub's Terms of Service (viewing and forking
+on GitHub). Third-party components keep their own licenses.
