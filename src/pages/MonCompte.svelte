@@ -192,6 +192,14 @@
         <Icon name="chevron-right" size={18} />
       </a>
     {/if}
+    <a class="link-row" href={href('aide')}>
+      <span class="section-icon"><Icon name="book" size={18} /></span>
+      <span class="link-text">
+        <span class="link-title">Aide</span>
+        <span class="link-sub">À quoi sert Madéo, comment s’en servir</span>
+      </span>
+      <Icon name="chevron-right" size={18} />
+    </a>
   </nav>
 
   <!-- Nom d'affichage -->

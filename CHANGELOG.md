@@ -39,6 +39,9 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **
 - **Fondateur** : voit les membres de ses autres familles (« Membres (n) »), change leur rôle,
   les retire, et **supprime une famille vide** (0 membre, 0 lien en attente).
 
+- **Aide** (Mon compte → Aide) : à quoi sert Madéo, chaque onglet expliqué, « Ma famille » selon
+  ton rôle, questions fréquentes. **Écran de bienvenue** au premier lancement (une seule fois).
+
 ### Modifié
 - **L'appli s'appelle désormais Madéo** (onglet, écran d'accueil du téléphone, connexion,
   invitation, Mon compte). Nouvelle adresse `https://titouvgx.github.io/madeo/` une fois le dépôt

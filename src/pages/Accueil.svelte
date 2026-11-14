@@ -9,6 +9,8 @@
   import { fetchDailyRecipes, todayKey, DAILY_RECIPES_COUNT } from '../lib/api/recipes'
   import { computeFloatLayout, MIN_ZONE_HEIGHT } from '../lib/floatLayout'
   import FloatingRecipeCard from '../components/FloatingRecipeCard.svelte'
+  import Bienvenue from '../components/Bienvenue.svelte'
+  import { welcomeSeen, markWelcomeSeen } from '../lib/bienvenue'
   import PlanRecipeDialog from '../components/PlanRecipeDialog.svelte'
   import { fetchRecipe } from '../lib/api/recipes'
   import { fetchTodayMeals, type TodayMeal } from '../lib/api/household'
@@ -145,7 +147,22 @@
   }
 
   onDestroy(() => cancelAnimationFrame(frame))
+
+  // ── Bienvenue (1er lancement sur ce téléphone, une seule fois) ──
+  let welcomeDismissed = $state(false)
+  const showWelcome = $derived(
+    !welcomeDismissed && !!profileState.profile?.id && !welcomeSeen(profileState.profile.id),
+  )
+  function closeWelcome() {
+    const id = profileState.profile?.id
+    if (id) markWelcomeSeen(id)
+    welcomeDismissed = true
+  }
 </script>
+
+{#if showWelcome}
+  <Bienvenue onclose={closeWelcome} />
+{/if}
 
 {#if planRecipe}
   <PlanRecipeDialog recipe={planRecipe} mode="plan" onclose={() => (planRecipe = null)} />

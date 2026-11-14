@@ -19,6 +19,7 @@
   import Historique from './pages/Historique.svelte'
   import MonCompte from './pages/MonCompte.svelte'
   import Famille from './pages/Famille.svelte'
+  import Aide from './pages/Aide.svelte'
   import Admin from './pages/Admin.svelte'
   import Rejoindre from './pages/Rejoindre.svelte'
   import MotDePasseOublie from './pages/MotDePasseOublie.svelte'
@@ -108,6 +109,8 @@
       <MonCompte />
     {:else if router.current === 'famille'}
       <Famille />
+    {:else if router.current === 'aide'}
+      <Aide />
     {:else if router.current === 'admin'}
       <Admin />
     {:else}
