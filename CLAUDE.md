@@ -34,7 +34,7 @@ Svelte 5 (runes uniquement : `$state`, `$derived`, `$effect`, `$props`) + TypeSc
 1 schema · 2 rls_functions · 3 rls_policies · 4 seed_categories · 5 shopping_categories_icon · 6 known_ingredients · 7 seed_recipes (⚠️ échoue sans 1 compte + 1 famille) · 8 shared_recipes · 9 recipe_images · 10 realtime_publication · 11 recipe_photos_storage · 12 security_fixes · 13 household · 14 more_ingredients · 15 photo_paths (`image_url` = chemin `<recette>/<uuid>.webp|jpg` de notre bucket ou Unsplash ; fichier vérifié) · 16 recettes_v1 (**GÉNÉRÉE** par `npm run recettes`) · 17 familles_invitations · 18 recettes_photos (**GÉNÉRÉE**, depuis `supabase/recettes/photos.json`) · 19 admin_famille (retirer un membre, supprimer une famille vide, gardes)
 
 **État des bases** (à tenir à jour) :
-- `courses-test` : 1 à 18 appliquées et vérifiées le 14/11/2026 (513 ingrédients, 50 catalogue dont 49 avec photo, 0 table sans RLS) ; **19 à exécuter** (branche `admin-v1`) ; code v0.9.0 · 6225216 en ligne
+- `courses-test` : 1 à 19 appliquées et vérifiées le 14/11/2026 (513 ingrédients, 50 catalogue dont 49 avec photo, 0 table sans RLS ; contrôle 19 : `supabase/tests/controle_19_admin_famille.sql`, tout à true) ; fonction `accepter-invitation` redéployée (adresse `/accepter-invitation`, Verify JWT désactivé), invitation testée OK
 - `courses-prod` : pas encore créée → guide `supabase/prod/README.md` (`npm run prod:sql`)
 
 **Règle** : migration exécutée et vérifiée (requête de contrôle) AVANT de pousser le code qui en dépend. Nouvelle table = RLS par famille + attaques ajoutées dans `tests/rls` avant de pousser. Recettes livrées : `visibility = 'catalogue'`, JSON dans `supabase/recettes/` (jamais les vraies recettes de la famille dans le dépôt public), migrations générées jamais éditées à la main.
@@ -69,7 +69,7 @@ Svelte 5 (runes uniquement : `$state`, `$derived`, `$effect`, `$props`) + TypeSc
 - Réglages Supabase par base pour invitations / mot de passe oublié : fonction `accepter-invitation` déployée (Verify JWT désactivé, `supabase/functions/README.md`) ; Site URL + Redirect URLs = adresse du site ; modèle « Reset Password » : `{{ .SiteURL }}?token_hash={{ .TokenHash }}&type=recovery#/nouveau-mot-de-passe`
 
 ## Suite
-- **En cours : administration v1** (branche `admin-v1`, migration 19) — décidé : AVANT la mise en prod. Hors v1 : déplacer une famille, désactiver un compte, gérer le catalogue dans l'appli (reste en JSON), quitter soi-même sa famille, supprimer une famille d'une autre super-famille depuis `#/admin`
+- **Administration v1** (migration 19) : en ligne le 14/11/2026. Hors v1 : déplacer une famille, désactiver un compte, gérer le catalogue dans l'appli (reste en JSON), quitter soi-même sa famille, supprimer une famille d'une autre super-famille depuis `#/admin`
 - **Étape 10 : mise en prod → v1.0.0** (guide `supabase/prod/README.md`), après les tests de l'utilisateur sur téléphone
 - **Validé, à faire ensuite** : booster des recettes du jour (accueil : booster qui se déchire, 5 cartes qui sortent vers leur place `floatLayout`, une ouverture par jour, bouton « Passer », mouvement réduit → cartes directes)
 - **Boîte à idées (feu vert requis)** : liste par WhatsApp/SMS, recopier une semaine, favoris et notes, minuteurs en cuisine, notifications, livre de recettes PDF, figer la liste, arrondir les pièces, Nutri-Score, Playwright + sauvegardes, import de recette par lien
