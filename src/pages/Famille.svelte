@@ -4,7 +4,9 @@
   //   - les membres, avec passage Membre ↔ Admin pour qui gère (jamais soi-même) ;
   //   - les liens d'invitation de la famille (admin, fondateur, super-admin) ;
   //   - fondateur / super-admin : « Mes familles » (toutes les familles de la
-  //     super-famille, invitations dans chacune, création jusqu'à 3).
+  //     super-famille, membres et invitations de chacune, création jusqu'à 3,
+  //     suppression d'une famille vide) ;
+  //   - « Retirer » un membre (son compte est supprimé) : jamais soi-même ni le fondateur.
   // Les droits sont vérifiés par la base : l'écran ne fait que montrer les bons boutons.
   import { untrack, tick } from 'svelte'
   import Icon from '../components/Icon.svelte'
@@ -15,7 +17,7 @@
   import { toast } from '../lib/toast.svelte'
   import {
     fetchMembers, setMemberRole, renameFamily, fetchFamilies, countMembers, createFamily,
-    revokeInvitation, fetchInvitations, invitationStatus, namesOf,
+    revokeInvitation, fetchInvitations, invitationStatus, namesOf, removeMember, deleteFamily,
     type Member, type InvitationStatus,
   } from '../lib/api/famille'
   import type { Family, Invitation } from '../lib/types'
@@ -229,6 +231,47 @@
     }
   }
 
+  // ── Membres des autres familles (fondateur / super-admin), chargés à l'ouverture ──
+  let otherMembers = $state<Record<string, Member[]>>({})
+  let otherLoading = $state<Record<string, boolean>>({})
+  let otherError = $state<Record<string, string | null>>({})
+  let membersOpen = $state<Record<string, boolean>>({})
+
+  async function loadOtherMembers(fid: string) {
+    otherLoading[fid] = true
+    otherError[fid] = null
+    try {
+      otherMembers[fid] = await fetchMembers(fid)
+    } catch (e) {
+      otherError[fid] = messageOf(e, 'Les membres n’ont pas pu être chargés.')
+    } finally {
+      otherLoading[fid] = false
+    }
+  }
+
+  function toggleMembers(fid: string) {
+    membersOpen[fid] = !membersOpen[fid]
+    if (membersOpen[fid] && !otherMembers[fid]) void loadOtherMembers(fid)
+  }
+
+  function familyNameOf(fid: string): string {
+    return families.find((f) => f.id === fid)?.name ?? family?.name ?? 'la famille'
+  }
+
+  /** Mêmes règles que la base : jamais soi-même ni le fondateur ; sa famille si on la
+   *  gère, les autres familles du groupe pour le fondateur et le super-admin. */
+  function canEditMember(m: Member, own: boolean): boolean {
+    if (!me || m.id === me || m.id === founderId) return false
+    return own ? canManage : isFounder || isSuperAdmin
+  }
+
+  /** Applique un changement à la liste où se trouve ce membre. */
+  function patchMember(m: Member, change: (list: Member[]) => Member[]) {
+    if (m.family_id === familyId) members = change(members)
+    const other = otherMembers[m.family_id]
+    if (other) otherMembers[m.family_id] = change(other)
+  }
+
   // ── Rôles ──
   let roleTarget = $state<Member | null>(null)
   let savingRole = $state(false)
@@ -240,13 +283,59 @@
     savingRole = true
     try {
       await setMemberRole(m.id, next)
-      members = members.map((x) => (x.id === m.id ? { ...x, role: next } : x))
+      patchMember(m, (list) => list.map((x) => (x.id === m.id ? { ...x, role: next } : x)))
       toast.success(next === 'admin' ? `${m.display_name} est maintenant admin` : `${m.display_name} est maintenant membre`)
       roleTarget = null
     } catch (e) {
       toast.error(messageOf(e, 'Le rôle n’a pas pu être changé.'))
     } finally {
       savingRole = false
+    }
+  }
+
+  // ── Retirer quelqu'un ──
+  let removeTarget = $state<Member | null>(null)
+  let removing = $state(false)
+
+  async function confirmRemove() {
+    const m = removeTarget
+    if (!m || removing) return
+    removing = true
+    try {
+      await removeMember(m.id)
+      patchMember(m, (list) => list.filter((x) => x.id !== m.id))
+      counts = { ...counts, [m.family_id]: Math.max(0, (counts[m.family_id] ?? 1) - 1) }
+      toast.success(`${m.display_name || 'Cette personne'} ne fait plus partie de ${familyNameOf(m.family_id)}`)
+      removeTarget = null
+      // Ses liens d'invitation ont été supprimés avec son compte
+      if (canManage || showFamilies) void loadInvites()
+    } catch (e) {
+      toast.error(messageOf(e, 'Cette personne n’a pas pu être retirée.'))
+    } finally {
+      removing = false
+    }
+  }
+
+  // ── Supprimer une famille vide ──
+  let deleteTarget = $state<Family | null>(null)
+  let deletingFamily = $state(false)
+
+  async function confirmDeleteFamily() {
+    const f = deleteTarget
+    if (!f || deletingFamily) return
+    deletingFamily = true
+    try {
+      await deleteFamily(f.id)
+      families = families.filter((x) => x.id !== f.id)
+      invites = invites.filter((i) => i.family_id !== f.id)
+      delete otherMembers[f.id]
+      toast.success(`Famille « ${f.name} » supprimée`)
+      deleteTarget = null
+      await refreshContext()
+    } catch (e) {
+      toast.error(messageOf(e, 'La famille n’a pas pu être supprimée.'))
+    } finally {
+      deletingFamily = false
     }
   }
 
@@ -327,6 +416,35 @@
       </li>
     {/each}
   </ul>
+{/snippet}
+
+{#snippet memberRow(m: Member, own: boolean)}
+  {@const editable = canEditMember(m, own)}
+  <li class="row">
+    <span class="avatar" class:avatar-admin={m.role === 'admin'} aria-hidden="true">{initialOf(m.display_name)}</span>
+    <span class="row-main">
+      <span class="row-name">
+        {m.display_name || 'Sans nom'}
+        {#if m.id === me}<span class="me">(toi)</span>{/if}
+      </span>
+      <span class="row-meta">
+        <span class="badge" class:badge-admin={m.role === 'admin'}>{m.role === 'admin' ? 'Admin' : 'Membre'}</span>
+        {#if m.id === founderId}<span class="badge badge-founder">Fondateur</span>{/if}
+      </span>
+    </span>
+    {#if editable}
+      <button
+        class="btn btn-row-action"
+        onclick={() => (roleTarget = m)}
+        aria-label={m.role === 'admin' ? `Passer ${m.display_name} membre` : `Passer ${m.display_name} admin`}
+      >
+        {m.role === 'admin' ? 'Passer membre' : 'Passer admin'}
+      </button>
+      <button class="icon-btn icon-danger" onclick={() => (removeTarget = m)} aria-label={`Retirer ${m.display_name} de la famille`}>
+        <Icon name="trash" size={18} />
+      </button>
+    {/if}
+  </li>
 {/snippet}
 
 {#snippet errorBox(message: string)}
@@ -485,29 +603,7 @@
       {:else}
         <ul class="rows">
           {#each members as m (m.id)}
-            {@const isMe = m.id === me}
-            <li class="row">
-              <span class="avatar" class:avatar-admin={m.role === 'admin'} aria-hidden="true">{initialOf(m.display_name)}</span>
-              <span class="row-main">
-                <span class="row-name">
-                  {m.display_name || 'Sans nom'}
-                  {#if isMe}<span class="me">(toi)</span>{/if}
-                </span>
-                <span class="row-meta">
-                  <span class="badge" class:badge-admin={m.role === 'admin'}>{m.role === 'admin' ? 'Admin' : 'Membre'}</span>
-                  {#if m.id === founderId}<span class="badge badge-founder">Fondateur</span>{/if}
-                </span>
-              </span>
-              {#if canManage && !isMe}
-                <button
-                  class="btn btn-row-action"
-                  onclick={() => (roleTarget = m)}
-                  aria-label={m.role === 'admin' ? `Passer ${m.display_name} membre` : `Passer ${m.display_name} admin`}
-                >
-                  {m.role === 'admin' ? 'Passer membre' : 'Passer admin'}
-                </button>
-              {/if}
-            </li>
+            {@render memberRow(m, true)}
           {/each}
         </ul>
       {/if}
@@ -586,6 +682,37 @@
                   {#if n === 0 && pendingCount === 0}
                     <p class="fam-hint">Invite son premier admin : il pourra ensuite inviter sa famille.</p>
                   {/if}
+                  {#if n > 0}
+                    <button
+                      class="link-btn fam-toggle"
+                      aria-expanded={!!membersOpen[f.id]}
+                      aria-controls={`fam-members-${f.id}`}
+                      onclick={() => toggleMembers(f.id)}
+                    >
+                      <span class="chev" class:open={membersOpen[f.id]}><Icon name="chevron-down" size={16} /></span>
+                      Membres ({n})
+                    </button>
+                    {#if membersOpen[f.id]}
+                      <div class="fam-links" id={`fam-members-${f.id}`}>
+                        {#if otherLoading[f.id] && !otherMembers[f.id]}
+                          {@render skeleton(1)}
+                        {:else if otherError[f.id]}
+                          <div class="state-error" role="alert">
+                            <p>{otherError[f.id]}</p>
+                            <button class="btn btn-outline btn-small" onclick={() => loadOtherMembers(f.id)}>
+                              <Icon name="refresh" size={16} /> Réessayer
+                            </button>
+                          </div>
+                        {:else}
+                          <ul class="rows">
+                            {#each otherMembers[f.id] ?? [] as m (m.id)}
+                              {@render memberRow(m, false)}
+                            {/each}
+                          </ul>
+                        {/if}
+                      </div>
+                    {/if}
+                  {/if}
                   <button
                     class="link-btn fam-toggle"
                     aria-expanded={!!expanded[f.id]}
@@ -605,6 +732,11 @@
                         {@render inviteList(links, f.id, 'Aucun lien pour cette famille.')}
                       {/if}
                     </div>
+                  {/if}
+                  {#if n === 0 && pendingCount === 0}
+                    <button class="link-btn link-danger" onclick={() => (deleteTarget = f)} aria-label={`Supprimer la famille ${f.name}`}>
+                      <Icon name="trash" size={16} /> Supprimer cette famille
+                    </button>
                   {/if}
                 {/if}
               </li>
@@ -682,12 +814,43 @@
     oncancel={() => (roleTarget = null)}
   >
     {#if toAdmin}
-      Cette personne pourra inviter de nouvelles personnes dans {family?.name ?? 'la famille'}
+      Cette personne pourra inviter de nouvelles personnes dans {familyNameOf(roleTarget.family_id)}
       et changer le rôle des autres membres.
     {:else}
       Cette personne ne pourra plus inviter ni gérer les membres. Elle garde l’accès au planning,
       aux courses et aux recettes.
     {/if}
+  </ConfirmDialog>
+{/if}
+
+{#if removeTarget}
+  <ConfirmDialog
+    title={`Retirer ${removeTarget.display_name || 'cette personne'} ?`}
+    confirmLabel="Retirer"
+    cancelLabel="Garder"
+    danger
+    busy={removing}
+    onconfirm={confirmRemove}
+    oncancel={() => (removeTarget = null)}
+  >
+    Son compte sera supprimé : elle ne pourra plus se connecter ni voir {familyNameOf(removeTarget.family_id)}.
+    Ses recettes restent dans la famille{removeTarget.role === 'admin' ? ', et les liens qu’elle avait créés ne marcheront plus' : ''}.
+    Tu pourras l’inviter à nouveau avec un nouveau lien.
+  </ConfirmDialog>
+{/if}
+
+{#if deleteTarget}
+  <ConfirmDialog
+    title={`Supprimer « ${deleteTarget.name} » ?`}
+    confirmLabel="Supprimer"
+    cancelLabel="Garder"
+    danger
+    busy={deletingFamily}
+    onconfirm={confirmDeleteFamily}
+    oncancel={() => (deleteTarget = null)}
+  >
+    La famille disparaît avec son planning, ses listes, son placard et ses recettes.
+    C’est définitif.
   </ConfirmDialog>
 {/if}
 
@@ -792,7 +955,7 @@
   .family-name {
     font-size: 22px;
     color: var(--text);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word; /* coupe entre les mots (« Paul / Martin »), pas au milieu */
     min-width: 0;
   }
 
@@ -826,6 +989,8 @@
   }
 
   .icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .icon-danger { color: #FF9A9D; }
+  .link-btn.link-danger { color: #FF9A9D; }
 
   .inline-actions {
     display: flex;
@@ -1115,6 +1280,10 @@
   .fam-hint { margin-top: 6px; font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
   .fam-toggle { margin-top: 2px; }
+
+  /* Membres d'une autre famille : un peu plus serré (la carte est plus étroite) */
+  .fam-links .row { gap: 8px; }
+  .fam-links .btn-row-action { padding: 0 10px; }
 
   .fam-links {
     padding-top: 4px;

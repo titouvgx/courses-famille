@@ -74,6 +74,27 @@ export async function createFamily(name: string, superFamilyId?: string): Promis
   return data as string
 }
 
+/**
+ * Retire quelqu'un de sa famille : son compte est supprimé (accès coupé tout de
+ * suite, réinvitable avec le même e-mail). Droits vérifiés par la base
+ * (remove_member) : admin de la famille, fondateur, super-admin ; jamais
+ * soi-même, le fondateur ni un super-admin.
+ */
+export async function removeMember(memberId: string): Promise<void> {
+  const { error } = await db().rpc('remove_member', { p_member: memberId })
+  if (error) throw error
+}
+
+/**
+ * Supprime une famille VIDE (0 membre, 0 lien en attente), avec son planning,
+ * ses listes et ses recettes. Fondateur ou super-admin ; vérifié par la base
+ * (delete_family), qui refuse aussi sa propre famille et celle du catalogue.
+ */
+export async function deleteFamily(familyId: string): Promise<void> {
+  const { error } = await db().rpc('delete_family', { p_family: familyId })
+  if (error) throw error
+}
+
 // ────────── Invitations ──────────
 
 export const INVITATION_DAYS = 7

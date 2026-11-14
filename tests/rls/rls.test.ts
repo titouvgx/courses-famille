@@ -739,6 +739,7 @@ describe('Anonyme (rôle anon, sans claims)', () => {
       'guard_super_family_update',
       'guard_recipe_write',
       'guard_item_checked_by',
+      'guard_family_delete',
       'check_recipe_image_exists',
     ]) {
       const o = await s.as('anon', `SELECT public.${f}()`)
@@ -2366,6 +2367,239 @@ describe('Familles : create_family et pouvoirs du fondateur', () => {
     expect(await snapshot(s, 'public.profiles', 'id', ID.memberB)).toBe(before)
     expectRefused(await s.asUid(ID.nouveau1, CREATE_INV, ['membre', ID.famB, 'admin', null]), '42501', 'invite dans B', /inviter/)
     expectRefused(await s.asUid(ID.nouveau1, CREATE_FAMILY, ['PIRATE', ID.sfB]), '42501', 'create_family', /Seul le fondateur/)
+  })
+})
+
+// ════════════════════════════════════════════════════════════════════════════
+describe('Administration : retirer un membre (remove_member)', () => {
+  const REMOVE = `SELECT public.remove_member($1) AS v`
+  const INTROUVABLE = /Membre introuvable/
+  const exists = async (s: Scenario, uid: string) => ({
+    profil: !!(await profileOf(s, uid)),
+    compte: (await countRows(s, 'auth.users', 'id = $1', [uid])) === 1,
+  })
+  /** Refus attendu ET la personne visée garde son profil et son compte. */
+  async function removeRefused(s: Scenario, actor: Actor, target: string, code: string, message: RegExp) {
+    const before = await snapshot(s, 'public.profiles', 'id', target)
+    expect(before, 'la personne visée doit exister').not.toBeNull()
+    expectRefused(await s.as(actor, REMOVE, [target]), code, `${ACTOR_LABEL[actor]} remove_member`, message)
+    expect(await snapshot(s, 'public.profiles', 'id', target), 'le profil a changé').toBe(before)
+    expect(await exists(s, target)).toEqual({ profil: true, compte: true })
+  }
+  /** Fondateur de SB + une 2e famille B2 avec un admin (nouveau1). */
+  async function familleB2AvecAdmin(s: Scenario) {
+    const fid = (await s.as('adminB', CREATE_FAMILY, ['Foyer B2', null])).rows[0].id as string
+    const r = await newInvitation(s, 'adminB', 'membre', fid, 'admin')
+    expectOk(await consume(s, r.token, ID.nouveau1, 'Admin B2'), 'consume', 1)
+    return fid
+  }
+
+  attaque('anonyme ne peut pas appeler remove_member', async (s) => {
+    expectNoExecute(await s.as('anon', REMOVE, [ID.memberA]), 'anon remove_member')
+  })
+  attaque('connecté sans foyer ne retire personne', async (s) => {
+    await removeRefused(s, 'sansProfil', ID.memberA, '42501', INTROUVABLE)
+  })
+  attaque('membre A (non admin) ne retire pas l\'admin A ni un autre membre', async (s) => {
+    await removeRefused(s, 'memberA', ID.adminA, '42501', INTROUVABLE)
+  })
+  for (const [X, Y] of PAIRS) {
+    attaque(`admin ${X} ne retire pas le membre ni l'admin de ${Y} (${lien(X, Y)})`, async (s) => {
+      await removeRefused(s, admin[X], memberId[Y], '42501', INTROUVABLE)
+      await removeRefused(s, admin[X], adminId[Y], '42501', INTROUVABLE)
+    })
+  }
+  attaque('admin A ne se retire pas lui-même', async (s) => {
+    await removeRefused(s, 'adminA', ID.adminA, '42501', /toi-même/)
+  })
+  attaque('admin A ne retire pas le super-admin (membre de son foyer, fondateur de SA)', async (s) => {
+    await removeRefused(s, 'adminA', ID.superAdmin, '42501', /fondateur|super-admin/)
+  })
+  attaque('un admin du foyer B ne retire pas le fondateur de SB', async (s) => {
+    await s.su(`UPDATE public.profiles SET role = 'admin' WHERE id = $1`, [ID.memberB])
+    await removeRefused(s, 'memberB', ID.adminB, '42501', /fondateur ne peut pas/)
+  })
+  attaque('même le super-admin ne retire pas un fondateur depuis l\'appli', async (s) => {
+    await removeRefused(s, 'superAdmin', ID.adminB, '42501', /fondateur ne peut pas/)
+  })
+  attaque('le fondateur de SB ne retire personne dans SA', async (s) => {
+    await removeRefused(s, 'adminB', ID.memberA2, '42501', INTROUVABLE)
+  })
+  attaque('l\'admin d\'une autre famille de SB ne retire pas le membre B', async (s) => {
+    await familleB2AvecAdmin(s)
+    const before = await snapshot(s, 'public.profiles', 'id', ID.memberB)
+    expectRefused(await s.asUid(ID.nouveau1, REMOVE, [ID.memberB]), '42501', 'admin B2', INTROUVABLE)
+    expect(await snapshot(s, 'public.profiles', 'id', ID.memberB)).toBe(before)
+  })
+  attaque('identifiant inconnu : même message que sans droit (pas d\'indice)', async (s) => {
+    expectRefused(await s.as('adminA', REMOVE, ['c0000000-0000-4000-8000-0000000000aa']), '42501', 'inconnu', INTROUVABLE)
+    expectRefused(await s.as('adminA', REMOVE, [ID.sansProfil]), '42501', 'compte sans profil', INTROUVABLE)
+  })
+  attaque('plus de DELETE direct sur profiles, même pour le super-admin', async (s) => {
+    await attemptOnRow(s, 'superAdmin', { table: 'public.profiles', id: ID.memberB }, `DELETE FROM public.profiles WHERE id = $1 RETURNING id`, [ID.memberB])
+  })
+  attaque('un membre retiré ne lit plus rien avec son ancien jeton', async (s) => {
+    expectOk(await s.as('adminA', REMOVE, [ID.memberA]), 'retrait', 1)
+    for (const t of ['public.profiles', 'public.recipes', 'public.meal_plans', 'public.shopping_lists', 'public.families']) {
+      expectBlocked(await s.asUid(ID.memberA, `SELECT 1 FROM ${t}`), `lecture ${t}`)
+    }
+    await attemptInsert(s, 'memberA', 'public.staples', `INSERT INTO public.staples (family_id, name) VALUES ($1, 'PIRATE') RETURNING id`, [ID.famA])
+  })
+  attaque('l\'auteur d\'une recette ne s\'efface pas tant que son compte existe', async (s) => {
+    await attemptOnRow(s, 'adminA', { table: 'public.recipes', id: ID.recA }, `UPDATE public.recipes SET created_by = NULL WHERE id = $1 RETURNING id`, [ID.recA])
+  })
+
+  controle('admin A retire le membre A : profil et compte supprimés, ses recettes restent', async (s) => {
+    await s.su(`UPDATE public.meal_slots SET cook_id = $1 WHERE id = $2`, [ID.memberA, ID.slotA])
+    await s.su(`UPDATE public.shopping_list_items SET checked_by = $1 WHERE id = $2`, [ID.memberA, ID.itemA])
+    expectOk(await s.as('adminA', REMOVE, [ID.memberA]), 'retrait', 1)
+    expect(await exists(s, ID.memberA)).toEqual({ profil: false, compte: false })
+    const r = await s.su(`SELECT created_by FROM public.recipes WHERE id = $1`, [ID.recAshared])
+    expect(r, 'la recette du membre retiré existe toujours').toHaveLength(1)
+    expect(r[0].created_by).toBeNull()
+    expect((await s.su(`SELECT cook_id FROM public.meal_slots WHERE id = $1`, [ID.slotA]))[0].cook_id).toBeNull()
+    expect((await s.su(`SELECT checked_by FROM public.shopping_list_items WHERE id = $1`, [ID.itemA]))[0].checked_by).toBeNull()
+  })
+  controle('admin A retire un autre admin de son foyer', async (s) => {
+    await s.su(`UPDATE public.profiles SET role = 'admin' WHERE id = $1`, [ID.memberA])
+    expectOk(await s.as('adminA', REMOVE, [ID.memberA]), 'retrait admin', 1)
+    expect(await exists(s, ID.memberA)).toEqual({ profil: false, compte: false })
+  })
+  controle('l\'admin qui part emporte ses liens en attente (ils ne servent plus)', async (s) => {
+    await s.su(`UPDATE public.profiles SET role = 'admin' WHERE id = $1`, [ID.memberA])
+    const r = await newInvitation(s, 'memberA', 'membre', ID.famA, 'member')
+    expectOk(await s.as('adminA', REMOVE, [ID.memberA]), 'retrait', 1)
+    expect(await countRows(s, 'public.invitations', 'id = $1', [r.id])).toBe(0)
+    expectRefused(await consume(s, r.token, ID.nouveau1), '22023', 'lien de l\'admin parti', /invalide/)
+  })
+  controle('le fondateur de SB retire l\'admin d\'une autre de ses familles, puis le réinvite', async (s) => {
+    const fid = await familleB2AvecAdmin(s)
+    expectOk(await s.as('adminB', REMOVE, [ID.nouveau1]), 'retrait', 1)
+    expect(await exists(s, ID.nouveau1)).toEqual({ profil: false, compte: false })
+    // Même personne, nouveau compte (même e-mail possible : l'ancien n'existe plus)
+    await s.su(`INSERT INTO auth.users (id, aud, role, email) VALUES ($1, 'authenticated', 'authenticated', 'nouveau1@test.local')`, [ID.nouveau1])
+    const r = await newInvitation(s, 'adminB', 'membre', fid, 'member')
+    expectOk(await consume(s, r.token, ID.nouveau1, 'De retour'), 'réinvitation', 1)
+  })
+  controle('le super-admin retire le membre B (autre super-famille)', async (s) => {
+    expectOk(await s.as('superAdmin', REMOVE, [ID.memberB]), 'retrait', 1)
+    expect(await exists(s, ID.memberB)).toEqual({ profil: false, compte: false })
+  })
+})
+
+describe('Administration : supprimer une famille (delete_family)', () => {
+  const DELETE_FAMILY = `SELECT public.delete_family($1) AS v`
+  const INTROUVABLE = /Famille introuvable/
+  async function deleteRefused(s: Scenario, actor: Actor, fid: string, code: string, message: RegExp) {
+    const before = await snapshot(s, 'public.families', 'id', fid)
+    expect(before, 'la famille visée doit exister').not.toBeNull()
+    expectRefused(await s.as(actor, DELETE_FAMILY, [fid]), code, `${ACTOR_LABEL[actor]} delete_family`, message)
+    expect(await snapshot(s, 'public.families', 'id', fid), 'la famille a changé').toBe(before)
+  }
+  const emptyB2 = async (s: Scenario) => (await s.as('adminB', CREATE_FAMILY, ['Foyer B2', null])).rows[0].id as string
+  /** A2 vidée de ses membres et de son lien en attente (super-utilisateur). */
+  async function emptyA2(s: Scenario) {
+    await s.su(`DELETE FROM public.profiles WHERE family_id = $1`, [ID.famA2])
+    await s.su(`UPDATE public.invitations SET revoked_at = now() WHERE family_id = $1`, [ID.famA2])
+  }
+
+  attaque('anonyme ne peut pas appeler delete_family', async (s) => {
+    expectNoExecute(await s.as('anon', DELETE_FAMILY, [ID.famA2]), 'anon delete_family')
+  })
+  for (const actor of ['sansProfil', 'memberA', 'adminA', 'adminA2', 'memberA2', 'adminB'] as const) {
+    attaque(`${ACTOR_LABEL[actor]} ne supprime pas le foyer A2 (vide), pas fondateur de SA`, async (s) => {
+      await emptyA2(s)
+      await deleteRefused(s, actor, ID.famA2, '42501', INTROUVABLE)
+    })
+  }
+  attaque('membre B ne supprime pas une famille vide de sa super-famille (réservé au fondateur)', async (s) => {
+    await deleteRefused(s, 'memberB', await emptyB2(s), '42501', INTROUVABLE)
+  })
+  attaque('le fondateur ne supprime pas sa propre famille', async (s) => {
+    await deleteRefused(s, 'adminB', ID.famB, '23514', /propre famille/)
+  })
+  attaque('le fondateur ne supprime pas une famille qui a encore des membres', async (s) => {
+    const fid = await emptyB2(s)
+    const r = await newInvitation(s, 'adminB', 'membre', fid, 'member')
+    expectOk(await consume(s, r.token, ID.nouveau1, 'Cousin'), 'consume', 1)
+    await deleteRefused(s, 'adminB', fid, '23514', /encore des membres/)
+    expect(await profileOf(s, ID.nouveau1)).not.toBeNull()
+  })
+  attaque('le fondateur ne supprime pas une famille avec un lien en attente', async (s) => {
+    const fid = await emptyB2(s)
+    await newInvitation(s, 'adminB', 'membre', fid, 'admin')
+    await deleteRefused(s, 'adminB', fid, '23514', /liens d'invitation en attente/)
+  })
+  attaque('une famille dont une recette est au planning d\'une autre famille ne se supprime pas', async (s) => {
+    const fid = await emptyB2(s)
+    const rid = (await s.su(`INSERT INTO public.recipes (family_id, title, visibility) VALUES ($1, 'Partagée B2', 'super_famille') RETURNING id`, [fid]))[0].id
+    await s.su(`UPDATE public.meal_slots SET recipe_id = $1 WHERE id = $2`, [rid, ID.slotB])
+    await deleteRefused(s, 'adminB', fid, '23514', /planning d'une autre famille/)
+    expect(await countRows(s, 'public.meal_slots', 'recipe_id = $1', [rid])).toBeGreaterThan(0)
+  })
+  attaque('la famille qui porte le catalogue ne se supprime pas, même vide, même par le super-admin', async (s) => {
+    const fid = (await s.as('superAdmin', CREATE_FAMILY, ['Catalogue', ID.sfA])).rows[0].id as string
+    const cat = await catalogue(s)
+    await s.su(`UPDATE public.recipes SET family_id = $1 WHERE id = $2`, [fid, cat.recipes])
+    await deleteRefused(s, 'superAdmin', fid, '23514', /catalogue/)
+    expect(await countRows(s, 'public.recipes', 'id = $1', [cat.recipes])).toBe(1)
+  })
+  attaque('le garde-fou du catalogue tient aussi face à un DELETE direct (trigger)', async (s) => {
+    const fid = (await s.as('superAdmin', CREATE_FAMILY, ['Catalogue', ID.sfA])).rows[0].id as string
+    const cat = await catalogue(s)
+    await s.su(`UPDATE public.recipes SET family_id = $1 WHERE id = $2`, [fid, cat.recipes])
+    // Même si une règle DELETE revenait un jour, le trigger refuse
+    await s.su(`CREATE POLICY "tmp_delete" ON public.families FOR DELETE USING (public.is_super_admin())`)
+    expectRefused(await s.as('superAdmin', `DELETE FROM public.families WHERE id = $1 RETURNING id`, [fid]), '23514', 'DELETE direct', /catalogue/)
+    expect(await countRows(s, 'public.recipes', 'id = $1', [cat.recipes])).toBe(1)
+  })
+  attaque('plus de DELETE direct sur families, même pour le super-admin', async (s) => {
+    await emptyA2(s)
+    await attemptOnRow(s, 'superAdmin', { table: 'public.families', id: ID.famA2 }, `DELETE FROM public.families WHERE id = $1 RETURNING id`, [ID.famA2])
+  })
+
+  controle('le fondateur de SB supprime une famille vide qu\'il a créée', async (s) => {
+    const fid = await emptyB2(s)
+    expectOk(await s.as('adminB', DELETE_FAMILY, [fid]), 'suppression', 1)
+    expect(await countRows(s, 'public.families', 'id = $1', [fid])).toBe(0)
+  })
+  controle('le fondateur retire le dernier membre puis supprime la famille (liens utilisés effacés avec)', async (s) => {
+    const fid = await emptyB2(s)
+    const r = await newInvitation(s, 'adminB', 'membre', fid, 'member')
+    expectOk(await consume(s, r.token, ID.nouveau1, 'Cousin'), 'consume', 1)
+    expectOk(await s.as('adminB', `SELECT public.remove_member($1) AS v`, [ID.nouveau1]), 'retrait', 1)
+    expectOk(await s.as('adminB', DELETE_FAMILY, [fid]), 'suppression', 1)
+    expect(await countRows(s, 'public.invitations', 'family_id = $1', [fid])).toBe(0)
+  })
+  controle('le super-admin supprime le foyer A2 vidé : planning, listes, placard et recettes partent avec', async (s) => {
+    await emptyA2(s)
+    expectOk(await s.as('superAdmin', DELETE_FAMILY, [ID.famA2]), 'suppression', 1)
+    for (const t of ['public.meal_plans', 'public.shopping_lists', 'public.staples', 'public.pantry_items', 'public.recipes']) {
+      expect(await countRows(s, t, 'family_id = $1', [ID.famA2]), t).toBe(0)
+    }
+    // Les autres foyers n'ont rien perdu
+    expect(await countRows(s, 'public.meal_plans', 'family_id = $1', [ID.famA])).toBeGreaterThan(0)
+    expect(await countRows(s, 'public.recipes', `visibility = 'catalogue'`)).toBe(50)
+  })
+})
+
+describe('Administration : noms et rôle du fondateur (guard_profile_update)', () => {
+  const upd = (set: string) => `UPDATE public.profiles SET ${set} WHERE id = $1 RETURNING id`
+  attaque('admin A ne renomme pas le membre A (son foyer)', async (s) => {
+    await refusedOnRow(s, 'adminA', { table: 'public.profiles', id: ID.memberA }, upd(`display_name = 'PIRATE'`), [ID.memberA], '42501', /nom d'un autre/)
+  })
+  attaque('le fondateur de SB ne renomme pas le membre B', async (s) => {
+    await refusedOnRow(s, 'adminB', { table: 'public.profiles', id: ID.memberB }, upd(`display_name = 'PIRATE'`), [ID.memberB], '42501', /nom d'un autre/)
+  })
+  attaque('un admin du foyer B ne fait pas passer le fondateur de SB « membre »', async (s) => {
+    await s.su(`UPDATE public.profiles SET role = 'admin' WHERE id = $1`, [ID.memberB])
+    await refusedOnRow(s, 'memberB', { table: 'public.profiles', id: ID.adminB }, upd(`role = 'member'`), [ID.adminB], '42501', /rôle du fondateur/)
+  })
+  attaque('admin A ne change pas le rôle du super-admin (fondateur de SA)', async (s) => {
+    await refusedOnRow(s, 'adminA', { table: 'public.profiles', id: ID.superAdmin }, upd(`role = 'admin'`), [ID.superAdmin], '42501', /rôle du fondateur/)
+  })
+  controle('admin A change toujours le rôle d\'un membre ordinaire', async (s) => {
+    expectOk(await s.as('adminA', upd(`role = 'admin'`), [ID.memberA]), 'promotion', 1)
   })
 })
 

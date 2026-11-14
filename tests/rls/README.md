@@ -125,6 +125,13 @@ de **contrôles positifs** et de **contrôles de structure**, et la liste des é
   3 familles sauf super-admin) ;
 - gardes : `checked_by` d'un autre foyer, `shopping_lists.meal_plan_id` d'un autre foyer,
   `recipes.image_url`, `meal_slots.cook_id` ;
+- administration (migration `admin_famille`) : `remove_member` (qui retire qui : admin dans sa
+  famille, fondateur dans ses familles, super-admin ; jamais soi-même, le fondateur ni un super-admin ;
+  même message pour un id inconnu ; un retiré ne lit plus rien ; recettes gardées, cuisinier et
+  « coché par » remis à NULL ; liens de l'admin parti inutilisables ; réinvitation possible) ;
+  `delete_family` (fondateur ou super-admin, famille vide, pas la sienne, pas celle du catalogue même
+  par `DELETE` direct, aucune recette au planning d'une autre famille) ; plus de `DELETE` direct sur
+  `families` / `profiles` ; nom d'un autre et rôle du fondateur intouchables ;
 - `storage.objects`, bucket `recipe-photos` : liste limitée aux recettes lisibles, envoi
   seulement dans une recette modifiable ;
 - fonctions RPC vues par un anonyme et par un membre ;

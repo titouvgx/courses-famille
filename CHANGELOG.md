@@ -21,7 +21,8 @@ numérotation [SemVer](https://semver.org/lang/fr/) : **MAJEUR.MINEUR.CORRECTIF*
 
 ## [Non publié]
 
-Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`) + fonction serveur
+Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **18**
+(`20261114110000_recettes_photos.sql`), **19** (`20261114120000_admin_famille.sql`) + fonction serveur
 `accepter-invitation` déployée + réglages Auth (voir `CLAUDE.md`, « Supabase : réglages… »).
 
 ### Ajouté
@@ -32,8 +33,18 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`) + f
 - **Mot de passe oublié** depuis la connexion (lien par e-mail, nouveau mot de passe).
 - **Qui voit la recette** : « Ma famille seulement » (par défaut) ou « Toutes nos familles » ;
   les 50 recettes livrées forment un **catalogue commun** en lecture seule.
+- **Retirer quelqu'un d'une famille** (Ma famille, icône corbeille) : son compte est supprimé, il ne
+  peut plus se connecter ; ses recettes restent ; il peut être réinvité avec le même e-mail.
+  Admin : dans sa famille ; fondateur : dans toutes ses familles ; jamais soi-même ni le fondateur.
+- **Fondateur** : voit les membres de ses autres familles (« Membres (n) »), change leur rôle,
+  les retire, et **supprime une famille vide** (0 membre, 0 lien en attente).
 
 ### Sécurité
+- Migration 19 : retrait et suppression uniquement par les fonctions `remove_member` et
+  `delete_family`, qui vérifient les droits ; plus aucun `DELETE` direct sur les familles et les
+  profils, même super-admin. La famille du catalogue ne peut pas être supprimée, ni une famille
+  dont une recette est au planning d'une autre. Corrigé : un admin pouvait renommer les autres
+  membres, et faire passer le fondateur « membre ». Banc : 861 attaques bloquées, 191 contrôles.
 - Règles d'accès réécrites et banc d'attaque étendu (familles, super-familles, invitations,
   visibilité). Comptes créés uniquement par la fonction serveur (clé secrète jamais dans le site).
 - Corrigé : une liste ne peut plus être rattachée au planning d'un autre foyer ; l'auteur d'une
