@@ -40,7 +40,8 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **
   les retire, et **supprime une famille vide** (0 membre, 0 lien en attente).
 
 - **Aide** (Mon compte → Aide) : à quoi sert Lichouz, chaque onglet expliqué, « Ma famille » selon
-  ton rôle, questions fréquentes. **Écran de bienvenue** au premier lancement (une seule fois).
+  ton rôle, questions fréquentes. **Écran de bienvenue** plein écran à chaque ouverture, avec
+  « Ne plus afficher » pour le fermer définitivement sur ce téléphone.
 
 ### Modifié
 - **L'appli s'appelle désormais Lichouz** (onglet, écran d'accueil du téléphone, connexion,

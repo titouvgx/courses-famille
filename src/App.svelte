@@ -20,6 +20,8 @@
   import MonCompte from './pages/MonCompte.svelte'
   import Famille from './pages/Famille.svelte'
   import Aide from './pages/Aide.svelte'
+  import Bienvenue from './components/Bienvenue.svelte'
+  import { welcome, welcomeSeen } from './lib/bienvenue.svelte'
   import Admin from './pages/Admin.svelte'
   import Rejoindre from './pages/Rejoindre.svelte'
   import MotDePasseOublie from './pages/MotDePasseOublie.svelte'
@@ -57,6 +59,13 @@
       navigate('accueil')
     }
   })
+
+  // Bienvenue plein écran : à chaque ouverture, une fois connecté (profil chargé),
+  // jusqu'à « Ne plus afficher ». Jamais sur les pages publiques ni sur l'aide.
+  const showWelcome = $derived(
+    !!auth.user && !!profileState.profile?.id && !isPublicPage && router.current !== 'aide'
+      && !welcome.closedThisLaunch && !welcomeSeen(profileState.profile.id),
+  )
 
   function handleSignOut() {
     clearProfile(true) // déconnexion : on efface aussi les données gardées sur le téléphone
@@ -123,6 +132,9 @@
   </div>
 
   <TabBar />
+  {#if showWelcome}
+    <Bienvenue />
+  {/if}
 {/if}
 
 <style>

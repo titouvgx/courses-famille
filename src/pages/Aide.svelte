@@ -6,13 +6,6 @@
   import type { IconName } from '../components/Icon.svelte'
   import { profileState } from '../lib/profile.svelte'
   import { href } from '../lib/router.svelte'
-  import { markWelcomeSeen } from '../lib/bienvenue'
-
-  // Ouvrir l'aide vaut « bienvenue vue »
-  $effect(() => {
-    const id = profileState.profile?.id
-    if (id) markWelcomeSeen(id)
-  })
 
   const ctx = $derived(profileState.context)
   const myRole = $derived(
