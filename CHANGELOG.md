@@ -39,6 +39,13 @@ Migrations nécessaires : **17** (`20261114100000_familles_invitations.sql`), **
 - **Fondateur** : voit les membres de ses autres familles (« Membres (n) »), change leur rôle,
   les retire, et **supprime une famille vide** (0 membre, 0 lien en attente).
 
+### Corrigé
+- **Création de compte par lien** : la fonction serveur `accepter-invitation` chargeait `supabase-js`
+  par un import dynamique, absent du paquet déployé par Supabase → elle plantait. Import statique,
+  en-têtes CORS alignés sur `supabase-js`. **À redéployer** (copier-coller `index.ts`).
+- Si la création de compte échoue, l'écran donne le code d'erreur et un indice (Verify JWT,
+  fonction non déployée, fonction plantée).
+
 ### Sécurité
 - Migration 19 : retrait et suppression uniquement par les fonctions `remove_member` et
   `delete_family`, qui vérifient les droits ; plus aucun `DELETE` direct sur les familles et les

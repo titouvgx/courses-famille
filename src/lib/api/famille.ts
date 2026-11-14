@@ -187,6 +187,14 @@ export interface AcceptInvitationInput {
   family_name?: string
 }
 
+/** Indice pour l'admin quand la fonction serveur répond sans message lisible. */
+function hintFor(status: number): string {
+  if (status === 401) return ' : réglage « Verify JWT » à désactiver'
+  if (status === 404) return ' : fonction « accepter-invitation » non déployée'
+  if (status >= 500) return ' : la fonction serveur a planté, voir ses Logs'
+  return ''
+}
+
 /** Crée le compte via la fonction serveur, puis connecte la personne. */
 export async function acceptInvitation(input: AcceptInvitationInput): Promise<void> {
   const client = db()
@@ -194,12 +202,16 @@ export async function acceptInvitation(input: AcceptInvitationInput): Promise<vo
   if (error) {
     // Message lisible renvoyé par la fonction (JSON { erreur })
     let message = 'Le compte n’a pas pu être créé. Réessaie dans un instant.'
+    const ctx = (error as { context?: unknown }).context
+    const status = ctx instanceof Response ? ctx.status : null
     try {
-      const ctx = (error as { context?: Response }).context
-      const body = ctx ? await ctx.json() : null
+      const body = ctx instanceof Response ? await ctx.json() : null
       if (body?.erreur) message = body.erreur
+      else if (status) message = `${message} (code ${status}${hintFor(status)})`
     } catch {
-      // réponse illisible : message générique
+      // Réponse illisible (fonction plantée, absente, mal réglée) : on donne le code
+      if (status) message = `${message} (code ${status}${hintFor(status)})`
+      else message = `${message} (serveur d’invitation injoignable)`
     }
     throw new Error(message)
   }

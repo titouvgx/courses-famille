@@ -112,6 +112,8 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       include: ['tests/**/*.test.ts'],
+      // Spécificateur Deno de la fonction serveur → faux module dans les tests
+      alias: { 'npm:@supabase/supabase-js@2': new URL('./tests/stubs/supabase-js-deno.ts', import.meta.url).pathname },
       testTimeout: 60_000,
       hookTimeout: 120_000,
     },

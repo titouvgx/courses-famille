@@ -17,6 +17,12 @@
 // « Verify JWT » désactivé : la personne n'a pas encore de compte).
 // ------------------------------------------------------------------
 
+// Import STATIQUE obligatoire : au déploiement, Supabase emballe le code et ses
+// dépendances dans un seul fichier (eszip) ; un import dynamique dont le nom est
+// dans une variable n'y est pas inclus et la fonction plantait au démarrage.
+// (Dans les tests Node, ce module est remplacé par un faux : vite.config.ts.)
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
 /** Accès à Supabase dont la fonction a besoin (remplacé par un faux dans les tests). */
 export interface Acces {
   invitationInfo(token: string): Promise<{ status: string; kind: string | null } | null>
@@ -37,7 +43,10 @@ const MESSAGES_STATUT: Record<string, string> = {
 function entetesCors(origine: string | null, origines: string[]): Record<string, string> {
   const h: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info',
+    // Liste recommandée par supabase-js (@supabase/supabase-js/cors) : un en-tête
+    // manquant ici ferait échouer la demande préalable du navigateur
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, x-retry-count, traceparent, tracestate, baggage',
     'Access-Control-Max-Age': '600',
     Vary: 'Origin',
   }
@@ -115,9 +124,6 @@ declare const Deno: {
 } | undefined
 
 if (typeof Deno !== 'undefined') {
-  // Spécificateur en variable : seul Deno le résout (les tests Node n'entrent pas ici)
-  const paquet = 'npm:@supabase/supabase-js@2'
-  const { createClient } = await import(/* @vite-ignore */ paquet)
   const url = Deno.env.get('SUPABASE_URL')!
   // Nouvelle clé secrète (« default ») si présente, sinon ancienne clé service_role
   let cle = ''

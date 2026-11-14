@@ -35,3 +35,10 @@ supabase functions deploy accepter-invitation --no-verify-jwt --use-api
 Dans l'appli : Mon compte → Ma famille → « Inviter quelqu'un » → ouvrir le lien
 dans une fenêtre privée → créer un compte de test → il apparaît dans la famille.
 Logs : Edge Functions → accepter-invitation → **Logs**.
+
+### Si la création de compte échoue
+L'écran « Rejoindre » affiche le code renvoyé :
+- **401** : « Verify JWT » est encore activé → le désactiver ;
+- **404** : fonction absente ou mal nommée → la (re)déployer sous le nom `accepter-invitation` ;
+- **500 / 503** : la fonction plante → Logs. Ne jamais remettre d'import dynamique
+  (`await import(variable)`) : Supabase n'emballe que les imports statiques.
