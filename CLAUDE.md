@@ -1,7 +1,7 @@
 # Lichouz — Contexte projet
 
 **Lichouz** (anciennement « Courses en famille », renommée le 14/11/2026 → `docs/renommage-lichouz.md`) : PWA familiale : recettes, planning de la semaine, liste de courses partagée en temps réel entre les membres d'une famille.
-- **Site** : https://titouvgx.github.io/lichouz/ — **Repo** : https://github.com/titouvgx/lichouz (public) — tant que le dépôt n'est pas renommé sur GitHub : `…/courses-famille`
+- **Site** : https://titouvgx.github.io/lichouz/ — **Repo** : https://github.com/titouvgx/lichouz (public). ⚠️ Au 14/11 le dépôt s'appelle `Lichouz` (L majuscule) → le site répond sur `/Lichouz/` et `/lichouz/` = 404 (casse prise en compte par GitHub Pages) ; conseillé : renommer en `lichouz` minuscules (voir « À reprendre »)
 - **Détails à lire seulement si besoin** : `docs/architecture.md` (modèle, Realtime, photos, hors connexion, vie du foyer, structure des fichiers, recettes livrées), `docs/design.md` (design « Mer », règles UI mobile), `docs/historique.md` (étapes passées, anciennes décisions), `supabase/prod/README.md` (mise en prod), `tests/rls/README.md` (banc d'attaque)
 
 ## Règles de travail (demandées par l'utilisateur)
@@ -70,6 +70,13 @@ Svelte 5 (runes uniquement : `$state`, `$derived`, `$effect`, `$props`) + TypeSc
 
 ## Suite
 - **Administration v1** (migration 19) : en ligne le 14/11/2026. Hors v1 : déplacer une famille, désactiver un compte, gérer le catalogue dans l'appli (reste en JSON), quitter soi-même sa famille, supprimer une famille d'une autre super-famille depuis `#/admin`
+- **À reprendre (arrêt du 14/11/2026)** — en ligne : admin v1 + Lichouz + aide (`main` = 749fdd6, déploiement et contrôle de sécurité verts) :
+  1. **Casse de l'adresse** : dépôt `Lichouz` → site sur `/Lichouz/` seulement ; Supabase `courses-test` a `/lichouz/` → lien « mot de passe oublié » en 404 tant que ce n'est pas aligné. Conseil : renommer le dépôt en `lichouz` (sinon : `/Lichouz/` dans Supabase + docs). Revérifier les deux adresses après
+  2. **Essais sur téléphone** (avant la prod) : réinstaller l'appli (nouvelle adresse), écran de bienvenue une fois, Aide, invitation avec un 2e e-mail, retrait du compte jetable (corbeille dans Ma famille), mot de passe oublié
+  3. **`comptes_sans_profil`** (requête de contrôle 19) : valeur pas encore donnée ; si > 0 = comptes créés par les essais d'invitation ratés → proposer un nettoyage
+  4. **Mise en prod** ensuite : projet Supabase à nommer `lichouz-prod` (le guide dit `courses-prod`), fonction créée directement à l'adresse `accepter-invitation` + Verify JWT désactivé, préparer `npm run prod:sql`, requête de contrôle sur la prod, puis v1.0.0
+  5. **Dependabot** : mises à jour ouvertes le 14/11 (typescript, @types/node) — ne pas fusionner avant la v1.0.0, puis vérifier une par une
+  6. Petits restes : icône toujours un chariot (logo Lichouz = chantier à décider) ; dossier du projet claude.ai encore nommé `courses-famille/` (cosmétique) ; branches `admin-v1` et `aide` fusionnées, supprimables ; la fonction serveur écrit maintenant la raison des échecs dans ses Logs
 - **Étape 10 : mise en prod → v1.0.0** (guide `supabase/prod/README.md`), après les tests de l'utilisateur sur téléphone
 - **Validé, à faire ensuite** : booster des recettes du jour (accueil : booster qui se déchire, 5 cartes qui sortent vers leur place `floatLayout`, une ouverture par jour, bouton « Passer », mouvement réduit → cartes directes)
 - **Boîte à idées (feu vert requis)** : liste par WhatsApp/SMS, recopier une semaine, favoris et notes, minuteurs en cuisine, notifications, livre de recettes PDF, figer la liste, arrondir les pièces, Nutri-Score, Playwright + sauvegardes, import de recette par lien
